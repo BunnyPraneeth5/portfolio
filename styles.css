@@ -1,18 +1,20 @@
 :root {
-  --blue: #0066ff;
-  --blue-light: #e6f0ff;
-  --gray-50: #f9fafb;
-  --gray-600: #4b5563;
-  --primary: #2d3e50;      /* Deep navy blue */
-  --secondary: #e74c3c;    /* Vibrant coral/red */
-  --accent: #27ae60;       /* Emerald green */
-  --light: #ecf0f1;        /* Light silver/off-white */
-  --dark: #1a252f;         /* Darker navy */
-  --gradient-start: #2c3e50;
-  --gradient-end: #3498db;
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --text-primary: #2c3e50;
-  --text-light: #ecf0f1;
+  --blue: #4a6fa5;  /* Darker blue */
+  --blue-light: #1e293b;  /* Dark blue instead of light blue */
+  --gray-50: #1a1a1a;  /* Very dark for backgrounds */
+  --gray-600: #a3a3a3;  /* Lighter gray for better contrast on dark */
+  --primary: #1e293b;  /* Darker navy blue */
+  --secondary: #e05d41;  /* Slightly muted coral/red */
+  --accent: #2ecc71;  /* Brighter emerald for better visibility */
+  --light: #f8f9fa;  /* Off-white */
+  --dark: #0f172a;  /* Very dark blue/almost black */
+  --gradient-start: #0f172a;  /* Dark blue gradient start */
+  --gradient-end: #334155;  /* Medium-dark blue gradient end */
+  --card-bg: rgba(30, 41, 59, 0.95);  /* Dark card background */
+  --text-primary: #e2e8f0;  /* Light text for dark backgrounds */
+  --text-light: #f8fafc;  /* Very light text */
+  --text-secondary: #94a3b8;  /* Softer text for less emphasis */
+  --border-color: #334155;  /* Subtle borders */
 }
 
 body {
@@ -20,7 +22,8 @@ body {
   margin: 0;
   padding: 0;
   line-height: 1.5;
-  color: #333;
+  color: var(--text-primary);
+  background-color: var(--dark);
 }
 
 .min-h-screen {
@@ -31,10 +34,12 @@ body {
   display: inline-block;
   margin: 0 0.5rem;
   transition: transform 0.3s ease;
+  color: var(--text-secondary);
 }
 
 .social-icons a:hover {
   transform: scale(1.1);
+  color: var(--accent);
 }
 
 .social-icons svg {
@@ -43,7 +48,7 @@ body {
 }
 
 .bg-gradient-to-b {
-  background: linear-gradient(to bottom, var(--blue-light), white);
+  background: linear-gradient(to bottom, var(--gradient-start), var(--dark));
 }
 
 .hero {
@@ -83,20 +88,21 @@ nav .flex span {
 }
 
 nav a {
-  color: #e6f0ff;
+  color: var(--text-secondary);
   text-decoration: none;
   margin: 0 1rem;
   transition: color 0.3s;
 }
 
 nav a:hover {
-  color: white;
+  color: var(--text-light);
 }
 
 h1 {
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
+  color: var(--text-light);
 }
 
 .btn {
@@ -112,7 +118,7 @@ h1 {
 .btn-secondary {
   background-color: var(--secondary);
   color: var(--light);
-  box-shadow: 0 4px 6px rgba(231, 76, 60, 0.25);
+  box-shadow: 0 4px 6px rgba(224, 93, 65, 0.25);
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
   font-weight: 500;
@@ -124,7 +130,7 @@ h1 {
 .btn-secondary:hover {
   background-color: #c0392b;
   transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(231, 76, 60, 0.3);
+  box-shadow: 0 6px 8px rgba(224, 93, 65, 0.3);
 }
 
 .btn-outline {
@@ -135,7 +141,7 @@ h1 {
 
 .btn-outline:hover {
   background-color: var(--accent);
-  color: white;
+  color: var(--dark);
 }
 
 section {
@@ -158,6 +164,7 @@ h2 {
   font-size: 2.25rem;
   font-weight: bold;
   margin-bottom: 2rem;
+  color: var(--text-light);
 }
 
 .grid {
@@ -171,38 +178,39 @@ h2 {
   width: 50%;
   background-color: var(--card-bg);
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
   padding: 1.5rem;
   transition: box-shadow 0.3s;
   border-left: 4px solid var(--accent);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .card-title {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  color: var(--text-light);
 }
 
 .card-description {
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin-bottom: 1rem;
 }
 
 .badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
-  background-color: rgba(39, 174, 96, 0.1);
+  background-color: rgba(46, 204, 113, 0.15);
   color: var(--accent);
   border-radius: 9999px;
   font-size: 0.875rem;
   border: 1px solid var(--accent);
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
 }
 
 .bg-gray-50 {
@@ -261,7 +269,7 @@ h2 {
 }
 
 .border-white {
-  border-color: white;
+  border-color: var(--border-color);
 }
 
 .w-10 {
@@ -278,13 +286,13 @@ h2 {
   height: 80px; /* Adjust the size as needed */
   border-radius: 50%; /* Ensure it stays circular */
   border: 2px solid var(--accent); /* Add a border */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Optional: Add a shadow */
   object-fit: cover; /* Ensure the image covers the space */
 }
 
 /* Skills section */
 #skills {
-  background-color: var(--light);
+  background-color: var(--gray-50);
 }
 
 .skill-bar {
