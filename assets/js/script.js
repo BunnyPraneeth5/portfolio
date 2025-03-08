@@ -11,10 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const skillsContainer = document.getElementById("skills-container");
   
-  if (!skillsContainer) {
-    console.error("Skills container not found!");
-    return;
-  }
+  if (!skillsContainer) return;
 
   // Clear existing content
   skillsContainer.innerHTML = "";
@@ -30,23 +27,14 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="w-full bg-gray-200 rounded-full h-2.5">
               <div class="skill-bar bg-blue-600 h-2.5 rounded-full" 
                    data-width="${skill.level}" 
-                   style="width: 0%; transition: width 1.5s ease-out;">
+                   style="width: 0%;">
               </div>
           </div>
       `;
       skillsContainer.appendChild(skillCard);
   });
 
-  // Force browser reflow before animation
-  setTimeout(() => {
-    const bars = document.querySelectorAll(".skill-bar");
-    bars.forEach(bar => {
-      const width = bar.getAttribute("data-width");
-      bar.style.width = `${width}%`;
-    });
-  }, 300);
-
-  // Alternative approach with IntersectionObserver
+  // Using IntersectionObserver for animating skill bars
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -54,13 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
           const bars = entry.target.querySelectorAll(".skill-bar");
           bars.forEach(bar => {
             const width = bar.getAttribute("data-width");
+            bar.style.transition = "width 1.5s ease-out";
             bar.style.width = `${width}%`;
           });
           observer.unobserve(entry.target);
         }
       });
     },
-    { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    { threshold: 0.1 }
   );
 
   observer.observe(skillsContainer);
