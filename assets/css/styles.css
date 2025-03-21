@@ -312,3 +312,25 @@ h2 {
 #contact {
   background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
 }
+
+.project-card {
+  padding: 20px;
+  margin: 15px 0;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.project-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.project-card a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
