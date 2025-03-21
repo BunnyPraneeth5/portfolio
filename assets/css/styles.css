@@ -81,33 +81,28 @@ body {
 }
 
 /* Navbar Styles */
+/* styles.css */
 nav {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* Adjust to match your theme */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  z-index: 1000;
+}
+nav ul {
+  list-style: none;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 0;
+  justify-content: center;
+  gap: 20px;
 }
-
-nav .flex {
-  display: flex;
-  align-items: center;
-}
-
-nav .flex span {
-  margin-left: 0.75rem; /* Adjust spacing between image and name */
-  font-size: 1.125rem; /* Adjust font size */
-  font-weight: 500; /* Adjust font weight */
-}
-
 nav a {
-  color: var(--text-secondary);
   text-decoration: none;
-  margin: 0 1rem;
-  transition: color 0.3s;
+  color: #333; /* Adjust color */
+  font-weight: 500;
 }
-
 nav a:hover {
-  color: var(--text-light);
+  color: #007bff; /* Accent color */
 }
 
 h1 {
