@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Karu Praneeth Kumar</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-900 text-white font-['Space_Grotesk']">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="about.html" class="nav-link">About</a>
+                    <a href="skills.html" class="nav-link">Skills</a>
+                    <a href="projects.html" class="nav-link">Projects</a>
+                    <a href="blog.html" class="nav-link active">Blog</a>
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu md:hidden">
+        <div class="p-4">
+            <a href="about.html" class="block py-2 text-gray-300 hover:text-white">About</a>
+            <a href="skills.html" class="block py-2 text-gray-300 hover:text-white">Skills</a>
+            <a href="projects.html" class="block py-2 text-gray-300 hover:text-white">Projects</a>
+            <a href="blog.html" class="block py-2 text-gray-300 hover:text-white active">Blog</a>
+            <a href="contact.html" class="block py-2 text-gray-300 hover:text-white">Contact</a>
+        </div>
+    </div>
+
+    <!-- Blog Content -->
+    <main class="pt-24 pb-12">
+        <div class="container mx-auto px-4">
+            <!-- Header -->
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+                        Tech Blog
+                    </span>
+                </h1>
+                <p class="text-xl text-gray-300">Insights, tutorials, and thoughts on technology</p>
+            </div>
+
+            <!-- Blog Posts Grid -->
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogGrid">
+                    <!-- Blog posts will be rendered here by JavaScript -->
+                </div>
+
+                <!-- Coming Soon Message -->
+                <div class="text-center mt-16" data-aos="fade-up">
+                    <div class="glass-card p-8 max-w-2xl mx-auto">
+                        <i class="fas fa-rocket text-4xl text-blue-400 mb-4"></i>
+                        <h2 class="text-2xl font-['Orbitron'] mb-4">Blog Coming Soon!</h2>
+                        <p class="text-gray-300 mb-6">
+                            I'm working on creating valuable content about Machine Learning, Web Development, 
+                            and Security. Stay tuned for tutorials, project insights, and tech discussions.
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <span class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full text-sm">
+                                <i class="fas fa-brain mr-2"></i>ML Tutorials
+                            </span>
+                            <span class="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-sm">
+                                <i class="fas fa-code mr-2"></i>Web Dev Tips
+                            </span>
+                            <span class="px-4 py-2 bg-green-500/20 text-green-400 rounded-full text-sm">
+                                <i class="fas fa-shield-alt mr-2"></i>Security Insights
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

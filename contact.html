@@ -21,6 +21,7 @@
                     <a href="about.html" class="nav-link">About</a>
                     <a href="skills.html" class="nav-link">Skills</a>
                     <a href="projects.html" class="nav-link">Projects</a>
+                    <a href="blog.html" class="nav-link">Blog</a>
                     <a href="contact.html" class="nav-link active">Contact</a>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -41,6 +42,7 @@
             <a href="about.html" class="block py-2 text-gray-300 hover:text-white">About</a>
             <a href="skills.html" class="block py-2 text-gray-300 hover:text-white">Skills</a>
             <a href="projects.html" class="block py-2 text-gray-300 hover:text-white">Projects</a>
+            <a href="blog.html" class="block py-2 text-gray-300 hover:text-white">Blog</a>
             <a href="contact.html" class="block py-2 text-gray-300 hover:text-white active">Contact</a>
         </div>
     </div>
@@ -62,7 +64,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Contact Form -->
                     <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="100">
-                        <form id="contactForm" class="space-y-6">
+                        <form id="contactForm" action="https://formspree.io/f/xwpapyba" method="POST" class="space-y-6">
                             <div>
                                 <label for="name" class="block text-sm font-medium mb-2">Name</label>
                                 <input type="text" id="name" name="name" required
@@ -83,9 +85,9 @@
                                 <textarea id="message" name="message" rows="4" required
                                     class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                             </div>
-                            <button type="submit"
+                            <button type="submit" id="submitBtn"
                                 class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity">
-                                Send Message
+                                <i class="fas fa-paper-plane mr-2"></i><span id="btnText">Send Message</span>
                             </button>
                         </form>
                     </div>
@@ -104,7 +106,7 @@
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-map-marker-alt text-purple-400 w-8"></i>
-                                    <span class="text-gray-300">Kurnool, Andhra Pradesh, India</span>
+                                    <span class="text-gray-300">Andhra Pradesh, India</span>
                                 </div>
                             </div>
                         </div>
@@ -122,6 +124,11 @@
                                     class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                                     <i class="fab fa-linkedin text-xl mr-2"></i>
                                     <span>LinkedIn</span>
+                                </a>
+                                <a href="https://www.kaggle.com/bunnypraneeth5" target="_blank"
+                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+                                    <i class="fab fa-kaggle text-xl mr-2"></i>
+                                    <span>Kaggle</span>
                                 </a>
                                 <a href="https://hackerrank.com/profile/karu_praneeth" target="_blank"
                                     class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">

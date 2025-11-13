@@ -12,6 +12,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <span class="text-4xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</span>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p class="loading-text">Loading Portfolio...</p>
+        </div>
+    </div>
+    
+    <!-- Scroll Progress Bar -->
+    <div id="scrollProgress" class="scroll-progress"></div>
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
         <div class="container mx-auto px-4">
@@ -21,6 +38,7 @@
                     <a href="about.html" class="nav-link">About</a>
                     <a href="skills.html" class="nav-link">Skills</a>
                     <a href="projects.html" class="nav-link">Projects</a>
+                    <a href="blog.html" class="nav-link">Blog</a>
                     <a href="contact.html" class="nav-link">Contact</a>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -41,6 +59,7 @@
             <a href="about.html" class="block py-2 text-gray-300 hover:text-white">About</a>
             <a href="skills.html" class="block py-2 text-gray-300 hover:text-white">Skills</a>
             <a href="projects.html" class="block py-2 text-gray-300 hover:text-white">Projects</a>
+            <a href="blog.html" class="block py-2 text-gray-300 hover:text-white">Blog</a>
             <a href="contact.html" class="block py-2 text-gray-300 hover:text-white">Contact</a>
         </div>
     </div>
@@ -71,13 +90,25 @@
 
                 <!-- CTA Buttons -->
                 <div class="flex flex-col md:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
-                    <a href="projects.html" 
+                    <a href="about.html" 
                        class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        View My Work
+                        About Me
+                    </a>
+                    <a href="assets/resume/Karu_Praneeth_Kumar.pdf" download
+                       class="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 rounded-full text-white hover:opacity-90 transition-opacity">
+                        <i class="fas fa-download mr-2"></i>Download Resume
+                    </a>
+                    <a href="skills.html" 
+                       class="px-8 py-3 border border-purple-500/30 rounded-full hover:bg-purple-500/10 transition-colors">
+                        My Skills
+                    </a>
+                    <a href="projects.html" 
+                       class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
+                        View Projects
                     </a>
                     <a href="contact.html" 
                        class="px-8 py-3 border border-purple-500/30 rounded-full hover:bg-purple-500/10 transition-colors">
-                        Get in Touch
+                        Contact
                     </a>
                 </div>
 
@@ -90,6 +121,10 @@
                     <a href="https://linkedin.com/in/karu-praneeth-kumar" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
                         <i class="fab fa-linkedin text-2xl"></i>
+                    </a>
+                    <a href="https://www.kaggle.com/bunnypraneeth5" target="_blank" 
+                       class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-kaggle text-2xl"></i>
                     </a>
                     <a href="https://hackerrank.com/profile/karu_praneeth" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
@@ -106,5 +141,26 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Loading Screen
+        window.addEventListener('load', () => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1500);
+        });
+        
+        // Scroll Progress Bar
+        window.addEventListener('scroll', () => {
+            const scrollProgress = document.getElementById('scrollProgress');
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+        });
+    </script>
 </body>
 </html> 

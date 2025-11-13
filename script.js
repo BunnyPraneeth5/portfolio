@@ -26,25 +26,56 @@ document.querySelectorAll('#mobileMenu a').forEach(link => {
     });
 });
 
-// Dark Mode Management
+// Enhanced Dark Mode Management
 function updateDarkMode(isDark) {
     const icon = darkModeToggle.querySelector('i');
+    const body = document.body;
+    
     if (isDark) {
-        document.body.classList.add('dark-mode');
+        body.classList.add('dark-mode');
         icon.classList.remove('fa-moon');
         icon.classList.add('fa-sun');
     } else {
-        document.body.classList.remove('dark-mode');
+        body.classList.remove('dark-mode');
         icon.classList.add('fa-moon');
         icon.classList.remove('fa-sun');
     }
+    
     localStorage.setItem('darkMode', isDark);
+    
+    // Add ripple effect
+    const ripple = document.createElement('span');
+    ripple.style.cssText = `
+        position: absolute; top: 50%; left: 50%;
+        width: 40px; height: 40px;
+        background: rgba(59, 130, 246, 0.3);
+        border-radius: 50%; pointer-events: none;
+        transform: translate(-50%, -50%) scale(0);
+        animation: ripple 0.6s ease-out;
+    `;
+    darkModeToggle.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
 }
 
-// Dark Mode Toggle
+// Add ripple animation
+if (!document.querySelector('#ripple-style')) {
+    const style = document.createElement('style');
+    style.id = 'ripple-style';
+    style.textContent = '@keyframes ripple { to { transform: translate(-50%, -50%) scale(2); opacity: 0; } }';
+    document.head.appendChild(style);
+}
+
+// Enhanced Dark Mode Toggle
 const darkModeToggle = document.getElementById('darkModeToggle');
-darkModeToggle.addEventListener('click', () => {
+darkModeToggle.addEventListener('click', (e) => {
+    e.preventDefault();
     const isDark = !document.body.classList.contains('dark-mode');
+    
+    darkModeToggle.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        darkModeToggle.style.transform = 'scale(1)';
+    }, 150);
+    
     updateDarkMode(isDark);
 });
 
@@ -54,8 +85,7 @@ const skills = [
         category: 'Languages',
         items: [
             { name: 'Python', level: 90, icon: 'fab fa-python' },
-            { name: 'SQL', level: 85, icon: 'fas fa-database' },
-            { name: 'Java', level: 80, icon: 'fab fa-java' }
+            { name: 'SQL', level: 85, icon: 'fas fa-database' }
         ]
     },
     {
@@ -72,8 +102,13 @@ const skills = [
         category: 'Web',
         items: [
             { name: 'Django', level: 85, icon: 'fab fa-python' },
-            { name: 'HTML/CSS', level: 90, icon: 'fab fa-html5' },
-            { name: 'JavaScript', level: 80, icon: 'fab fa-js' }
+            { name: 'HTML/CSS', level: 90, icon: 'fab fa-html5' }
+        ]
+    },
+    {
+        category: 'Security',
+        items: [
+            { name: 'SOC L1', level: 75, icon: 'fas fa-shield-alt' }
         ]
     },
     {
@@ -105,6 +140,7 @@ const projects = [
         title: 'Car Sales Price Prediction',
         description: 'Neural network built using TensorFlow that predicts car prices with 88% accuracy.',
         link: 'https://github.com/BunnyPraneeth5/car-price-prediction',
+        liveDemo: 'https://car-price-predictor-demo.herokuapp.com',
         tags: ['TensorFlow', 'Machine Learning', 'Python'],
         image: 'path-to-image.jpg',
         features: [
@@ -133,14 +169,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedDarkMode = localStorage.getItem('darkMode');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const shouldBeDark = savedDarkMode === 'true' || (savedDarkMode === null && prefersDark);
+    
+    document.body.style.transition = 'none';
     updateDarkMode(shouldBeDark);
+    setTimeout(() => {
+        document.body.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+    }, 100);
+    
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (localStorage.getItem('darkMode') === null) {
+            updateDarkMode(e.matches);
+        }
+    });
 
-    // Initialize AOS
+    // Enhanced AOS initialization
     AOS.init({
-        duration: 800,
-        easing: 'ease-in-out',
+        duration: 1000,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
         once: true,
-        mirror: false
+        mirror: false,
+        offset: 50
     });
 
     // Initialize particles.js
@@ -148,14 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
         particlesJS('particles-container', {
             particles: {
                 number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: '#ffffff' },
+                color: { value: document.body.classList.contains('dark-mode') ? '#60a5fa' : '#3b82f6' },
                 shape: { type: 'circle' },
                 opacity: { value: 0.5, random: true },
                 size: { value: 3, random: true },
                 line_linked: {
                     enable: true,
                     distance: 150,
-                    color: '#ffffff',
+                    color: document.body.classList.contains('dark-mode') ? '#60a5fa' : '#3b82f6',
                     opacity: 0.4,
                     width: 1
                 },
@@ -209,6 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (projectsContainer) {
         renderProjects();
     }
+    
+    // Page load animation
+    document.body.style.opacity = '0';
+    document.body.style.transform = 'scale(1.02)';
+    
+    setTimeout(() => {
+        document.body.style.opacity = '1';
+        document.body.style.transform = 'scale(1)';
+    }, 100);
 });
 
 // Render Skills with Progress Bars
@@ -278,9 +336,16 @@ function renderProjects() {
                         </span>
                     `).join('')}
                 </div>
-                <a href="${project.link}" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
-                    View Project <i class="fas fa-external-link-alt ml-1"></i>
-                </a>
+                <div class="flex gap-4">
+                    <a href="${project.link}" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors">
+                        View Code <i class="fab fa-github ml-1"></i>
+                    </a>
+                    ${project.liveDemo ? `
+                        <a href="${project.liveDemo}" target="_blank" class="text-green-400 hover:text-green-300 transition-colors">
+                            Live Demo <i class="fas fa-external-link-alt ml-1"></i>
+                        </a>
+                    ` : ''}
+                </div>
             </div>
         `;
         projectsContainer.appendChild(projectCard);

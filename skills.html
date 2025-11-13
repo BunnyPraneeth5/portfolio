@@ -21,6 +21,7 @@
                     <a href="about.html" class="nav-link">About</a>
                     <a href="skills.html" class="nav-link active">Skills</a>
                     <a href="projects.html" class="nav-link">Projects</a>
+                    <a href="blog.html" class="nav-link">Blog</a>
                     <a href="contact.html" class="nav-link">Contact</a>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -41,6 +42,7 @@
             <a href="about.html" class="block py-2 text-gray-300 hover:text-white">About</a>
             <a href="skills.html" class="block py-2 text-gray-300 hover:text-white active">Skills</a>
             <a href="projects.html" class="block py-2 text-gray-300 hover:text-white">Projects</a>
+            <a href="blog.html" class="block py-2 text-gray-300 hover:text-white">Blog</a>
             <a href="contact.html" class="block py-2 text-gray-300 hover:text-white">Contact</a>
         </div>
     </div>
@@ -99,7 +101,7 @@
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-400 mr-2"></i>
-                            Node.js
+                            Django/FastAPI
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-400 mr-2"></i>
@@ -122,14 +124,6 @@
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-400 mr-2"></i>
                             Python
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-400 mr-2"></i>
-                            JavaScript
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-400 mr-2"></i>
-                            Java
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-400 mr-2"></i>
@@ -221,32 +215,50 @@
             <div class="mt-16 max-w-4xl mx-auto" data-aos="fade-up" data-aos-delay="700">
                 <h2 class="text-2xl font-['Orbitron'] text-center mb-8">Proficiency Levels</h2>
                 <div class="space-y-6">
-                    <div class="glass-card p-6">
+                    <div class="glass-card p-6" id="skillBars">
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
-                                <span>Machine Learning & AI</span>
-                                <span>80%</span>
+                                <span>Python</span>
+                                <span>90%</span>
                             </div>
-                            <div class="h-2 bg-gray-700 rounded-full">
-                                <div class="h-full w-[80%] bg-gradient-to-r from-blue-400 to-purple-600 rounded-full"></div>
+                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="90"></div>
                             </div>
                         </div>
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
-                                <span>Web Development</span>
-                                <span>78%</span>
+                                <span>Machine Learning (Scikit-Learn)</span>
+                                <span>90%</span>
                             </div>
-                            <div class="h-2 bg-gray-700 rounded-full">
-                                <div class="h-full w-[78%] bg-gradient-to-r from-blue-400 to-purple-600 rounded-full"></div>
+                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="90"></div>
                             </div>
                         </div>
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
-                                <span>Security Implementation</span>
-                                <span>70%</span>
+                                <span>Web Development (Django)</span>
+                                <span>85%</span>
                             </div>
-                            <div class="h-2 bg-gray-700 rounded-full">
-                                <div class="h-full w-[70%] bg-gradient-to-r from-blue-400 to-purple-600 rounded-full"></div>
+                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="85"></div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span>SOC Analyst L1</span>
+                                <span>75%</span>
+                            </div>
+                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="75"></div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span>SQL</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="85"></div>
                             </div>
                         </div>
                     </div>
@@ -257,5 +269,41 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Animate skill bars when they come into view
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const skillBarObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const skillBars = entry.target.querySelectorAll('.skill-bar');
+                    skillBars.forEach((bar, index) => {
+                        setTimeout(() => {
+                            const width = bar.getAttribute('data-width');
+                            bar.style.width = width + '%';
+                        }, index * 200);
+                    });
+                    skillBarObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const skillBarsContainer = document.getElementById('skillBars');
+            if (skillBarsContainer) {
+                // Initialize bars at 0 width
+                const skillBars = skillBarsContainer.querySelectorAll('.skill-bar');
+                skillBars.forEach(bar => {
+                    bar.style.width = '0%';
+                });
+                
+                // Observe the container
+                skillBarObserver.observe(skillBarsContainer);
+            }
+        });
+    </script>
 </body>
 </html> 

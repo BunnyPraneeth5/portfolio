@@ -5,12 +5,15 @@ A modern, responsive portfolio website built with HTML, Tailwind CSS, and JavaSc
 ## Features
 
 - 🎨 Modern, futuristic design with glassmorphism effects
-- 🌙 Dark mode toggle
+- 🌙 Enhanced dark/light mode toggle with animations
 - ✨ Interactive particle background
 - 📱 Fully responsive layout
-- 🎯 Smooth scroll animations
+- 🎯 Smooth scroll animations with progress bar
 - 💫 Hover effects and transitions
-- 📧 Contact form
+- 📧 Working contact form (Formspree integration)
+- 📝 Blog section (coming soon)
+- 📄 Resume download feature
+- ⚡ Loading screen with animations
 - 🔗 Social media integration
 
 ## Technologies Used
@@ -21,6 +24,8 @@ A modern, responsive portfolio website built with HTML, Tailwind CSS, and JavaSc
 - Particles.js
 - Font Awesome Icons
 - Google Fonts (Orbitron, Space Grotesk)
+- Formspree (contact form)
+- AOS (Animate On Scroll)
 
 ## Setup Instructions
 
@@ -34,35 +39,42 @@ git clone https://github.com/yourusername/portfolio.git
 cd portfolio
 ```
 
-3. Open `index.html` in your browser or use a local server:
-```bash
-# Using Python
-python -m http.server
+3. **Contact Form Setup:**
+   - Sign up at [formspree.io](https://formspree.io)
+   - Replace `xdkobqpz` in `contact.html` with your Formspree form ID
+   - Verify your email
 
-# Using Node.js
-npx serve
-```
+4. **Add Resume:**
+   - Place your resume PDF in `assets/resume/Karu_Praneeth_Kumar_Resume.pdf`
+
+5. Open `index.html` in your browser or deploy to GitHub Pages
 
 ## Customization
 
 ### Personal Information
-Edit the following files to customize your personal information:
-
-1. `index.html`: Update the hero section with your name and title
-2. `script.js`: Modify the `skills` and `projects` arrays with your information
+- Update hero section in `index.html`
+- Modify `skills` and `projects` arrays in `script.js`
+- Replace certificates in `assets/certificates/`
+- Add your resume to `assets/resume/`
 
 ### Styling
-Customize the appearance by editing:
+- Customize colors and animations in `styles.css`
+- Adjust particle effects in `script.js`
+- Modify dark/light mode themes
 
-1. `styles.css`: Modify colors, animations, and effects
-2. `script.js`: Adjust particles.js configuration
+### Content
+- Add blog posts to `blog.html`
+- Update social media links
+- Customize contact information
 
-### Adding New Sections
-To add new sections:
+## Pages
 
-1. Add the HTML structure in `index.html`
-2. Style it in `styles.css`
-3. Add any necessary JavaScript functionality in `script.js`
+- **Home**: Hero section with CTA buttons
+- **About**: Personal info, education, certifications
+- **Skills**: Technical skills with animated progress bars
+- **Projects**: Portfolio projects with live demos
+- **Blog**: Tech blog (coming soon)
+- **Contact**: Working contact form with Formspree
 
 ## Browser Support
 
@@ -75,9 +87,20 @@ To add new sections:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## Deployment
+
+**GitHub Pages Ready**: This portfolio works perfectly with GitHub Pages static hosting.
+
+1. Push to GitHub repository
+2. Enable GitHub Pages in repository settings
+3. Set up Formspree for contact form
+4. Your portfolio is live!
+
 ## Acknowledgments
 
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Particles.js](https://vincentgarreau.com/particles.js/)
 - [Font Awesome](https://fontawesome.com/)
-- [Google Fonts](https://fonts.google.com/) 
+- [Google Fonts](https://fonts.google.com/)
+- [Formspree](https://formspree.io/)
+- [AOS Library](https://michalsnik.github.io/aos/) 
