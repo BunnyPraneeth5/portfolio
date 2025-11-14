@@ -363,10 +363,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Contact Form Handler
-const contactForm = document.getElementById('contactForm');
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+//const contactForm = document.getElementById('contactForm');
+//contactForm.addEventListener('submit', (e) => {
+//    e.preventDefault();
     // Add your form submission logic here
-    alert('Thank you for your message! I will get back to you soon.');
-    contactForm.reset();
-}); 
+//    alert('Thank you for your message! I will get back to you soon.');
+//    contactForm.reset();
+//}); 
