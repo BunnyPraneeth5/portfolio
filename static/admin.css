@@ -1,0 +1,302 @@
+:root {
+    --primary: #3b82f6;
+    --secondary: #8b5cf6;
+    --accent: #06b6d4;
+    --primary-fg: #ffffff;
+    --body-bg: #0f172a;
+    --body-fg: #e2e8f0;
+    --body-quiet-color: #94a3b8;
+    --body-loud-color: #ffffff;
+    --breadcrumbs-bg: rgba(15, 23, 42, 0.92);
+    --breadcrumbs-fg: #cbd5e1;
+    --breadcrumbs-link-fg: #93c5fd;
+    --link-fg: #60a5fa;
+    --link-hover-color: #a78bfa;
+    --hairline-color: rgba(148, 163, 184, 0.18);
+    --border-color: rgba(148, 163, 184, 0.24);
+    --darkened-bg: rgba(15, 23, 42, 0.85);
+    --selected-bg: rgba(59, 130, 246, 0.18);
+    --selected-row: rgba(139, 92, 246, 0.16);
+    --button-fg: #ffffff;
+    --button-bg: #3b82f6;
+    --button-hover-bg: #2563eb;
+    --default-button-bg: #8b5cf6;
+    --default-button-hover-bg: #7c3aed;
+    --close-button-bg: #475569;
+    --close-button-hover-bg: #334155;
+    --delete-button-bg: #ef4444;
+    --delete-button-hover-bg: #dc2626;
+    --object-tools-fg: #ffffff;
+    --object-tools-bg: #8b5cf6;
+    --object-tools-hover-bg: #7c3aed;
+}
+
+html[data-theme="light"],
+html[data-theme="dark"] {
+    --primary: #3b82f6;
+    --secondary: #8b5cf6;
+    --accent: #06b6d4;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 34rem),
+        radial-gradient(circle at top right, rgba(139, 92, 246, 0.22), transparent 34rem),
+        linear-gradient(135deg, #0f172a 0%, #111827 100%);
+    color: var(--body-fg);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+#container {
+    background: transparent;
+}
+
+#header {
+    min-height: 78px;
+    background: rgba(15, 23, 42, 0.78);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(20px);
+}
+
+.kp-admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.kp-admin-logo {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 28px rgba(59, 130, 246, 0.35);
+}
+
+#branding h1 {
+    margin: 0;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+#branding h1 a:link,
+#branding h1 a:visited {
+    color: #ffffff;
+}
+
+.kp-admin-brand p {
+    margin: 4px 0 0;
+    color: #94a3b8;
+    font-size: 0.84rem;
+}
+
+#user-tools {
+    color: #cbd5e1;
+}
+
+#user-tools a {
+    border-bottom: 1px solid rgba(96, 165, 250, 0.35);
+    color: #bfdbfe;
+}
+
+.kp-admin-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 40px;
+    background: rgba(15, 23, 42, 0.7);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.kp-admin-shortcuts a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 7px 13px;
+    border: 1px solid rgba(96, 165, 250, 0.25);
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #dbeafe;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.kp-admin-shortcuts a:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.45), rgba(139, 92, 246, 0.45));
+    color: #ffffff;
+}
+
+div.breadcrumbs {
+    background: rgba(15, 23, 42, 0.82);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+#content {
+    padding: 28px 40px;
+}
+
+#content h1 {
+    color: #ffffff;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700;
+}
+
+.module,
+.inline-group,
+.submit-row,
+#changelist,
+#changelist-filter,
+.paginator,
+fieldset.module,
+.form-row {
+    border-color: rgba(148, 163, 184, 0.18);
+}
+
+.module,
+#changelist,
+#changelist-filter,
+.submit-row {
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(139, 92, 246, 0.26));
+    color: #ffffff;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.86rem;
+    letter-spacing: 0;
+}
+
+table {
+    background: transparent;
+}
+
+thead th {
+    background: rgba(15, 23, 42, 0.95);
+    color: #e2e8f0;
+}
+
+tbody tr {
+    background: rgba(15, 23, 42, 0.55);
+}
+
+tbody tr:nth-child(odd) {
+    background: rgba(30, 41, 59, 0.52);
+}
+
+tbody tr:hover {
+    background: rgba(59, 130, 246, 0.13);
+}
+
+td,
+th {
+    border-bottom-color: rgba(148, 163, 184, 0.14);
+}
+
+a:link,
+a:visited {
+    color: #93c5fd;
+}
+
+a:hover {
+    color: #c4b5fd;
+}
+
+input,
+textarea,
+select,
+.vTextField {
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #f8fafc;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.vTextField:focus {
+    border-color: rgba(96, 165, 250, 0.9);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+    outline: none;
+}
+
+input[type="color"] {
+    width: 72px;
+    min-height: 38px;
+    padding: 3px;
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+    font-weight: 700;
+    border: 0;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+}
+
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.submit-row input:hover,
+a.button:hover {
+    filter: brightness(1.08);
+}
+
+.object-tools a:link,
+.object-tools a:visited {
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+    font-weight: 700;
+}
+
+#changelist-filter h2 {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+}
+
+#changelist-filter h3 {
+    color: #ffffff;
+}
+
+.messagelist li {
+    border-radius: 12px;
+    background-color: rgba(34, 197, 94, 0.14);
+    color: #bbf7d0;
+}
+
+@media (max-width: 767px) {
+    #header {
+        align-items: flex-start;
+        min-height: 112px;
+        padding: 14px 18px;
+    }
+
+    .kp-admin-shortcuts {
+        padding: 10px 18px;
+    }
+
+    #content {
+        padding: 22px 18px;
+    }
+}

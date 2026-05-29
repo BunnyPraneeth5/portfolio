@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import About, Skill, Project, BlogPost, ContactMessage
@@ -9,12 +11,48 @@ def index(request):
     return render(request, 'index.html', {'about': about, 'skills': skills, 'projects': projects})
 
 def about_view(request):
+    from .models import (About, WhatIDo, EducationEntry,
+                         ExperienceEntry, EventEntry,
+                         AdditionalCertification)
     about = About.objects.first()
-    return render(request, 'about.html', {'about': about})
+    what_i_do = WhatIDo.objects.all()
+    education = EducationEntry.objects.all()
+    
+    # Split experience by side for paired timeline rendering
+    experience_entries = ExperienceEntry.objects.all()
+    
+    # Group experience into pairs for the two-column timeline
+    # Each pair = (left_entry, right_entry) — either can be None
+    experience_left = experience_entries.filter(side='left')
+    experience_right = experience_entries.filter(side='right')
+    experience_all = ExperienceEntry.objects.all().order_by('order')
+    
+    events = EventEntry.objects.all()
+    certifications = AdditionalCertification.objects.all()
+    
+    return render(request, 'about.html', {
+        'about': about,
+        'what_i_do': what_i_do,
+        'education': education,
+        'experience_left': experience_left,
+        'experience_right': experience_right,
+        'experience_all': experience_all,
+        'events': events,
+        'certifications': certifications,
+    })
 
 def skills_view(request):
     skills = Skill.objects.all()
-    return render(request, 'skills.html', {'skills': skills})
+    grouped_skills = OrderedDict()
+    category_labels = dict(Skill.CATEGORY_CHOICES)
+    for skill in skills:
+        grouped_skills.setdefault(skill.category, {
+            'label': category_labels.get(skill.category, skill.category),
+            'items': [],
+        })
+        grouped_skills[skill.category]['items'].append(skill)
+
+    return render(request, 'skills.html', {'skills': skills, 'grouped_skills': grouped_skills.values()})
 
 def projects_view(request):
     projects = Project.objects.all()

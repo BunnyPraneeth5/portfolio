@@ -1,0 +1,3 @@
+@echo off
+echo Starting Django Development Server (Local SQLite)...
+python manage.py runserver --settings=config.settings_local

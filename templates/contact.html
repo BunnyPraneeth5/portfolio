@@ -11,6 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    {% if site_appearance %}
+    <style>
+        :root {
+            --accent-blue: {{ site_appearance.primary_color }};
+            --accent-purple: {{ site_appearance.secondary_color }};
+            --accent-cyan: {{ site_appearance.accent_color }};
+        }
+    </style>
+    {% endif %}
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']">
     <!-- Navigation -->

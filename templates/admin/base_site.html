@@ -1,0 +1,29 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | KP Portfolio Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div class="kp-admin-brand">
+    <span class="kp-admin-logo">KP</span>
+    <div>
+        <h1 id="site-name"><a href="{% url 'admin:index' %}">Portfolio Administration</a></h1>
+        <p>Manage content, skills, projects, messages, and site appearance</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<div class="kp-admin-shortcuts">
+    <a href="{% url 'index' %}" target="_blank">View Website</a>
+    <a href="{% url 'admin:portfolio_skill_changelist' %}">Skills</a>
+    <a href="{% url 'admin:portfolio_siteappearance_changelist' %}">Appearance</a>
+    <a href="{% url 'admin:portfolio_project_changelist' %}">Projects</a>
+</div>
+{% endblock %}

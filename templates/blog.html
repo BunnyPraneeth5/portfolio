@@ -11,6 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    {% if site_appearance %}
+    <style>
+        :root {
+            --accent-blue: {{ site_appearance.primary_color }};
+            --accent-purple: {{ site_appearance.secondary_color }};
+            --accent-cyan: {{ site_appearance.accent_color }};
+        }
+    </style>
+    {% endif %}
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']">
     <!-- Navigation -->
@@ -63,10 +72,52 @@
 
             <!-- Blog Posts Grid -->
             <div class="max-w-6xl mx-auto">
+                {% if posts %}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogGrid">
-                    <!-- Blog posts will be rendered here -->
+                    {% for post in posts %}
+                    <div class="glass-card overflow-hidden" 
+                         data-aos="fade-up" 
+                         data-aos-delay="{{ forloop.counter0 }}00">
+                        
+                        {% if post.image %}
+                        <div class="w-full h-48 overflow-hidden">
+                            <img src="{{ post.image.url }}" 
+                                 alt="{{ post.title }}"
+                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                        </div>
+                        {% else %}
+                        <div class="w-full h-48 bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center">
+                            <i class="fas fa-newspaper text-4xl text-blue-400/50"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-xs text-gray-500">
+                                    {{ post.created_at|date:"M d, Y" }}
+                                </span>
+                            </div>
+                            
+                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug hover:text-blue-400 transition-colors">
+                                <a href="{% url 'blog_detail' post.slug %}">
+                                    {{ post.title }}
+                                </a>
+                            </h2>
+                            
+                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                                {{ post.excerpt }}
+                            </p>
+                            
+                            <a href="{% url 'blog_detail' post.slug %}" 
+                               class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium">
+                                Read More 
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-
+                {% else %}
                 <!-- Coming Soon Message -->
                 <div class="text-center mt-16" data-aos="fade-up">
                     <div class="glass-card p-8 max-w-2xl mx-auto">
@@ -89,6 +140,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </main>

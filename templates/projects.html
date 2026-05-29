@@ -11,6 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    {% if site_appearance %}
+    <style>
+        :root {
+            --accent-blue: {{ site_appearance.primary_color }};
+            --accent-purple: {{ site_appearance.secondary_color }};
+            --accent-cyan: {{ site_appearance.accent_color }};
+        }
+    </style>
+    {% endif %}
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']">
     <!-- Navigation -->
@@ -63,8 +72,32 @@
 
             <!-- Projects Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- SOC Copilot -->
+                <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
+                    <span class="featured-badge bg-gradient-to-r from-blue-500 to-purple-600">Featured</span>
+                    <div class="mb-4 pr-20">
+                        <h2 class="text-2xl font-['Orbitron'] mb-2">SOC Copilot</h2>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">Python</span>
+                            <span class="px-2 py-1 bg-purple-500/20 rounded-full text-sm">MCP</span>
+                            <span class="px-2 py-1 bg-green-500/20 rounded-full text-sm">PyQt6</span>
+                            <span class="px-2 py-1 bg-cyan-500/20 rounded-full text-sm">Scikit-learn</span>
+                            <span class="px-2 py-1 bg-pink-500/20 rounded-full text-sm">Agentic AI</span>
+                        </div>
+                        <p class="text-gray-300 mb-4">
+                            An agentic AI-powered Security Operations Center assistant built with a four-agent MCP pipeline (ReconAgent, ReputationAgent, ShodanAgent, ReportAgent). Achieves 99.88% intrusion detection accuracy on the CICIDS2017 dataset using ensemble ML. Features asyncio parallel agent execution, 6-hour diskcache TTL, and a PyQt6 desktop GUI.
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/bunnypraneeth5/SOC-Copilot" target="_blank"
+                               class="text-blue-400 hover:text-blue-300 transition-colors">
+                                <i class="fab fa-github mr-1"></i> View Code
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- College Gate Pass System -->
-                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="200">
                     <div class="mb-4">
                         <h2 class="text-2xl font-['Orbitron'] mb-2">College Gate Pass System</h2>
                         <div class="flex flex-wrap gap-2 mb-4">
@@ -85,7 +118,7 @@
                 </div>
 
                 <!-- Car Sales Price Prediction -->
-                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
                     <div class="mb-4">
                         <h2 class="text-2xl font-['Orbitron'] mb-2">Car Sales Price Prediction</h2>
                         <div class="flex flex-wrap gap-2 mb-4">
@@ -110,7 +143,7 @@
                 </div>
 
                 <!-- AI-Generated Fitness Website -->
-                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="400">
                     <div class="mb-4">
                         <h2 class="text-2xl font-['Orbitron'] mb-2">AI-Generated Fitness Website</h2>
                         <div class="flex flex-wrap gap-2 mb-4">
@@ -132,7 +165,7 @@
             </div>
 
             <!-- More Projects Link -->
-            <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="400">
+            <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="500">
                 <a href="https://github.com/BunnyPraneeth5" target="_blank" 
                    class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
                     <i class="fab fa-github mr-2"></i>View More on GitHub
