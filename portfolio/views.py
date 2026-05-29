@@ -42,7 +42,15 @@ def about_view(request):
     })
 
 def skills_view(request):
-    skills = Skill.objects.all()
+    seen_skill_names = set()
+    skills = []
+    for skill in Skill.objects.all():
+        normalized_name = skill.name.strip().casefold()
+        if normalized_name in seen_skill_names:
+            continue
+        seen_skill_names.add(normalized_name)
+        skills.append(skill)
+
     grouped_skills = OrderedDict()
     category_labels = dict(Skill.CATEGORY_CHOICES)
     for skill in skills:

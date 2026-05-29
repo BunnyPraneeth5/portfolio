@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="home">
-    <div id="particles-container" class="particles-container"></div>
+    <div id="atmosphere-container" class="atmosphere-container"></div>
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
@@ -24,7 +24,7 @@
                 <div class="spinner-ring"></div>
                 <div class="spinner-ring"></div>
             </div>
-            <p class="loading-text">Loading Portfolio...</p>
+            <p class="loading-text">Opening Sequence</p>
         </div>
     </div>
     
@@ -80,8 +80,12 @@
                         Karu Praneeth Kumar
                     </span>
                 </h1>
-                <p class="text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
-                    Machine Learning Engineer & Full-Stack Developer
+                <p class="hero-role text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <span id="typewriter" class="role-crossfade" aria-live="polite">
+                        <span class="role-crossfade__item active">Machine Learning Engineer</span>
+                        <span class="role-crossfade__item">Full-Stack Developer</span>
+                        <span class="role-crossfade__item">AI Systems Builder</span>
+                    </span>
                 </p>
                 <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
                     Crafting intelligent solutions through AI and modern web technologies. 
@@ -92,23 +96,11 @@
                 <div class="flex flex-col md:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
                     <a href="about.html" 
                        class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        About Me
-                    </a>
-                    <a href="assets/resume/Karu_Praneeth_Kumar.pdf" download
-                       class="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        <i class="fas fa-download mr-2"></i>Download Resume
-                    </a>
-                    <a href="skills.html" 
-                       class="px-8 py-3 border border-purple-500/30 rounded-full hover:bg-purple-500/10 transition-colors">
-                        My Skills
+                        Begin the Story
                     </a>
                     <a href="projects.html" 
                        class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
-                        View Projects
-                    </a>
-                    <a href="contact.html" 
-                       class="px-8 py-3 border border-purple-500/30 rounded-full hover:bg-purple-500/10 transition-colors">
-                        Contact
+                        View the Work
                     </a>
                 </div>
 
@@ -141,26 +133,5 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="script.js"></script>
-    <script>
-        // Loading Screen
-        window.addEventListener('load', () => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            setTimeout(() => {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }, 1500);
-        });
-        
-        // Scroll Progress Bar
-        window.addEventListener('scroll', () => {
-            const scrollProgress = document.getElementById('scrollProgress');
-            const scrollTop = document.documentElement.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrollPercent = (scrollTop / scrollHeight) * 100;
-            scrollProgress.style.width = scrollPercent + '%';
-        });
-    </script>
 </body>
 </html> 

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="blog">
-    <div id="particles-container" class="particles-container"></div>
+    <div id="atmosphere-container" class="atmosphere-container"></div>
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
         <div class="container mx-auto px-4">
@@ -55,10 +55,10 @@
             <div class="text-center mb-12" data-aos="fade-up">
                 <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Tech Blog
+                        Field Notes
                     </span>
                 </h1>
-                <p class="text-xl text-gray-300">Insights, tutorials, and thoughts on technology</p>
+                <p class="text-xl text-gray-300">Preserved thoughts, experiments, and reflections.</p>
             </div>
 
             <!-- Blog Posts Grid -->
@@ -67,25 +67,29 @@
                     <!-- Blog posts will be rendered here by JavaScript -->
                 </div>
 
-                <!-- Coming Soon Message -->
-                <div class="text-center mt-16" data-aos="fade-up">
-                    <div class="glass-card p-8 max-w-2xl mx-auto">
-                        <i class="fas fa-rocket text-4xl text-blue-400 mb-4"></i>
-                        <h2 class="text-2xl font-['Orbitron'] mb-4">Blog Coming Soon!</h2>
-                        <p class="text-gray-300 mb-6">
-                            I'm working on creating valuable content about Machine Learning, Web Development, 
-                            and Security. Stay tuned for tutorials, project insights, and tech discussions.
-                        </p>
-                        <div class="flex flex-wrap justify-center gap-4">
-                            <span class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full text-sm">
-                                <i class="fas fa-brain mr-2"></i>ML Tutorials
-                            </span>
-                            <span class="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-sm">
-                                <i class="fas fa-code mr-2"></i>Web Dev Tips
-                            </span>
-                            <span class="px-4 py-2 bg-green-500/20 text-green-400 rounded-full text-sm">
-                                <i class="fas fa-shield-alt mr-2"></i>Security Insights
-                            </span>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogGrid">
+                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up">
+                        <div class="blog-card-visual blog-card-visual--systems"></div>
+                        <div class="p-6">
+                            <span class="featured-badge mb-3">Coming Soon</span>
+                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">Designing Agentic SOC Workflows</h2>
+                            <p class="text-gray-400 text-sm leading-relaxed">Notes on MCP orchestration, agent boundaries, and reliable security automation.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+                        <div class="blog-card-visual blog-card-visual--ml"></div>
+                        <div class="p-6">
+                            <span class="featured-badge mb-3">Coming Soon</span>
+                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">What Accuracy Hides</h2>
+                            <p class="text-gray-400 text-sm leading-relaxed">A practical reflection on ML metrics, dataset trust, and meaningful evaluation.</p>
+                        </div>
+                    </div>
+                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                        <div class="blog-card-visual blog-card-visual--build"></div>
+                        <div class="p-6">
+                            <span class="featured-badge mb-3">Coming Soon</span>
+                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">Building Calm Engineering Tools</h2>
+                            <p class="text-gray-400 text-sm leading-relaxed">How interface restraint can make complex AI systems easier to understand.</p>
                         </div>
                     </div>
                 </div>

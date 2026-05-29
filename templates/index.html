@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
     {% if site_appearance %}
     <style>
@@ -23,7 +22,7 @@
     {% endif %}
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="home">
-    <div id="particles-container" class="particles-container"></div>
+    <div id="atmosphere-container" class="atmosphere-container"></div>
 
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
@@ -36,7 +35,7 @@
                 <div class="spinner-ring"></div>
                 <div class="spinner-ring"></div>
             </div>
-            <p class="loading-text">Loading Portfolio...</p>
+            <p class="loading-text">Opening Sequence</p>
         </div>
     </div>
     
@@ -92,8 +91,12 @@
                         {% if site_appearance %}{{ site_appearance.hero_title }}{% else %}Karu Praneeth Kumar{% endif %}
                     </span>
                 </h1>
-                <p class="text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
-                    <span id="typewriter"></span><span class="typewriter-cursor">|</span>
+                <p class="hero-role text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <span id="typewriter" class="role-crossfade" aria-live="polite">
+                        {% for phrase in typewriter_phrases %}
+                        <span class="role-crossfade__item{% if forloop.first %} active{% endif %}">{{ phrase }}</span>
+                        {% endfor %}
+                    </span>
                 </p>
                 <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
                     {% if site_appearance %}{{ site_appearance.hero_description }}{% else %}Building agentic AI systems, MCP pipelines, and intelligent automation tools. Final-year B.Tech CSE-AI @ SJCET Bengaluru. Open to agentic AI engineering roles and startup internships.{% endif %}
@@ -103,23 +106,11 @@
                 <div class="flex flex-col md:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
                     <a href="{% url 'about' %}" 
                        class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        About Me
-                    </a>
-                    <a href="{% if site_appearance and site_appearance.resume %}{{ site_appearance.resume.url }}{% else %}{% static 'assets/resume/Karu_Praneeth_Kumar.pdf' %}{% endif %}" download
-                       class="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        <i class="fas fa-download mr-2"></i>Download Resume
-                    </a>
-                    <a href="{% url 'skills' %}" 
-                       class="px-8 py-3 border border-purple-500/30 rounded-full hover:bg-purple-500/10 transition-colors">
-                        My Skills
+                        Begin the Story
                     </a>
                     <a href="{% url 'projects' %}" 
                        class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
-                        View Projects
-                    </a>
-                    <a href="{% url 'contact' %}" 
-                       class="px-8 py-3 border border-purple-500/30 rounded-full hover:bg-purple-500/10 transition-colors">
-                        Contact
+                        View the Work
                     </a>
                 </div>
 
@@ -151,12 +142,12 @@
     </main>
 
     <!-- Featured Projects -->
-    <section class="pb-20" data-aos="fade-up">
+    <section class="pb-20" data-nav-target="projects" data-aos="fade-up">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-3xl md:text-4xl font-['Orbitron'] font-bold text-center mb-8">
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Featured Projects
+                        Selected Work
                     </span>
                 </h2>
                 <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
@@ -181,7 +172,7 @@
                 </div>
                 <div class="text-center mt-8">
                     <a href="{% url 'projects' %}" class="text-blue-400 hover:text-blue-300 transition-colors">
-                        View All Projects &rarr;
+                        Continue to Projects
                     </a>
                 </div>
             </div>
@@ -190,70 +181,5 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="{% static 'script.js' %}"></script>
-    <script>
-        // Loading Screen
-        window.addEventListener('load', () => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            setTimeout(() => {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
-            }, 1500);
-        });
-        
-        // Scroll Progress Bar
-        window.addEventListener('scroll', () => {
-            const scrollProgress = document.getElementById('scrollProgress');
-            const scrollTop = document.documentElement.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrollPercent = (scrollTop / scrollHeight) * 100;
-            scrollProgress.style.width = scrollPercent + '%';
-        });
-
-        // Hero Typewriter
-        document.addEventListener('DOMContentLoaded', () => {
-            const typewriter = document.getElementById('typewriter');
-            if (!typewriter) return;
-
-            const phrases = [
-                {% for phrase in typewriter_phrases %}
-                '{{ phrase|escapejs }}'{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ];
-            let phraseIndex = 0;
-            let charIndex = 0;
-            let isDeleting = false;
-
-            const type = () => {
-                const currentPhrase = phrases[phraseIndex];
-                typewriter.textContent = currentPhrase.substring(0, charIndex);
-
-                if (!isDeleting && charIndex < currentPhrase.length) {
-                    charIndex += 1;
-                    setTimeout(type, 50);
-                    return;
-                }
-
-                if (!isDeleting && charIndex === currentPhrase.length) {
-                    isDeleting = true;
-                    setTimeout(type, 2000);
-                    return;
-                }
-
-                if (isDeleting && charIndex > 0) {
-                    charIndex -= 1;
-                    setTimeout(type, 30);
-                    return;
-                }
-
-                isDeleting = false;
-                phraseIndex = (phraseIndex + 1) % phrases.length;
-                setTimeout(type, 50);
-            };
-
-            type();
-        });
-    </script>
 </body>
 </html> 

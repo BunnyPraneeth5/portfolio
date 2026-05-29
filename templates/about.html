@@ -22,7 +22,7 @@
     {% endif %}
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="about">
-    <div id="particles-container" class="particles-container"></div>
+    <div id="atmosphere-container" class="atmosphere-container"></div>
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
         <div class="container mx-auto px-4">
@@ -66,7 +66,7 @@
                 <div class="text-center mb-12" data-aos="fade-up">
                     <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                            About Me
+                            Behind the Work
                         </span>
                     </h1>
                     <div class="flex justify-center gap-2 mb-4">
@@ -75,7 +75,7 @@
                         <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping" style="animation-delay:400ms"></span>
                     </div>
                     <p class="text-xl text-gray-400">
-                        {% if about.subtitle %}{{ about.subtitle }}{% else %}Agentic AI Engineer · B.Tech CSE-AI · Kurnool, India{% endif %}
+                        {% if about.subtitle %}{{ about.subtitle }}{% else %}Agentic AI Engineer / B.Tech CSE-AI / Kurnool, India{% endif %}
                     </p>
                 </div>
 
@@ -107,6 +107,24 @@
                         </div>
 
                         <div class="md:w-2/5">
+                            <figure class="story-portrait engineering-visual" aria-label="AI and MCP engineering architecture visualization">
+                                <div class="engineering-visual__header">
+                                    <span>MCP</span>
+                                    <span>AGENTIC AI</span>
+                                </div>
+                                <div class="engineering-visual__map">
+                                    <span class="engineering-node engineering-node--core">KPK</span>
+                                    <span class="engineering-node engineering-node--one">Recon</span>
+                                    <span class="engineering-node engineering-node--two">ML</span>
+                                    <span class="engineering-node engineering-node--three">Report</span>
+                                    <span class="engineering-node engineering-node--four">API</span>
+                                    <span class="engineering-line engineering-line--one"></span>
+                                    <span class="engineering-line engineering-line--two"></span>
+                                    <span class="engineering-line engineering-line--three"></span>
+                                    <span class="engineering-line engineering-line--four"></span>
+                                </div>
+                                <div class="engineering-visual__footer">systems / security / intelligence</div>
+                            </figure>
                             {% if about %}
                             <div class="glass-card p-6">
                                 <div class="grid grid-cols-2 gap-4">
@@ -161,7 +179,7 @@
                     <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Education Journey</h2>
                     <div class="relative">
                         <!-- Vertical Line -->
-                        <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-blue-400 to-purple-600"></div>
+                        <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-blue-400 to-purple-600"></div>
 
                         {% for entry in education %}
                         <div class="relative mb-12">
@@ -171,7 +189,7 @@
                                         {{ entry.year_range }}
                                     </span>
                                 </div>
-                                <div class="absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-gray-900">
+                                <div class="timeline-node absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-gray-900">
                                 </div>
                                 <div class="w-1/2 pl-8"></div>
                             </div>
@@ -221,7 +239,7 @@
                     <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Professional Experience</h2>
                     <div class="relative">
                         <!-- Vertical Line -->
-                        <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-blue-400 to-purple-600"></div>
+                        <div class="timeline-line absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-blue-400 to-purple-600"></div>
 
                         {% for entry in experience_all %}
                         <div class="relative mb-12">
@@ -233,7 +251,7 @@
                                     </span>
                                     {% endif %}
                                 </div>
-                                <div class="absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-gray-900"></div>
+                                <div class="timeline-node absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-gray-900"></div>
                                 <div class="w-1/2 pl-8">
                                     {% if entry.side == 'right' %}
                                     <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium border border-purple-500/30">
@@ -325,10 +343,10 @@
                     {% for event in events %}
                     <div class="glass-card p-8 max-w-3xl mx-auto relative overflow-hidden mb-6">
                         <span class="featured-badge">Organizer</span>
-                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-purple-600">
+                        <div class="timeline-line absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-purple-600">
                         </div>
                         <div class="flex flex-col md:flex-row items-start pl-4">
-                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center mr-6 flex-shrink-0 mb-4 md:mb-0">
+                            <div class="timeline-node w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center mr-6 flex-shrink-0 mb-4 md:mb-0">
                                 <i class="fas fa-code text-3xl text-blue-400"></i>
                             </div>
                             <div class="flex-1">

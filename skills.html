@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="skills">
-    <div id="particles-container" class="particles-container"></div>
+    <div id="atmosphere-container" class="atmosphere-container"></div>
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
         <div class="container mx-auto px-4">
@@ -55,10 +55,10 @@
             <div class="text-center mb-12" data-aos="fade-up">
                 <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Skills & Expertise
+                        Capabilities
                     </span>
                 </h1>
-                <p class="text-xl text-gray-300">My technical toolkit and capabilities</p>
+                <p class="text-xl text-gray-300">Knowledge organized into useful systems.</p>
             </div>
 
             <!-- Skills Grid -->
@@ -214,52 +214,31 @@
 
             <!-- Skill Level Indicators -->
             <div class="mt-16 max-w-4xl mx-auto" data-aos="fade-up" data-aos-delay="700">
-                <h2 class="text-2xl font-['Orbitron'] text-center mb-8">Proficiency Levels</h2>
+                <h2 class="text-2xl font-['Orbitron'] text-center mb-8">Working Depth</h2>
                 <div class="space-y-6">
-                    <div class="glass-card p-6" id="skillBars">
-                        <div class="mb-4">
-                            <div class="flex justify-between mb-2">
-                                <span>Python</span>
-                                <span>90%</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="90"></div>
-                            </div>
-                        </div>
+                    <div class="glass-card p-6 skill-expertise-list" id="skillBars">
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
                                 <span>Machine Learning (Scikit-Learn)</span>
-                                <span>90%</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="90"></div>
+                                <span class="expertise-label">Expert</span>
                             </div>
                         </div>
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
                                 <span>Web Development (Django)</span>
-                                <span>85%</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="85"></div>
+                                <span class="expertise-label">Advanced</span>
                             </div>
                         </div>
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
                                 <span>SOC Analyst L1</span>
-                                <span>75%</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="75"></div>
+                                <span class="expertise-label">Advanced</span>
                             </div>
                         </div>
                         <div class="mb-4">
                             <div class="flex justify-between mb-2">
                                 <span>SQL</span>
-                                <span>85%</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 rounded-full overflow-hidden">
-                                <div class="skill-bar h-full bg-gradient-to-r from-blue-400 to-purple-600 rounded-full transition-all duration-1000 ease-out" data-width="85"></div>
+                                <span class="expertise-label">Advanced</span>
                             </div>
                         </div>
                     </div>
@@ -270,41 +249,5 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="script.js"></script>
-    <script>
-        // Animate skill bars when they come into view
-        const observerOptions = {
-            threshold: 0.5,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const skillBarObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const skillBars = entry.target.querySelectorAll('.skill-bar');
-                    skillBars.forEach((bar, index) => {
-                        setTimeout(() => {
-                            const width = bar.getAttribute('data-width');
-                            bar.style.width = width + '%';
-                        }, index * 200);
-                    });
-                    skillBarObserver.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const skillBarsContainer = document.getElementById('skillBars');
-            if (skillBarsContainer) {
-                // Initialize bars at 0 width
-                const skillBars = skillBarsContainer.querySelectorAll('.skill-bar');
-                skillBars.forEach(bar => {
-                    bar.style.width = '0%';
-                });
-                
-                // Observe the container
-                skillBarObserver.observe(skillBarsContainer);
-            }
-        });
-    </script>
 </body>
 </html> 
