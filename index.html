@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']">
+<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="home">
+    <div id="particles-container" class="particles-container"></div>
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
@@ -69,9 +70,8 @@
         <div class="container mx-auto px-4 py-24">
             <div class="max-w-4xl mx-auto text-center">
                 <!-- Profile Image -->
-                <div class="mb-8" data-aos="fade-down">
-                    <img src="assets/images/favicon.png" alt="Karu Praneeth Kumar" 
-                         class="w-32 h-32 mx-auto rounded-full border-4 border-purple-500/30 shadow-lg shadow-purple-500/20">
+                <div class="portrait-container" data-aos="fade-down">
+                    <img src="assets/images/portrait.png" alt="Karu Praneeth Kumar" class="portrait-img">
                 </div>
                 
                 <!-- Hero Text -->

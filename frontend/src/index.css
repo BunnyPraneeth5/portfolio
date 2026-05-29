@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap');
+
+:root {
+  --void: #02040a;
+  --deep: #060c18;
+  --cosmos: #0a1428;
+  --horizon: #0d1f3c;
+  --navy: #122040;
+  --mist: #8ba0b8;
+  --silver: #b8c8d8;
+  --star: #e8f0f8;
+  --cyan: #4dd0e1;
+  --cyan-dim: #1a5a66;
+  --cyan-glow: rgba(77,208,225,0.15);
+  --gold: #c9a84c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background-color: var(--void) !important;
+  color: var(--mist) !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 300 !important;
+  line-height: 1.8 !important;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', serif !important;
+  font-weight: 300 !important;
+  color: #f4f8fc !important;
+  letter-spacing: 0.04em;
+}
+
+p, span, li, label, input, textarea {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 300 !important;
+}
+
+/* Custom scrollbar rules for overlay overlays */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--horizon);
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan);
+}
+
+/* Base utility layers */
+.fullscreen-3d {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.text-layer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  z-index: 10;
+}
+
+.section-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 4rem 2rem;
+}
+
+.glass-card {
+  background: rgba(6, 12, 24, 0.45);
+  border: 1px solid rgba(77, 208, 225, 0.08);
+  border-radius: 0px !important;
+  padding: 2.5rem;
+  max-width: 600px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(77, 208, 225, 0.22);
+  background: rgba(10, 20, 40, 0.6);
+}
+
+.mono-label {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 0.3em !important;
+  text-transform: uppercase !important;
+  color: var(--cyan) !important;
+}
+
+.chapter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-label::before {
+  content: '';
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--cyan);
+  opacity: 0.6;
+}
+
+.btn-primary {
+  background: var(--cyan) !important;
+  color: #02040a !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 0.25em !important;
+  text-transform: uppercase !important;
+  padding: 12px 28px !important;
+  border-radius: 0px !important;
+  border: none !important;
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover {
+  background: #ffffff !important;
+  box-shadow: 0 0 20px rgba(77, 208, 225, 0.35);
+}
+
+.btn-ghost {
+  background: transparent !important;
+  color: var(--silver) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  padding: 12px 24px !important;
+  border: 1px solid rgba(138, 160, 184, 0.15) !important;
+  border-radius: 0px !important;
+  cursor: pointer;
+  display: inline-block;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-ghost:hover {
+  color: var(--cyan) !important;
+  border-color: var(--cyan) !important;
+  background: rgba(77, 208, 225, 0.03) !important;
+}
+
+input, textarea {
+  background: rgba(6, 12, 24, 0.8) !important;
+  border: 1px solid rgba(77, 208, 225, 0.1) !important;
+  border-radius: 0px !important;
+  color: var(--star) !important;
+  padding: 10px 14px !important;
+  width: 100%;
+  transition: all 0.5s ease;
+}
+
+input:focus, textarea:focus {
+  border-color: rgba(77, 208, 225, 0.4) !important;
+  outline: none;
+}
