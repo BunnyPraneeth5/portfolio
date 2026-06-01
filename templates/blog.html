@@ -87,9 +87,7 @@
                                  class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                         </div>
                         {% else %}
-                        <div class="w-full h-48 bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center">
-                            <i class="fas fa-newspaper text-4xl text-blue-400/50"></i>
-                        </div>
+                        <div class="blog-card-visual blog-card-visual--empty h-48"></div>
                         {% endif %}
                         
                         <div class="p-6">
@@ -110,9 +108,9 @@
                             </p>
                             
                             <a href="{% url 'blog_detail' post.slug %}" 
-                               class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium">
+                               class="card-cta inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium">
                                 Read More 
-                                <i class="fas fa-arrow-right text-xs"></i>
+                                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
                             </a>
                         </div>
                     </div>

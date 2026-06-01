@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,8 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-l32n!r_o2#j5n)n=uxt5(@3u#(f@&+1)-&_sbrlmf6@%)$87%@'
-
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-local-only-key'
+)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -63,6 +66,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'portfolio.context_processors.site_appearance',
+                'portfolio.context_processors.site_settings',
             ],
         },
     },

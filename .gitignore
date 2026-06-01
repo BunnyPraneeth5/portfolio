@@ -1,10 +1,61 @@
-*.pyc
-__pycache__/
-db.sqlite3
-media/
-staticfiles/
+# Environment
 .env
+*.env
+
+# Database
+db.sqlite3
+
+# Collected static (regenerated on deploy)
+staticfiles/
+
+# Media uploads (use cloud storage in production)
+media/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
 *.log
+django-runserver.*.log
+
+# Dead frontend folder
+frontend/
+frontend/node_modules/
+frontend/dist/
+
+# Duplicate root-level files
+assets/
+portfolio_django/
+
+# One-off scripts
+fix_nav.py
+run_admin_verification.py
+wsgi_pythonanywhere.py
+
+# Duplicate documentation
+ADMIN_GUIDE.md
+DEPLOYMENT_CHECKLIST.md
+DJANGO_SETUP.md
+LOCAL_DEVELOPMENT.md
+PYTHONANYWHERE_DEPLOY.md
+QUICK_START.md
+SETUP_GUIDE.md
+
+# Local settings
+config/settings_local.py
+
+# Cleanup backup
+_backup/
+
+# OS
 .DS_Store
-venv/
-env/
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp

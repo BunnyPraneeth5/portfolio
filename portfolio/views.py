@@ -2,12 +2,12 @@ from collections import OrderedDict
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import About, Skill, Project, BlogPost, ContactMessage
+from .models import About, Skill, Project, BlogPost, ContactMessage, SiteSettings
 
 def index(request):
     about = About.objects.first()
     skills = Skill.objects.all()
-    projects = Project.objects.filter(featured=True)[:3]
+    projects = Project.objects.filter(is_featured=True, is_published=True)[:3]
     return render(request, 'index.html', {'about': about, 'skills': skills, 'projects': projects})
 
 def about_view(request):
@@ -63,8 +63,23 @@ def skills_view(request):
     return render(request, 'skills.html', {'skills': skills, 'grouped_skills': grouped_skills.values()})
 
 def projects_view(request):
-    projects = Project.objects.all()
-    return render(request, 'projects.html', {'projects': projects})
+    featured = Project.objects.filter(
+        is_featured=True,
+        is_published=True
+    ).first()
+    other_projects = Project.objects.filter(
+        is_featured=False,
+        is_published=True
+    ).order_by('order')
+    secondary_projects = other_projects[:2]
+    archive_projects = other_projects[2:]
+
+    return render(request, 'projects.html', {
+        'featured_project': featured,
+        'other_projects': other_projects,
+        'secondary_projects': secondary_projects,
+        'archive_projects': archive_projects,
+    })
 
 def blog_view(request):
     posts = BlogPost.objects.filter(published=True)
@@ -75,7 +90,12 @@ def blog_detail(request, slug):
     return render(request, 'blog_detail.html', {'post': post})
 
 def contact_view(request):
+    site_settings = SiteSettings.load()
     if request.method == 'POST':
+        if not site_settings.contact_form_active:
+            messages.info(request, 'The contact form is currently unavailable. Please email directly.')
+            return redirect('contact')
+
         name = request.POST.get('name')
         email = request.POST.get('email')
         subject = request.POST.get('subject')

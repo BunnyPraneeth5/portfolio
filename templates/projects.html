@@ -71,115 +71,142 @@
                 <p class="text-xl text-gray-300">Ideas tested against reality.</p>
             </div>
 
+            <hr class="section-rule" data-aos="fade-up">
+
             <!-- Projects Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <!-- SOC Copilot -->
-                <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
-                    <span class="featured-badge bg-gradient-to-r from-blue-500 to-purple-600">Featured</span>
-                    <div class="project-thumbnail project-thumbnail--soc mb-5" aria-label="SOC Copilot MCP agent workflow thumbnail">
-                        <span class="project-node project-node--center">SOC</span>
-                        <span class="project-node project-node--a">Recon</span>
-                        <span class="project-node project-node--b">Rep</span>
-                        <span class="project-node project-node--c">Shodan</span>
-                        <span class="project-node project-node--d">Report</span>
-                    </div>
-                    <div class="mb-4 pr-20">
-                        <h2 class="text-2xl font-['Orbitron'] mb-2">SOC Copilot</h2>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">Python</span>
-                            <span class="px-2 py-1 bg-purple-500/20 rounded-full text-sm">MCP</span>
-                            <span class="px-2 py-1 bg-green-500/20 rounded-full text-sm">PyQt6</span>
-                            <span class="px-2 py-1 bg-cyan-500/20 rounded-full text-sm">Scikit-learn</span>
-                            <span class="px-2 py-1 bg-pink-500/20 rounded-full text-sm">Agentic AI</span>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            An agentic AI-powered Security Operations Center assistant built with a four-agent MCP pipeline (ReconAgent, ReputationAgent, ShodanAgent, ReportAgent). Achieves 99.88% intrusion detection accuracy on the CICIDS2017 dataset using ensemble ML. Features asyncio parallel agent execution, 6-hour diskcache TTL, and a PyQt6 desktop GUI.
+            <div class="projects-grid">
+                {% if featured_project %}
+                <article class="glass-card project-card featured-project-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="featured-project-copy">
+                        <span class="featured-label">FEATURED PROJECT</span>
+                        <h2>{{ featured_project.title }}</h2>
+                        <p>
+                            {{ featured_project.card_description }}
                         </p>
-                        <div class="flex space-x-4">
-                            <a href="https://github.com/bunnypraneeth5/SOC-Copilot" target="_blank"
-                               class="text-blue-400 hover:text-blue-300 transition-colors">
-                                <i class="fab fa-github mr-1"></i> View Code
-                            </a>
+                        <div class="project-tags">
+                            {% for tag in featured_project.tech_tags_list %}
+                            <span class="project-tag">{{ tag }}</span>
+                            {% endfor %}
                         </div>
+                        {% if featured_project.github_url %}
+                        <a href="{{ featured_project.github_url }}" target="_blank" class="view-code-link">
+                            View Code <span aria-hidden="true">&rarr;</span>
+                        </a>
+                        {% endif %}
+                        {% if featured_project.primary_live_url %}
+                        <a href="{{ featured_project.primary_live_url }}" target="_blank" class="view-code-link">
+                            Live Demo <span aria-hidden="true">&rarr;</span>
+                        </a>
+                        {% endif %}
                     </div>
+                    <div class="project-metrics project-metrics-panel" aria-label="{{ featured_project.title }} metrics">
+                        {% if featured_project.card_image %}
+                        <img src="{{ featured_project.card_image.url }}" alt="{{ featured_project.title }}" class="soc-screenshot-placeholder">
+                        {% else %}
+                        <div class="soc-screenshot-placeholder" aria-label="{{ featured_project.title }} screenshot placeholder">
+                            <span>Screenshot Coming Soon</span>
+                        </div>
+                        {% endif %}
+                        {% if featured_project.metric_kicker %}
+                        <span class="metrics-label">{{ featured_project.metric_kicker }}</span>
+                        {% endif %}
+                        {% if featured_project.metric_1_value %}
+                        <div class="project-metric">
+                            <span class="project-metric-number">{{ featured_project.metric_1_value }}</span>
+                            <span class="project-metric-label">{{ featured_project.metric_1_label }}</span>
+                        </div>
+                        {% endif %}
+                        {% if featured_project.metric_2_value %}
+                        <div class="project-metric">
+                            <span class="project-metric-number">{{ featured_project.metric_2_value }}</span>
+                            <span class="project-metric-label">{{ featured_project.metric_2_label }}</span>
+                        </div>
+                        {% endif %}
+                        {% if featured_project.metric_3_value %}
+                        <div class="project-metric">
+                            <span class="project-metric-number">{{ featured_project.metric_3_value }}</span>
+                            <span class="project-metric-label">{{ featured_project.metric_3_label }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endif %}
+
+                <div class="secondary-project-grid">
+                    {% for project in secondary_projects %}
+                    <article class="glass-card project-card secondary-project-card" data-aos="fade-up" data-aos-delay="160">
+                        {% if project.secondary_kicker %}
+                        <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
+                        {% endif %}
+                        <h2>{{ project.title }}</h2>
+                        <p>
+                            {{ project.card_description }}
+                        </p>
+                        <div class="project-tags mb-4">
+                            {% for tag in project.tech_tags_list %}
+                            <span class="project-tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="secondary-project-footer">
+                            {% if project.metric_1_value %}
+                            <span class="secondary-project-metric">{{ project.metric_1_value }} <small>{{ project.metric_1_label }}</small></span>
+                            {% endif %}
+                            <div>
+                                {% if project.github_url %}
+                                <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
+                                    View Code <span aria-hidden="true">&rarr;</span>
+                                </a>
+                                {% endif %}
+                                {% if project.primary_live_url %}
+                                <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
+                                    Live Demo <span aria-hidden="true">&rarr;</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
                 </div>
 
-                <!-- College Gate Pass System -->
-                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="mb-4">
-                        <div class="project-thumbnail project-thumbnail--gate mb-5" aria-label="QR authentication workflow thumbnail"></div>
-                        <h2 class="text-2xl font-['Orbitron'] mb-2">College Gate Pass System</h2>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">Django</span>
-                            <span class="px-2 py-1 bg-purple-500/20 rounded-full text-sm">Python</span>
-                            <span class="px-2 py-1 bg-green-500/20 rounded-full text-sm">QR Auth</span>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Built a secure gate pass system using QR authentication, reducing unauthorized entries by 75%.
-                        </p>
-                        <div class="flex space-x-4">
-                            <a href="https://github.com/BunnyPraneeth5/gate-pass" target="_blank" 
-                               class="text-blue-400 hover:text-blue-300 transition-colors">
-                                <i class="fab fa-github mr-1"></i> View Code
-                            </a>
-                        </div>
+                {% for project in archive_projects %}
+                <article class="project-archive-row" data-aos="fade-up" data-aos-delay="300">
+                    <div>
+                        {% if project.secondary_kicker %}
+                        <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
+                        {% endif %}
+                        <h2>{{ project.title }}</h2>
                     </div>
-                </div>
-
-                <!-- Car Sales Price Prediction -->
-                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="mb-4">
-                        <div class="project-thumbnail project-thumbnail--ml mb-5" aria-label="Machine learning prediction chart thumbnail"></div>
-                        <h2 class="text-2xl font-['Orbitron'] mb-2">Car Sales Price Prediction</h2>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">TensorFlow</span>
-                            <span class="px-2 py-1 bg-purple-500/20 rounded-full text-sm">ANN</span>
-                            <span class="px-2 py-1 bg-green-500/20 rounded-full text-sm">ML</span>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Created a neural network to predict car prices with 88% accuracy, using feature engineering and visualization tools.
-                        </p>
-                        <div class="flex space-x-4">
-                            <a href="https://github.com/BunnyPraneeth5/Car-Sales-Prediction" target="_blank" 
-                               class="text-blue-400 hover:text-blue-300 transition-colors">
-                                <i class="fab fa-github mr-1"></i> View Code
-                            </a>
-                            <a href="https://Car-Sales-Price-Prediction.onrender.com" target="_blank" 
-                               class="text-purple-400 hover:text-purple-300 transition-colors">
-                                <i class="fas fa-external-link-alt mr-1"></i> Live Demo
-                            </a>
-                        </div>
+                    <p>
+                        {{ project.card_description }}
+                    </p>
+                    <div class="project-tags">
+                        {% for tag in project.tech_tags_list %}
+                        <span class="project-tag">{{ tag }}</span>
+                        {% endfor %}
                     </div>
-                </div>
-
-                <!-- AI-Generated Fitness Website -->
-                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="mb-4">
-                        <div class="project-thumbnail project-thumbnail--ai mb-5" aria-label="AI generated interface thumbnail"></div>
-                        <h2 class="text-2xl font-['Orbitron'] mb-2">AI-Generated Fitness Website</h2>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">v0.dev</span>
-                            <span class="px-2 py-1 bg-purple-500/20 rounded-full text-sm">ChatGPT</span>
-                            <span class="px-2 py-1 bg-green-500/20 rounded-full text-sm">AI Tools</span>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Built with AI tools, featuring 50+ components and rapid UI generation workflows. Backend integration in progress.
-                        </p>
-                        <div class="flex space-x-4">
-                            <a href="https://v0.dev/chat/fork-of-workout-website-FLvlcsE2hGL" target="_blank" 
-                               class="text-purple-400 hover:text-purple-300 transition-colors">
-                                <i class="fas fa-external-link-alt mr-1"></i> Live Demo
-                            </a>
-                        </div>
+                    <div>
+                        {% if project.github_url %}
+                        <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
+                            View Code <span aria-hidden="true">&rarr;</span>
+                        </a>
+                        {% endif %}
+                        {% if project.primary_live_url %}
+                        <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
+                            Live Demo <span aria-hidden="true">&rarr;</span>
+                        </a>
+                        {% endif %}
                     </div>
-                </div>
+                </article>
+                {% endfor %}
             </div>
+
+            <hr class="section-rule" data-aos="fade-up">
 
             <!-- More Projects Link -->
             <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="500">
                 <a href="https://github.com/BunnyPraneeth5" target="_blank" 
-                   class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                    <i class="fab fa-github mr-2"></i>More Work on GitHub
+                   class="github-outline-button inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
+                    <i class="fab fa-github mr-2"></i>More Work on GitHub <span class="cta-arrow" aria-hidden="true">&rarr;</span>
                 </a>
             </div>
         </div>

@@ -78,18 +78,178 @@ class SiteAppearance(models.Model):
         phrases = [phrase.strip() for phrase in self.typewriter_phrases.splitlines() if phrase.strip()]
         return phrases or ['Agentic AI Engineer', 'MCP Systems Builder', 'ML & Full-Stack Developer']
 
+class SiteSettings(models.Model):
+    profile_image = models.ImageField(
+        upload_to='appearance/',
+        blank=True,
+        null=True,
+        help_text='Profile image used in the homepage hero.'
+    )
+    resume = models.FileField(
+        upload_to='resume/',
+        blank=True,
+        null=True,
+        help_text='Resume PDF linked from the site.'
+    )
+    hero_name_display = models.CharField(
+        max_length=100,
+        default='Karu Praneeth Kumar'
+    )
+    hero_roles = models.TextField(
+        help_text='One role per line. These rotate in the hero.',
+        default='Agentic AI Engineer\nML Practitioner\nFull Stack Developer'
+    )
+    hero_description = models.TextField(
+        help_text='Short paragraph shown below the title.',
+        default='Building agentic AI systems, MCP pipelines, and intelligent automation tools. Final-year B.Tech CSE-AI @ SJCET Bengaluru. Open to agentic AI engineering roles and startup internships.'
+    )
+    hero_cta_primary_label = models.CharField(
+        max_length=50,
+        default='Begin the Story'
+    )
+    hero_cta_primary_url = models.CharField(
+        max_length=200,
+        default='/about/'
+    )
+    hero_cta_secondary_label = models.CharField(
+        max_length=50,
+        default='View the Work'
+    )
+    hero_cta_secondary_url = models.CharField(
+        max_length=200,
+        default='/projects/'
+    )
+
+    github_url = models.URLField(blank=True, default='https://github.com/BunnyPraneeth5')
+    linkedin_url = models.URLField(blank=True, default='https://linkedin.com/in/karu-praneeth-kumar')
+    kaggle_url = models.URLField(blank=True, default='https://www.kaggle.com/bunnypraneeth5')
+    hackerrank_url = models.URLField(blank=True, default='https://hackerrank.com/profile/karu_praneeth')
+    leetcode_url = models.URLField(blank=True, default='https://leetcode.com/u/praneethkumar_/')
+
+    contact_email = models.EmailField(default='karupraneethkumar@gmail.com')
+    contact_location = models.CharField(max_length=100, default='Andhra Pradesh, India')
+    contact_tagline = models.CharField(
+        max_length=200,
+        default='A quiet place for the next conversation.'
+    )
+    contact_form_active = models.BooleanField(
+        default=True,
+        help_text='Uncheck to hide the form and show email link only.'
+    )
+
+    meta_title = models.CharField(max_length=100, blank=True)
+    meta_description = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        verbose_name = 'Site Settings'
+        verbose_name_plural = 'Site Settings'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    @property
+    def hero_roles_list(self):
+        roles = [role.strip() for role in self.hero_roles.splitlines() if role.strip()]
+        return roles or ['Agentic AI Engineer', 'ML Practitioner', 'Full Stack Developer']
+
+    def __str__(self):
+        return 'Site Settings'
+
 class Project(models.Model):
     title = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(blank=True, default='')
+    short_description = models.TextField(
+        blank=True,
+        help_text='Shown in the project card.'
+    )
+    long_description = models.TextField(
+        blank=True,
+        help_text='Optional extended case study text.'
+    )
     image = models.ImageField(upload_to='projects/', blank=True, null=True)
+    thumbnail = models.ImageField(
+        upload_to='projects/',
+        null=True,
+        blank=True
+    )
     live_url = models.URLField(blank=True)
+    live_demo_url = models.URLField(blank=True)
     github_url = models.URLField(blank=True)
-    technologies = models.CharField(max_length=300)
+    technologies = models.CharField(max_length=300, blank=True, default='')
+    tech_tags = models.CharField(
+        max_length=500,
+        blank=True,
+        help_text='Comma-separated. e.g. Python, MCP, PyQt6'
+    )
     featured = models.BooleanField(default=False)
+    is_featured = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text='Lower number appears first.'
+    )
+    metric_kicker = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text='Small label above metrics, e.g. MCP PIPELINE.'
+    )
+    secondary_kicker = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text='Small label above non-featured project titles.'
+    )
+    metric_1_value = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text='e.g. 99.88%'
+    )
+    metric_1_label = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text='e.g. Detection Accuracy'
+    )
+    metric_2_value = models.CharField(max_length=20, blank=True)
+    metric_2_label = models.CharField(max_length=50, blank=True)
+    metric_3_value = models.CharField(max_length=20, blank=True)
+    metric_3_label = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['order']
+
+    @property
+    def tech_tags_list(self):
+        source = self.tech_tags or self.technologies
+        return [tag.strip() for tag in source.split(',') if tag.strip()]
+
+    @property
+    def card_description(self):
+        return self.short_description or self.description
+
+    @property
+    def card_image(self):
+        return self.thumbnail or self.image
+
+    @property
+    def primary_live_url(self):
+        return self.live_demo_url or self.live_url
+
+    def save(self, *args, **kwargs):
+        if not self.description and self.short_description:
+            self.description = self.short_description
+        if not self.technologies and self.tech_tags:
+            self.technologies = self.tech_tags
+        if not self.live_url and self.live_demo_url:
+            self.live_url = self.live_demo_url
+        if self.is_featured and not self.featured:
+            self.featured = True
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return self.title

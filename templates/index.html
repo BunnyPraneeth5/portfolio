@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karu Praneeth Kumar | Portfolio</title>
+    <title>{% if site_settings.meta_title %}{{ site_settings.meta_title }}{% else %}{{ site_settings.hero_name_display }} | Portfolio{% endif %}</title>
+    {% if site_settings.meta_description %}
+    <meta name="description" content="{{ site_settings.meta_description }}">
+    {% endif %}
     <link rel="icon" type="image/png" href="{% static 'assets/images/favicon.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -82,60 +85,74 @@
             <div class="max-w-4xl mx-auto text-center">
                 <!-- Profile Image -->
                 <div class="portrait-container" data-aos="fade-down">
-                    <img src="{% if site_appearance and site_appearance.profile_image %}{{ site_appearance.profile_image.url }}{% else %}{% static 'assets/images/portrait.png' %}{% endif %}" alt="{% if site_appearance %}{{ site_appearance.site_name }}{% else %}Karu Praneeth Kumar{% endif %}" class="portrait-img">
+                    <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}" class="portrait-img">
                 </div>
                 
                 <!-- Hero Text -->
                 <h1 class="text-4xl md:text-6xl font-['Orbitron'] font-bold mb-6" data-aos="fade-up">
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        {% if site_appearance %}{{ site_appearance.hero_title }}{% else %}Karu Praneeth Kumar{% endif %}
+                        {{ site_settings.hero_name_display }}
                     </span>
                 </h1>
                 <p class="hero-role text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
                     <span id="typewriter" class="role-crossfade" aria-live="polite">
-                        {% for phrase in typewriter_phrases %}
+                        {% for phrase in site_settings.hero_roles_list %}
                         <span class="role-crossfade__item{% if forloop.first %} active{% endif %}">{{ phrase }}</span>
                         {% endfor %}
                     </span>
                 </p>
                 <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-                    {% if site_appearance %}{{ site_appearance.hero_description }}{% else %}Building agentic AI systems, MCP pipelines, and intelligent automation tools. Final-year B.Tech CSE-AI @ SJCET Bengaluru. Open to agentic AI engineering roles and startup internships.{% endif %}
+                    {{ site_settings.hero_description }}
                 </p>
 
                 <!-- CTA Buttons -->
                 <div class="flex flex-col md:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
-                    <a href="{% url 'about' %}" 
+                    <a href="{{ site_settings.hero_cta_primary_url }}" 
                        class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        Begin the Story
+                        {{ site_settings.hero_cta_primary_label }}
                     </a>
-                    <a href="{% url 'projects' %}" 
+                    <a href="{{ site_settings.hero_cta_secondary_url }}" 
                        class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
-                        View the Work
+                        {{ site_settings.hero_cta_secondary_label }}
+                    </a>
+                    <a href="{{ resume_url }}" target="_blank"
+                       class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
+                        Resume
                     </a>
                 </div>
 
                 <!-- Social Links -->
                 <div class="mt-12 flex justify-center space-x-6" data-aos="fade-up" data-aos-delay="400">
-                    <a href="https://github.com/BunnyPraneeth5" target="_blank" 
+                    {% if site_settings.github_url %}
+                    <a href="{{ site_settings.github_url }}" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
                         <i class="fab fa-github text-2xl"></i>
                     </a>
-                    <a href="https://linkedin.com/in/karu-praneeth-kumar" target="_blank" 
+                    {% endif %}
+                    {% if site_settings.linkedin_url %}
+                    <a href="{{ site_settings.linkedin_url }}" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
                         <i class="fab fa-linkedin text-2xl"></i>
                     </a>
-                    <a href="https://www.kaggle.com/bunnypraneeth5" target="_blank" 
+                    {% endif %}
+                    {% if site_settings.kaggle_url %}
+                    <a href="{{ site_settings.kaggle_url }}" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
                         <i class="fab fa-kaggle text-2xl"></i>
                     </a>
-                    <a href="https://hackerrank.com/profile/karu_praneeth" target="_blank" 
+                    {% endif %}
+                    {% if site_settings.hackerrank_url %}
+                    <a href="{{ site_settings.hackerrank_url }}" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
                         <i class="fab fa-hackerrank text-2xl"></i>
                     </a>
-                    <a href="https://leetcode.com/u/praneethkumar_/" target="_blank" 
+                    {% endif %}
+                    {% if site_settings.leetcode_url %}
+                    <a href="{{ site_settings.leetcode_url }}" target="_blank" 
                        class="text-gray-400 hover:text-white transition-colors">
                         <i class="fas fa-code text-2xl"></i>
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -145,6 +162,7 @@
     <section class="pb-20" data-nav-target="projects" data-aos="fade-up">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
+                <p class="featured-label text-center">SELECTED WORK</p>
                 <h2 class="text-3xl md:text-4xl font-['Orbitron'] font-bold text-center mb-8">
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
                         Selected Work

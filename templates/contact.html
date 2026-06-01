@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact | Karu Praneeth Kumar</title>
+    <title>{% if site_settings.meta_title %}Contact | {{ site_settings.meta_title }}{% else %}Contact | {{ site_settings.hero_name_display }}{% endif %}</title>
+    {% if site_settings.meta_description %}
+    <meta name="description" content="{{ site_settings.meta_description }}">
+    {% endif %}
     <link rel="icon" type="image/png" href="{% static 'assets/images/favicon.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -68,20 +71,20 @@
                         Contact
                     </span>
                 </h1>
-                <p class="text-xl text-gray-300">A quiet place for the next conversation.</p>
+                <p class="text-xl text-gray-300">{{ site_settings.contact_tagline }}</p>
             </div>
 
             <div class="max-w-4xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Contact Form -->
                     <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="100">
+                        {% if site_settings.contact_form_active %}
                         {% if messages %}
-                            {% for message in messages %}
-                            <div class="mb-4 p-4 bg-green-500/20 text-green-400 rounded-lg">
-                                {{ message }}
-                            </div>
-                            {% endfor %}
-                        {% endif %}
+                        <div class="contact-success" role="status">
+                            <h2>Thank you.</h2>
+                            <p>I'll get back to you soon.</p>
+                        </div>
+                        {% else %}
                         <form id="contactForm" method="POST" class="contact-form-refined space-y-6">
                             {% csrf_token %}
                             <div>
@@ -109,6 +112,17 @@
                                 <i class="fas fa-paper-plane mr-2"></i><span id="btnText">Send Message</span>
                             </button>
                         </form>
+                        {% endif %}
+                        {% else %}
+                        <div class="contact-success" role="status">
+                            <h2>Email directly.</h2>
+                            <p>The contact form is currently offline.</p>
+                            <a href="mailto:{{ site_settings.contact_email }}"
+                               class="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity">
+                                Send a direct email
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <!-- Contact Information -->
@@ -119,13 +133,13 @@
                             <div class="space-y-4">
                                 <div class="flex items-center">
                                     <i class="fas fa-envelope text-blue-400 w-8"></i>
-                                    <a href="mailto:karupraneethkumar@gmail.com" class="text-gray-300 hover:text-white">
-                                        karu.praneeth@gmail.com
+                                    <a href="mailto:{{ site_settings.contact_email }}" class="text-gray-300 hover:text-white">
+                                        {{ site_settings.contact_email }}
                                     </a>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-map-marker-alt text-purple-400 w-8"></i>
-                                    <span class="text-gray-300">Andhra Pradesh, India</span>
+                                    <span class="text-gray-300">{{ site_settings.contact_location }}</span>
                                 </div>
                             </div>
                         </div>
@@ -134,26 +148,41 @@
                         <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
                             <h2 class="text-2xl font-['Orbitron'] mb-4">Elsewhere</h2>
                             <div class="grid grid-cols-2 gap-4">
-                                <a href="https://github.com/BunnyPraneeth5" target="_blank"
+                                {% if site_settings.github_url %}
+                                <a href="{{ site_settings.github_url }}" target="_blank"
                                     class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                                     <i class="fab fa-github text-xl mr-2"></i>
                                     <span>GitHub</span>
                                 </a>
-                                <a href="https://linkedin.com/in/karu-praneeth-kumar" target="_blank"
+                                {% endif %}
+                                {% if site_settings.linkedin_url %}
+                                <a href="{{ site_settings.linkedin_url }}" target="_blank"
                                     class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                                     <i class="fab fa-linkedin text-xl mr-2"></i>
                                     <span>LinkedIn</span>
                                 </a>
-                                <a href="https://www.kaggle.com/bunnypraneeth5" target="_blank"
+                                {% endif %}
+                                {% if site_settings.kaggle_url %}
+                                <a href="{{ site_settings.kaggle_url }}" target="_blank"
                                     class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                                     <i class="fab fa-kaggle text-xl mr-2"></i>
                                     <span>Kaggle</span>
                                 </a>
-                                <a href="https://hackerrank.com/profile/karu_praneeth" target="_blank"
+                                {% endif %}
+                                {% if site_settings.hackerrank_url %}
+                                <a href="{{ site_settings.hackerrank_url }}" target="_blank"
                                     class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                                     <i class="fab fa-hackerrank text-xl mr-2"></i>
                                     <span>HackerRank</span>
                                 </a>
+                                {% endif %}
+                                {% if site_settings.leetcode_url %}
+                                <a href="{{ site_settings.leetcode_url }}" target="_blank"
+                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+                                    <i class="fas fa-code text-xl mr-2"></i>
+                                    <span>LeetCode</span>
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
