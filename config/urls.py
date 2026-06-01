@@ -18,9 +18,26 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path(
+        'apple-touch-icon.png',
+        RedirectView.as_view(url='/static/favicon_io/apple-touch-icon.png', permanent=True),
+    ),
+    path(
+        'favicon-32x32.png',
+        RedirectView.as_view(url='/static/favicon_io/favicon-32x32.png', permanent=True),
+    ),
+    path(
+        'favicon-16x16.png',
+        RedirectView.as_view(url='/static/favicon_io/favicon-16x16.png', permanent=True),
+    ),
+    path(
+        'site.webmanifest',
+        RedirectView.as_view(url='/static/favicon_io/site.webmanifest', permanent=True),
+    ),
     path('', include('portfolio.urls')),
 ]
 
