@@ -84,7 +84,7 @@
                         <span class="featured-label">FEATURED PROJECT</span>
                         <h2>{{ featured_project.title }}</h2>
                         <p>
-                            {{ featured_project.card_description }}
+                            {{ featured_project.card_description|linebreaksbr }}
                         </p>
                         <div class="project-tags">
                             {% for tag in featured_project.tech_tags_list %}
@@ -143,7 +143,7 @@
                         {% endif %}
                         <h2>{{ project.title }}</h2>
                         <p>
-                            {{ project.card_description }}
+                            {{ project.card_description|linebreaksbr }}
                         </p>
                         <div class="project-tags mb-4">
                             {% for tag in project.tech_tags_list %}
@@ -180,7 +180,7 @@
                         <h2>{{ project.title }}</h2>
                     </div>
                     <p>
-                        {{ project.card_description }}
+                        {{ project.card_description|linebreaksbr }}
                     </p>
                     <div class="project-tags">
                         {% for tag in project.tech_tags_list %}

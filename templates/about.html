@@ -87,13 +87,13 @@
                     <div class="flex flex-col md:flex-row gap-8">
                         <div class="md:w-3/5">
                             <p class="mb-4 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_1 }}
+                                {{ about.bio_paragraph_1|linebreaksbr }}
                             </p>
                             <p class="mb-4 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_2 }}
+                                {{ about.bio_paragraph_2|linebreaksbr }}
                             </p>
                             <p class="mb-6 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_3 }}
+                                {{ about.bio_paragraph_3|linebreaksbr }}
                             </p>
 
                             {% if what_i_do %}
@@ -301,7 +301,7 @@
                                 <p class="text-purple-400 text-sm font-medium mb-3">
                                     {{ event.role }} · {{ event.year }}
                                 </p>
-                                <p class="text-gray-300 mb-4">{{ event.description }}</p>
+                                <p class="text-gray-300 mb-4">{{ event.description|linebreaksbr }}</p>
                                 <div class="flex flex-wrap gap-4">
                                     {% if event.stat_1_value %}
                                     <div class="flex items-center gap-2 text-sm text-gray-400">
