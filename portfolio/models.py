@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 class About(models.Model):
@@ -257,6 +259,7 @@ class Project(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+    event_date = models.DateField(default=date.today)
     content = models.TextField()
     excerpt = models.TextField(max_length=300)
     image = models.ImageField(upload_to='blog/', blank=True, null=True)

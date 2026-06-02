@@ -101,11 +101,20 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'published', 'created_at', 'thumbnail_preview']
+    list_display = ['title', 'event_date', 'published', 'created_at', 'thumbnail_preview']
     list_filter = ['published', 'created_at']
     list_editable = ['published']
     search_fields = ['title', 'content', 'excerpt']
     prepopulated_fields = {'slug': ('title',)}
+    fields = [
+        'title',
+        'slug',
+        'event_date',
+        'content',
+        'excerpt',
+        'image',
+        'published',
+    ]
 
     def thumbnail_preview(self, obj):
         if obj.image:
