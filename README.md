@@ -1,106 +1,114 @@
-# Futuristic Portfolio Website
+# Personal Portfolio Website
 
-A modern, responsive portfolio website built with HTML, Tailwind CSS, and JavaScript. Features a futuristic design with glassmorphism effects, smooth animations, and interactive elements.
+A personal portfolio website built with Django to showcase my projects, skills, certifications, achievements, and experience. The website includes a powerful admin dashboard that allows portfolio content to be managed without modifying the source code.
+
+🌐 Live Website: https://bunnypraneeth.pythonanywhere.com/
+
+## Why I Built This
+
+I wanted a portfolio that was more than just a static website. Instead of hardcoding every update, I built a system where projects, skills, achievements, certifications, and other content can be managed directly through the Django admin panel.
+
+The project also serves as a reusable portfolio solution that can be customized by other developers, students, and professionals.
 
 ## Features
 
-- 🎨 Modern, futuristic design with glassmorphism effects
-- 🌙 Enhanced dark/light mode toggle with animations
-- ✨ Interactive particle background
-- 📱 Fully responsive layout
-- 🎯 Smooth scroll animations with progress bar
-- 💫 Hover effects and transitions
-- 📧 Working contact form (Formspree integration)
-- 📝 Blog section (coming soon)
-- 📄 Resume download feature
-- ⚡ Loading screen with animations
-- 🔗 Social media integration
+* Responsive portfolio design
+* Dynamic content management through Django Admin
+* Project showcase section
+* Skills section
+* Certifications and achievements
+* About and contact sections
+* Easy customization and extension
+* Open-source project structure
 
-## Technologies Used
+## Tech Stack
 
-- HTML5
-- Tailwind CSS
-- JavaScript
-- Particles.js
-- Font Awesome Icons
-- Google Fonts (Orbitron, Space Grotesk)
-- Formspree (contact form)
-- AOS (Animate On Scroll)
+* Python
+* Django
+* HTML
+* CSS
+* JavaScript
+* Bootstrap
+* SQLite
 
-## Setup Instructions
+## Getting Started
 
-1. Clone the repository:
+### Clone the Repository
+
 ```bash
-git clone https://github.com/yourusername/portfolio.git
-```
-
-2. Navigate to the project directory:
-```bash
+git clone https://github.com/BunnyPraneeth5/portfolio.git
 cd portfolio
 ```
 
-3. **Contact Form Setup:**
-   - Sign up at [formspree.io](https://formspree.io)
-   - Replace `xdkobqpz` in `contact.html` with your Formspree form ID
-   - Verify your email
+### Create a Virtual Environment
 
-4. **Add Resume:**
-   - Place your resume PDF in `assets/resume/Karu_Praneeth_Kumar_Resume.pdf`
+```bash
+python -m venv venv
+```
 
-5. Open `index.html` in your browser or deploy to GitHub Pages
+### Activate the Environment
 
-## Customization
+Windows:
 
-### Personal Information
-- Update hero section in `index.html`
-- Modify `skills` and `projects` arrays in `script.js`
-- Replace certificates in `assets/certificates/`
-- Add your resume to `assets/resume/`
+```bash
+venv\Scripts\activate
+```
 
-### Styling
-- Customize colors and animations in `styles.css`
-- Adjust particle effects in `script.js`
-- Modify dark/light mode themes
+Linux/macOS:
 
-### Content
-- Add blog posts to `blog.html`
-- Update social media links
-- Customize contact information
+```bash
+source venv/bin/activate
+```
 
-## Pages
+### Install Dependencies
 
-- **Home**: Hero section with CTA buttons
-- **About**: Personal info, education, certifications
-- **Skills**: Technical skills with animated progress bars
-- **Projects**: Portfolio projects with live demos
-- **Blog**: Tech blog (coming soon)
-- **Contact**: Working contact form with Formspree
+```bash
+pip install -r requirements.txt
+```
 
-## Browser Support
+### Run Migrations
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+```bash
+python manage.py migrate
+```
 
-## License
+### Create an Admin Account
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+```bash
+python manage.py createsuperuser
+```
 
-## Deployment
+### Start the Development Server
 
-**GitHub Pages Ready**: This portfolio works perfectly with GitHub Pages static hosting.
+```bash
+python manage.py runserver
+```
 
-1. Push to GitHub repository
-2. Enable GitHub Pages in repository settings
-3. Set up Formspree for contact form
-4. Your portfolio is live!
+Visit:
 
-## Acknowledgments
+```text
+http://127.0.0.1:8000/
+```
 
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Particles.js](https://vincentgarreau.com/particles.js/)
-- [Font Awesome](https://fontawesome.com/)
-- [Google Fonts](https://fonts.google.com/)
-- [Formspree](https://formspree.io/)
-- [AOS Library](https://michalsnik.github.io/aos/) 
+## Project Structure
+
+The portfolio content is managed through the Django admin panel, making it easy to update information without changing the frontend code. This allows the website to remain maintainable as new projects and achievements are added.
+
+## Future Improvements
+
+* Blog integration
+* Resume download tracking
+* Dark mode
+* Advanced project filtering
+* Visitor analytics
+* Multi-user support
+
+## Contributing
+
+If you have suggestions or improvements, feel free to open an issue or submit a pull request.
+
+## Author
+
+Praneeth
+
+GitHub: https://github.com/BunnyPraneeth5
