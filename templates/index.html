@@ -171,30 +171,85 @@
                         Selected Work
                     </span>
                 </h2>
-                <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
-                    <span class="featured-badge">Featured</span>
-                    <div class="pr-20">
-                        <h3 class="text-2xl font-['Orbitron'] mb-3">SOC Copilot</h3>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">Python</span>
-                            <span class="px-2 py-1 bg-purple-500/20 rounded-full text-sm">MCP</span>
-                            <span class="px-2 py-1 bg-green-500/20 rounded-full text-sm">PyQt6</span>
-                            <span class="px-2 py-1 bg-cyan-500/20 rounded-full text-sm">Scikit-learn</span>
-                            <span class="px-2 py-1 bg-pink-500/20 rounded-full text-sm">Agentic AI</span>
+                <div class="space-y-6">
+                    {% for project in projects %}
+                    <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
+                        <span class="featured-badge">Featured</span>
+                        <div class="pr-20">
+                            <h3 class="text-2xl font-['Orbitron'] mb-3">{{ project.title }}</h3>
+                            {% if project.tech_tags_list %}
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                {% for tag in project.tech_tags_list %}
+                                <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <p class="text-gray-300 mb-5">
+                                {{ project.card_description|linebreaksbr }}
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                {% if project.github_url %}
+                                <a href="{{ project.github_url }}" target="_blank"
+                                   class="text-blue-400 hover:text-blue-300 transition-colors">
+                                    <i class="fab fa-github mr-1"></i> View Code
+                                </a>
+                                {% endif %}
+                                {% if project.primary_live_url %}
+                                <a href="{{ project.primary_live_url }}" target="_blank"
+                                   class="text-blue-400 hover:text-blue-300 transition-colors">
+                                    <i class="fas fa-external-link-alt mr-1"></i> Live Demo
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
-                        <p class="text-gray-300 mb-5">
-                            An agentic AI-powered Security Operations Center assistant built with a four-agent MCP pipeline (ReconAgent, ReputationAgent, ShodanAgent, ReportAgent). Achieves 99.88% intrusion detection accuracy on the CICIDS2017 dataset using ensemble ML. Features asyncio parallel agent execution, 6-hour diskcache TTL, and a PyQt6 desktop GUI.
-                        </p>
-                        <a href="https://github.com/bunnypraneeth5/SOC-Copilot" target="_blank"
-                           class="text-blue-400 hover:text-blue-300 transition-colors">
-                            <i class="fab fa-github mr-1"></i> View Code
-                        </a>
                     </div>
+                    {% empty %}
+                    <div class="glass-card p-6 text-center">
+                        <p class="text-gray-400">No featured projects available.</p>
+                    </div>
+                    {% endfor %}
                 </div>
                 <div class="text-center mt-8">
                     <a href="{% url 'projects' %}" class="text-blue-400 hover:text-blue-300 transition-colors">
                         Continue to Projects
                     </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="pb-20" data-nav-target="skills" data-aos="fade-up">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <p class="featured-label text-center">CAPABILITIES</p>
+                <h2 class="text-3xl md:text-4xl font-['Orbitron'] font-bold text-center mb-8">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+                        Skills & Technologies
+                    </span>
+                </h2>
+                <div class="glass-card p-6" data-aos="fade-up">
+                    {% regroup skills by get_category_display as skill_groups %}
+                    {% for group in skill_groups %}
+                    <div class="mb-4 last:mb-0">
+                        <h3 class="text-sm font-['Orbitron'] text-blue-400 uppercase tracking-wider mb-2">{{ group.grouper }}</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for skill in group.list %}
+                            <span class="px-3 py-1 bg-gray-800 border border-gray-700/60 rounded-full text-sm text-gray-300">
+                                {{ skill.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="flex flex-wrap justify-center gap-2">
+                        {% for skill in skills %}
+                        <span class="px-3 py-1 bg-gray-800 border border-gray-700/60 rounded-full text-sm text-gray-300">
+                            {{ skill.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>

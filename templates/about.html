@@ -86,6 +86,11 @@
                 <div class="glass-card p-8 mb-12" data-aos="fade-up" data-aos-delay="200">
                     <div class="flex flex-col md:flex-row gap-8">
                         <div class="md:w-3/5">
+                            {% if about.description %}
+                            <p class="mb-4 text-gray-300 leading-relaxed font-medium">
+                                {{ about.description|linebreaksbr }}
+                            </p>
+                            {% endif %}
                             <p class="mb-4 text-gray-300 leading-relaxed">
                                 {{ about.bio_paragraph_1|linebreaksbr }}
                             </p>
@@ -254,7 +259,12 @@
                                 <strong>{{ entry.role }}</strong>
                             </div>
                             <div class="glass-card roadmap-card">
-                                <h3>{{ entry.organization }}</h3>
+                                <h3>
+                                    {% if entry.icon_class %}
+                                    <i class="{{ entry.icon_class }} {% if entry.icon_color %}{{ entry.icon_color }}{% else %}text-blue-400{% endif %} mr-2"></i>
+                                    {% endif %}
+                                    {{ entry.organization }}
+                                </h3>
                                 <div class="roadmap-badge">Credential</div>
                                 {% if entry.tags %}
                                 <div>

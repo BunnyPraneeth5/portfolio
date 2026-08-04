@@ -66,11 +66,13 @@ def projects_view(request):
     featured = Project.objects.filter(
         is_featured=True,
         is_published=True
-    ).first()
-    other_projects = Project.objects.filter(
-        is_featured=False,
-        is_published=True
-    ).order_by('order')
+    ).order_by('order').first()
+
+    other_projects = Project.objects.filter(is_published=True)
+    if featured:
+        other_projects = other_projects.exclude(pk=featured.pk)
+    other_projects = other_projects.order_by('order')
+
     secondary_projects = other_projects[:2]
     archive_projects = other_projects[2:]
 
