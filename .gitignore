@@ -1,6 +1,7 @@
 # Environment
 .env
 *.env
+venv/
 
 # Database
 db.sqlite3
