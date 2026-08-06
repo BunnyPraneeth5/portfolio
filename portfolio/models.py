@@ -5,8 +5,6 @@ from django.db import models
 class About(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='about/', blank=True, null=True)
-    resume = models.FileField(upload_to='resume/', blank=True, null=True)
     bio_paragraph_1 = models.TextField(blank=True)
     bio_paragraph_2 = models.TextField(blank=True)
     bio_paragraph_3 = models.TextField(blank=True)
@@ -41,9 +39,8 @@ class Skill(models.Model):
     ]
 
     name = models.CharField(max_length=100)
-    percentage = models.IntegerField(default=0)
-    icon = models.CharField(max_length=100, blank=True)
     category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='tools')
+    is_featured = models.BooleanField(default=False, help_text='Show on homepage')
     order = models.IntegerField(default=0)
     
     class Meta:
@@ -53,20 +50,9 @@ class Skill(models.Model):
         return self.name
 
 class SiteAppearance(models.Model):
-    site_name = models.CharField(max_length=120, default='Karu Praneeth Kumar')
-    hero_title = models.CharField(max_length=160, default='Karu Praneeth Kumar')
-    typewriter_phrases = models.TextField(
-        default='Agentic AI Engineer\nMCP Systems Builder\nML & Full-Stack Developer',
-        help_text='One phrase per line. These appear in the homepage typewriter.'
-    )
-    hero_description = models.TextField(
-        default='Building agentic AI systems, MCP pipelines, and intelligent automation tools. Final-year B.Tech CSE-AI @ SJCET Bengaluru. Open to agentic AI engineering roles and startup internships.'
-    )
     primary_color = models.CharField(max_length=7, default='#3b82f6', help_text='Hex color, for example #3b82f6')
     secondary_color = models.CharField(max_length=7, default='#8b5cf6', help_text='Hex color, for example #8b5cf6')
     accent_color = models.CharField(max_length=7, default='#06b6d4', help_text='Hex color, for example #06b6d4')
-    profile_image = models.ImageField(upload_to='appearance/', blank=True, null=True)
-    resume = models.FileField(upload_to='resume/', blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -74,11 +60,7 @@ class SiteAppearance(models.Model):
         verbose_name_plural = 'Site Appearance'
 
     def __str__(self):
-        return self.site_name
-
-    def typewriter_list(self):
-        phrases = [phrase.strip() for phrase in self.typewriter_phrases.splitlines() if phrase.strip()]
-        return phrases or ['Agentic AI Engineer', 'MCP Systems Builder', 'ML & Full-Stack Developer']
+        return 'Site Appearance'
 
 class SiteSettings(models.Model):
     profile_image = models.ImageField(
@@ -174,7 +156,6 @@ class Project(models.Model):
         blank=True,
         help_text='Optional extended case study text.'
     )
-    image = models.ImageField(upload_to='projects/', blank=True, null=True)
     thumbnail = models.ImageField(
         upload_to='projects/',
         null=True,
@@ -236,7 +217,7 @@ class Project(models.Model):
 
     @property
     def card_image(self):
-        return self.thumbnail or self.image
+        return self.thumbnail
 
     @property
     def primary_live_url(self):

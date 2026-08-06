@@ -16,7 +16,7 @@ class AboutAdmin(admin.ModelAdmin):
     list_display = ['title']
     fieldsets = (
         ('Basic Info', {
-            'fields': ('title', 'subtitle', 'image', 'resume')
+            'fields': ('title', 'subtitle')
         }),
         ('Bio Paragraphs', {
             'fields': (
@@ -38,10 +38,10 @@ class AboutAdmin(admin.ModelAdmin):
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'percentage', 'icon', 'order']
+    list_display = ['name', 'category', 'is_featured', 'order']
     list_filter = ['category']
-    list_editable = ['category', 'percentage', 'icon', 'order']
-    search_fields = ['name', 'icon']
+    list_editable = ['category', 'is_featured', 'order']
+    search_fields = ['name']
     ordering = ['category', 'order', 'name']
 
 @admin.register(Project)
@@ -80,7 +80,6 @@ class ProjectAdmin(admin.ModelAdmin):
         ('Legacy fields', {
             'fields': (
                 'description',
-                'image',
                 'technologies',
                 'live_url',
                 'featured',
@@ -90,7 +89,7 @@ class ProjectAdmin(admin.ModelAdmin):
     )
 
     def thumbnail_preview(self, obj):
-        image = obj.thumbnail or obj.image
+        image = obj.thumbnail
         if image:
             return format_html(
                 '<img src="{}" height="40" style="border-radius:2px;"/>',
@@ -161,17 +160,11 @@ class AdditionalCertificationAdmin(admin.ModelAdmin):
 @admin.register(SiteAppearance)
 class SiteAppearanceAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Brand & Hero', {
-            'fields': ('site_name', 'hero_title', 'typewriter_phrases', 'hero_description')
-        }),
         ('Colors', {
             'fields': ('primary_color', 'secondary_color', 'accent_color')
         }),
-        ('Files', {
-            'fields': ('profile_image', 'resume')
-        }),
     )
-    list_display = ['site_name', 'primary_color', 'secondary_color', 'accent_color', 'updated_at']
+    list_display = ['primary_color', 'secondary_color', 'accent_color', 'updated_at']
     readonly_fields = ['updated_at']
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):

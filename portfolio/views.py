@@ -6,7 +6,7 @@ from .models import About, Skill, Project, BlogPost, ContactMessage, SiteSetting
 
 def index(request):
     about = About.objects.first()
-    skills = Skill.objects.all()
+    skills = Skill.objects.filter(is_featured=True)
     projects = Project.objects.filter(is_featured=True, is_published=True)[:3]
     return render(request, 'index.html', {'about': about, 'skills': skills, 'projects': projects})
 
