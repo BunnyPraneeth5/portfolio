@@ -14,7 +14,7 @@ This system is a personal portfolio web application built with Django that rende
 * **Frontend**: Tailwind CSS CDN (`templates/index.html:L15`), FontAwesome 6.0.0 CDN (`templates/index.html:L17`), AOS animation library (`templates/index.html:L18`), custom stylesheet (`static/styles.css`), and custom script (`static/script.js`).
 
 ### Hosting & WSGI Execution Environment
-The project targets hosting on PythonAnywhere (`bunnypraneeth.pythonanywhere.com`, specified in `ALLOWED_HOSTS` at `config/settings.py:L31`). It is served via standard WSGI entrypoint `config/wsgi.py` (`config/wsgi.py:L10-L16`) pointing to `config.settings`. An environment setup pattern for PythonAnywhere is provided in `_backup/wsgi_pythonanywhere.py` (`_backup/wsgi_pythonanywhere.py:L5-L14`) which adds `/home/bunnypraneeth/portfolio` to `sys.path`.
+The project targets hosting on PythonAnywhere (`bunnypraneeth.pythonanywhere.com`). Standard WSGI entrypoint `config/wsgi.py` routes requests. Settings dynamically evaluate `DEBUG`, `SECRET_KEY`, and `ALLOWED_HOSTS` via `os.environ` (`config/settings.py:L25-L40`). An environment setup pattern for PythonAnywhere is provided in `_backup/wsgi_pythonanywhere.py`.
 
 ---
 
@@ -69,12 +69,10 @@ sequenceDiagram
 
 All models reside in `portfolio/models.py` (`portfolio/models.py:L1-L398`). No relational foreign key, one-to-one, or many-to-many fields exist across models in this codebase.
 
-### `About` (`portfolio/models.py:L5-L30`)
+### `About` (`portfolio/models.py:L5-L29`)
 * **Fields**:
   * `title`: `CharField(max_length=200)`
   * `description`: `TextField()`
-  * `image`: `ImageField(upload_to='about/', blank=True, null=True)`
-  * `resume`: `FileField(upload_to='resume/', blank=True, null=True)`
   * `bio_paragraph_1`: `TextField(blank=True)`
   * `bio_paragraph_2`: `TextField(blank=True)`
   * `bio_paragraph_3`: `TextField(blank=True)`
@@ -90,32 +88,23 @@ All models reside in `portfolio/models.py` (`portfolio/models.py:L1-L398`). No r
 * **Relationships**: None.
 * **Methods**: `__str__` returns `self.title`. Meta: `verbose_name_plural = "About"`.
 
-### `Skill` (`portfolio/models.py:L32-L53`)
+### `Skill` (`portfolio/models.py:L30-L51`)
 * **Fields**:
   * `name`: `CharField(max_length=100)`
-  * `percentage`: `IntegerField(default=0)`
-  * `icon`: `CharField(max_length=100, blank=True)`
   * `category`: `CharField(max_length=30, choices=CATEGORY_CHOICES, default='tools')`. Choices: `agentic`, `ml`, `web`, `languages`, `security`, `tools`, `soft`.
+  * `is_featured`: `BooleanField(default=False)`
   * `order`: `IntegerField(default=0)`
 * **Relationships**: None.
 * **Methods**: `__str__` returns `self.name`. Meta ordering: `['category', 'order', 'name']`.
 
-### `SiteAppearance` (`portfolio/models.py:L55-L81`)
+### `SiteAppearance` (`portfolio/models.py:L52-L64`)
 * **Fields**:
-  * `site_name`: `CharField(max_length=120, default='Karu Praneeth Kumar')`
-  * `hero_title`: `CharField(max_length=160, default='Karu Praneeth Kumar')`
-  * `typewriter_phrases`: `TextField(default='Agentic AI Engineer\nMCP Systems Builder\nML & Full-Stack Developer')`
-  * `hero_description`: `TextField(...)`
   * `primary_color`: `CharField(max_length=7, default='#3b82f6')`
   * `secondary_color`: `CharField(max_length=7, default='#8b5cf6')`
   * `accent_color`: `CharField(max_length=7, default='#06b6d4')`
-  * `profile_image`: `ImageField(upload_to='appearance/', blank=True, null=True)`
-  * `resume`: `FileField(upload_to='resume/', blank=True, null=True)`
   * `updated_at`: `DateTimeField(auto_now=True)`
 * **Relationships**: None.
-* **Methods**:
-  * `typewriter_list()`: Splits `typewriter_phrases` by line break and returns clean non-empty phrases or default fallback list (`portfolio/models.py:L79-L81`).
-  * `__str__` returns `self.site_name`.
+* **Methods**: `__str__` returns `'Site Appearance'`. Meta: `verbose_name_plural = 'Site Appearance'`.
 
 ### `SiteSettings` (`portfolio/models.py:L83-L164`)
 * **Fields**:
@@ -282,31 +271,17 @@ Environment variable names and purposes referenced across `config/settings.py` a
 
 ## 6. KNOWN GAPS / UNVERIFIED
 
-**Security-relevant**:
-* **Hardcoded Fallback `SECRET_KEY`**: `config/settings.py:L24-L27` silently falls back to `'django-insecure-local-only-key'` if `SECRET_KEY` is unset, compromising session security and CSRF protection if executed in production.
-* **Hardcoded `DEBUG = True`**: `config/settings.py:L29` forces debug mode on, exposing sensitive stack traces, environment values, and application internals to public users upon runtime errors.
-
 Based strictly on codebase inspection, the following discrepancies, unrendered model fields, and unverified configurations exist:
 
-1. **Hardcoded Fallback `SECRET_KEY` Security Risk**:
-   `config/settings.py:L24-L27` assigns `SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-only-key')`. If the environment variable `SECRET_KEY` is omitted or unset in production, Django silently uses this known, committed fallback string. This undermines cryptographic signature verification for user sessions, password reset tokens, and CSRF protection in a production deployment.
-2. **Hardcoded `DEBUG = True` Security Risk**:
-   `config/settings.py:L29` hardcodes `DEBUG = True` rather than evaluating an environment variable (such as `os.environ.get('DEBUG')`). If deployed to production with this hardcoded value active, any unhandled HTTP 500 error or 404 page will render full Django debug error screens, exposing raw stack traces, local path names, environment variables, installed applications, and internal configuration details to public site visitors.
-3. **`index.html` Hardcoded Work Section**:
-   `views.index` queries `projects = Project.objects.filter(is_featured=True, is_published=True)[:3]` (`portfolio/views.py:L10`) and passes `projects` to `index.html`. However, `templates/index.html:L174-L193` hardcodes the "SOC Copilot" project text directly and ignores the dynamic `projects` context variable.
-4. **`index.html` Unrendered Context Variables**:
-   `views.index` queries `skills = Skill.objects.all()` (`portfolio/views.py:L9`) and passes `skills` in context, but `skills` is not referenced or looped anywhere in `templates/index.html`.
-5. **Unused Model Fields in Templates**:
-   * `About.description` (`portfolio/models.py:L7`): Configured in `AboutAdmin` (`portfolio/admin.py:L26`), but `templates/about.html` only renders `bio_paragraph_1`, `bio_paragraph_2`, and `bio_paragraph_3` (`templates/about.html:L90,L93,L96`).
-   * `Skill.percentage` and `Skill.icon` (`portfolio/models.py:L44-L45`): Editable in `SkillAdmin` (`portfolio/admin.py:L41`), but `templates/skills.html:L88` only outputs `{{ skill.name }}` inside list items.
-   * `ExperienceEntry.icon_class` and `ExperienceEntry.icon_color` (`portfolio/models.py:L332-L337`): Defined and editable in admin, but omitted from `templates/about.html:L244-L280`.
-   * `Project.long_description` (`portfolio/models.py:L173`): Defined in model, but no project detail view/template exists to display extended case study text.
-   * `SiteAppearance` branding text fields (`site_name`, `hero_title`, `hero_description` at `portfolio/models.py:L56-L64`): Present in `SiteAppearance`, but templates read `site_settings.hero_name_display` and `site_settings.hero_description` instead.
-6. **Experience Timeline Split Logic Bypassed**:
-   `about_view` executes `experience_left = experience_entries.filter(side='left')` and `experience_right = experience_entries.filter(side='right')` (`portfolio/views.py:L26-L27`), but `templates/about.html:L249` loops over `experience_all` in a single-column layout, leaving `experience_left` and `experience_right` unused in template context.
-7. **Hardcoded `ALLOWED_HOSTS`**:
-   `config/settings.py:L31` hardcodes `ALLOWED_HOSTS = ['bunnypraneeth.pythonanywhere.com', 'localhost', '127.0.0.1']`, rather than reading host configuration dynamically from environment variables.
-8. **Version Metadata Mismatch**:
+1. **`index.html` Hardcoded Work Section**:
+   `views.index` queries `projects = Project.objects.filter(is_featured=True, is_published=True)[:3]` (`portfolio/views.py:L10`) and passes `projects` to `index.html`. However, `templates/index.html:L174-L193` hardcodes project text directly and ignores the dynamic `projects` context variable.
+2. **Unused Model Fields in Templates**:
+   * `About.description` (`portfolio/models.py:L7`): Configured in `AboutAdmin`, but `templates/about.html` renders `bio_paragraph_1`, `bio_paragraph_2`, and `bio_paragraph_3`.
+   * `ExperienceEntry.icon_class` and `ExperienceEntry.icon_color`: Defined in model, but omitted from `templates/about.html`.
+   * `Project.long_description`: Defined in model, but no project detail view/template currently displays extended case study text.
+3. **Experience Timeline Split Logic Bypassed**:
+   `about_view` executes `experience_left = experience_entries.filter(side='left')` and `experience_right = experience_entries.filter(side='right')` (`portfolio/views.py:L26-L27`), but `templates/about.html` loops over `experience_all` in a single-column layout, leaving `experience_left` and `experience_right` unused in template context.
+4. **Version Metadata Mismatch**:
    `config/settings.py:L4` states "Generated by 'django-admin startproject' using Django 6.0", whereas `requirements.txt:L1` constrains Django to `>=5.0,<6.0`.
 
 ---

@@ -1,35 +1,33 @@
 # Personal Portfolio Website
 
-A personal portfolio website built with Django to showcase my projects, skills, certifications, achievements, and experience. The website includes a powerful admin dashboard that allows portfolio content to be managed without modifying the source code.
+A personal portfolio website built with Django to showcase my projects, skills, certifications, achievements, and experience. The website includes a powerful admin dashboard that allows portfolio content to be managed dynamically without modifying the source code.
 
 🌐 Live Website: https://bunnypraneeth.pythonanywhere.com/
 
 ## Why I Built This
 
-I wanted a portfolio that was more than just a static website. Instead of hardcoding every update, I built a system where projects, skills, achievements, certifications, and other content can be managed directly through the Django admin panel.
+I wanted a portfolio that was more than just a static website. Instead of hardcoding every update, I built a system where projects, skills, achievements, certifications, blog posts, and site appearance can be managed directly through the Django admin panel.
 
 The project also serves as a reusable portfolio solution that can be customized by other developers, students, and professionals.
 
 ## Features
 
-* Responsive portfolio design
 * Dynamic content management through Django Admin
-* Project showcase section
-* Skills section
-* Certifications and achievements
-* About and contact sections
-* Easy customization and extension
-* Open-source project structure
+* Project showcase with metric kickers & tech tags
+* Categorized skill matrix (Agentic AI, ML, Web, Security, Tools, etc.)
+* Timeline management (Education, Experience, Events & Leadership)
+* Certifications and achievements showcase
+* Built-in Blog engine with detail pages
+* Customizable site appearance (theme accent colors) & site settings (hero, social links, contact info)
+* Responsive design with dynamic micro-animations
+* Contact form with database logging & toggle control
 
 ## Tech Stack
 
-* Python
-* Django
-* HTML
-* CSS
-* JavaScript
-* Bootstrap
-* SQLite
+* **Backend**: Python, Django 5.x
+* **Database**: SQLite (Local development), MySQL (Production)
+* **Frontend**: HTML5, Tailwind CSS, JavaScript, FontAwesome 6, AOS Animation Library
+* **Media & Utilities**: Pillow, Python-Dotenv
 
 ## Getting Started
 
@@ -90,17 +88,22 @@ Visit:
 http://127.0.0.1:8000/
 ```
 
+Admin Panel:
+
+```text
+http://127.0.0.1:8000/admin/
+```
+
 ## Project Structure
 
 The portfolio content is managed through the Django admin panel, making it easy to update information without changing the frontend code. This allows the website to remain maintainable as new projects and achievements are added.
 
 ## Future Improvements
 
-* Blog integration
-* Resume download tracking
-* Dark mode
-* Advanced project filtering
-* Visitor analytics
+* Resume download tracking & analytics
+* Dark / Light mode toggle switch
+* Advanced project search and tag filtering
+* Visitor analytics dashboard
 * Multi-user support
 
 ## Contributing
@@ -112,3 +115,4 @@ If you have suggestions or improvements, feel free to open an issue or submit a 
 Praneeth
 
 GitHub: https://github.com/BunnyPraneeth5
+

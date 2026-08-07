@@ -36,15 +36,6 @@ fix_nav.py
 run_admin_verification.py
 wsgi_pythonanywhere.py
 
-# Duplicate documentation
-ADMIN_GUIDE.md
-DEPLOYMENT_CHECKLIST.md
-DJANGO_SETUP.md
-LOCAL_DEVELOPMENT.md
-PYTHONANYWHERE_DEPLOY.md
-QUICK_START.md
-SETUP_GUIDE.md
-
 # Local settings
 config/settings_local.py
 
