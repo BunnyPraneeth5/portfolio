@@ -46,15 +46,17 @@ class SkillAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
+    list_display = ['title', 'slug', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
     list_filter = ['is_featured', 'is_published']
     list_editable = ['is_featured', 'is_published', 'order']
     search_fields = ['title', 'short_description', 'long_description', 'tech_tags']
     ordering = ['order']
+    prepopulated_fields = {'slug': ('title',)}
     fieldsets = (
         ('Basic Info', {
             'fields': (
                 'title',
+                'slug',
                 'short_description',
                 'long_description',
                 'thumbnail',
@@ -74,15 +76,6 @@ class ProjectAdmin(admin.ModelAdmin):
                 'metric_1_value', 'metric_1_label',
                 'metric_2_value', 'metric_2_label',
                 'metric_3_value', 'metric_3_label',
-            ),
-            'classes': ('collapse',)
-        }),
-        ('Legacy fields', {
-            'fields': (
-                'description',
-                'technologies',
-                'live_url',
-                'featured',
             ),
             'classes': ('collapse',)
         }),

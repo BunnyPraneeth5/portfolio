@@ -23,16 +23,15 @@ class PortfolioViewsTestCase(TestCase):
         
         self.skill = Skill.objects.create(
             name="Astrophysics",
-            percentage=95,
-            category="ML", # Using valid choice
-            icon="fa-space-shuttle"
+            category="ml",
         )
-        
+
         self.project = Project.objects.create(
             title="Project Lazarus",
-            description="Locate a habitable planet.",
-            technologies="Gravity, Time",
-            featured=True
+            slug="project-lazarus",
+            short_description="Locate a habitable planet.",
+            tech_tags="Gravity, Time",
+            is_featured=True
         )
         
         self.blog_post = BlogPost.objects.create(

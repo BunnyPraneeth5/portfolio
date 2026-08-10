@@ -81,6 +81,7 @@ def projects_view(request):
         'other_projects': other_projects,
         'secondary_projects': secondary_projects,
         'archive_projects': archive_projects,
+        'all_projects': Project.objects.filter(is_published=True).order_by('order'),
     })
 
 def blog_view(request):
@@ -90,6 +91,10 @@ def blog_view(request):
 def blog_detail(request, slug):
     post = get_object_or_404(BlogPost, slug=slug, published=True)
     return render(request, 'blog_detail.html', {'post': post})
+
+def project_detail(request, slug):
+    project = get_object_or_404(Project, slug=slug, is_published=True)
+    return render(request, 'project_detail.html', {'project': project})
 
 def contact_view(request):
     site_settings = SiteSettings.load()

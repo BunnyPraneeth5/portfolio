@@ -78,65 +78,8 @@
 
             <!-- Projects Grid -->
             <div class="projects-grid">
-                {% if featured_project %}
-                <article class="glass-card project-card featured-project-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="featured-project-copy">
-                        <span class="featured-label">FEATURED PROJECT</span>
-                        <h2>{{ featured_project.title }}</h2>
-                        <p>
-                            {{ featured_project.card_description|linebreaksbr }}
-                        </p>
-                        <div class="project-tags">
-                            {% for tag in featured_project.tech_tags_list %}
-                            <span class="project-tag">{{ tag }}</span>
-                            {% endfor %}
-                        </div>
-                        {% if featured_project.github_url %}
-                        <a href="{{ featured_project.github_url }}" target="_blank" class="view-code-link">
-                            View Code <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                        {% if featured_project.primary_live_url %}
-                        <a href="{{ featured_project.primary_live_url }}" target="_blank" class="view-code-link">
-                            Live Demo <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                    </div>
-                    <div class="project-metrics project-metrics-panel" aria-label="{{ featured_project.title }} metrics">
-                        {% if featured_project.card_image %}
-                        <img src="{{ featured_project.card_image.url }}" alt="{{ featured_project.title }}" class="soc-screenshot-placeholder">
-                        {% else %}
-                        <div class="soc-screenshot-placeholder" aria-label="{{ featured_project.title }} screenshot placeholder">
-                            <span>Screenshot Coming Soon</span>
-                        </div>
-                        {% endif %}
-                        {% if featured_project.metric_kicker %}
-                        <span class="metrics-label">{{ featured_project.metric_kicker }}</span>
-                        {% endif %}
-                        {% if featured_project.metric_1_value %}
-                        <div class="project-metric">
-                            <span class="project-metric-number">{{ featured_project.metric_1_value }}</span>
-                            <span class="project-metric-label">{{ featured_project.metric_1_label }}</span>
-                        </div>
-                        {% endif %}
-                        {% if featured_project.metric_2_value %}
-                        <div class="project-metric">
-                            <span class="project-metric-number">{{ featured_project.metric_2_value }}</span>
-                            <span class="project-metric-label">{{ featured_project.metric_2_label }}</span>
-                        </div>
-                        {% endif %}
-                        {% if featured_project.metric_3_value %}
-                        <div class="project-metric">
-                            <span class="project-metric-number">{{ featured_project.metric_3_value }}</span>
-                            <span class="project-metric-label">{{ featured_project.metric_3_label }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                </article>
-                {% endif %}
-
                 <div class="secondary-project-grid">
-                    {% for project in secondary_projects %}
+                    {% for project in all_projects %}
                     <article class="glass-card project-card secondary-project-card" data-aos="fade-up" data-aos-delay="160">
                         {% if project.secondary_kicker %}
                         <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
@@ -155,6 +98,9 @@
                             <span class="secondary-project-metric">{{ project.metric_1_value }} <small>{{ project.metric_1_label }}</small></span>
                             {% endif %}
                             <div>
+                                <a href="{% url 'project_detail' project.slug %}" class="view-code-link">
+                                    View Project <span aria-hidden="true">&rarr;</span>
+                                </a>
                                 {% if project.github_url %}
                                 <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
                                     View Code <span aria-hidden="true">&rarr;</span>
@@ -170,37 +116,6 @@
                     </article>
                     {% endfor %}
                 </div>
-
-                {% for project in archive_projects %}
-                <article class="project-archive-row" data-aos="fade-up" data-aos-delay="300">
-                    <div>
-                        {% if project.secondary_kicker %}
-                        <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
-                        {% endif %}
-                        <h2>{{ project.title }}</h2>
-                    </div>
-                    <p>
-                        {{ project.card_description|linebreaksbr }}
-                    </p>
-                    <div class="project-tags">
-                        {% for tag in project.tech_tags_list %}
-                        <span class="project-tag">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {% if project.github_url %}
-                        <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
-                            View Code <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                        {% if project.primary_live_url %}
-                        <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
-                            Live Demo <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                    </div>
-                </article>
-                {% endfor %}
             </div>
 
             <hr class="section-rule" data-aos="fade-up">

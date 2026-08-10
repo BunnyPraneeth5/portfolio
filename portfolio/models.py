@@ -147,7 +147,7 @@ class SiteSettings(models.Model):
 
 class Project(models.Model):
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True, default='')
+    slug = models.SlugField(unique=True, blank=True)
     short_description = models.TextField(
         blank=True,
         help_text='Shown in the project card.'
@@ -161,16 +161,13 @@ class Project(models.Model):
         null=True,
         blank=True
     )
-    live_url = models.URLField(blank=True)
     live_demo_url = models.URLField(blank=True)
     github_url = models.URLField(blank=True)
-    technologies = models.CharField(max_length=300, blank=True, default='')
     tech_tags = models.CharField(
         max_length=500,
         blank=True,
         help_text='Comma-separated. e.g. Python, MCP, PyQt6'
     )
-    featured = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
     order = models.PositiveIntegerField(
@@ -208,12 +205,11 @@ class Project(models.Model):
 
     @property
     def tech_tags_list(self):
-        source = self.tech_tags or self.technologies
-        return [tag.strip() for tag in source.split(',') if tag.strip()]
+        return [tag.strip() for tag in self.tech_tags.split(',') if tag.strip()]
 
     @property
     def card_description(self):
-        return self.short_description or self.description
+        return self.short_description
 
     @property
     def card_image(self):
@@ -221,18 +217,7 @@ class Project(models.Model):
 
     @property
     def primary_live_url(self):
-        return self.live_demo_url or self.live_url
-
-    def save(self, *args, **kwargs):
-        if not self.description and self.short_description:
-            self.description = self.short_description
-        if not self.technologies and self.tech_tags:
-            self.technologies = self.tech_tags
-        if not self.live_url and self.live_demo_url:
-            self.live_url = self.live_demo_url
-        if self.is_featured and not self.featured:
-            self.featured = True
-        super().save(*args, **kwargs)
+        return self.live_demo_url
     
     def __str__(self):
         return self.title
