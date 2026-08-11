@@ -1,7 +1,11 @@
+import json
 from collections import OrderedDict
 
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from . import chatbot
 from .models import About, Skill, Project, BlogPost, ContactMessage, SiteSettings
 
 def index(request):
@@ -118,3 +122,15 @@ def contact_view(request):
         return redirect('contact')
     
     return render(request, 'contact.html')
+
+@require_POST
+def chat_reply(request):
+    message = request.POST.get('message', '')
+    if not message and request.body:
+        try:
+            payload = json.loads(request.body)
+            message = payload.get('message', '')
+        except (ValueError, AttributeError):
+            message = ''
+    reply = chatbot.get_reply(message)
+    return JsonResponse({'reply': reply})

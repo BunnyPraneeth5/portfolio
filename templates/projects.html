@@ -78,39 +78,48 @@
 
             <!-- Projects Grid -->
             <div class="projects-grid">
-                <div class="secondary-project-grid">
+                <div class="secondary-project-grid gap-8">
                     {% for project in all_projects %}
                     <article class="glass-card project-card secondary-project-card" data-aos="fade-up" data-aos-delay="160">
-                        {% if project.secondary_kicker %}
-                        <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
-                        {% endif %}
-                        <h2>{{ project.title }}</h2>
-                        <p>
-                            {{ project.card_description|linebreaksbr }}
-                        </p>
-                        <div class="project-tags mb-4">
-                            {% for tag in project.tech_tags_list %}
-                            <span class="project-tag">{{ tag }}</span>
-                            {% endfor %}
+                        {% if project.card_image %}
+                        <div class="project-thumbnail">
+                            <img src="{{ project.card_image.url }}" alt="{{ project.title }}">
                         </div>
-                        <div class="secondary-project-footer">
-                            {% if project.metric_1_value %}
-                            <span class="secondary-project-metric">{{ project.metric_1_value }} <small>{{ project.metric_1_label }}</small></span>
+                        {% else %}
+                        <div class="project-thumbnail project-thumbnail--{% cycle 'soc' 'ml' 'gate' 'ai' %}"></div>
+                        {% endif %}
+                        <div class="secondary-project-card-body">
+                            {% if project.secondary_kicker %}
+                            <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
                             {% endif %}
-                            <div>
-                                <a href="{% url 'project_detail' project.slug %}" class="view-code-link">
-                                    View Project <span aria-hidden="true">&rarr;</span>
-                                </a>
-                                {% if project.github_url %}
-                                <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
-                                    View Code <span aria-hidden="true">&rarr;</span>
-                                </a>
+                            <h2>{{ project.title }}</h2>
+                            <p>
+                                {{ project.card_description|linebreaksbr }}
+                            </p>
+                            <div class="project-tags mb-4">
+                                {% for tag in project.tech_tags_list %}
+                                <span class="project-tag">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="secondary-project-footer">
+                                {% if project.metric_1_value %}
+                                <span class="secondary-project-metric">{{ project.metric_1_value }} <small>{{ project.metric_1_label }}</small></span>
                                 {% endif %}
-                                {% if project.primary_live_url %}
-                                <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
-                                    Live Demo <span aria-hidden="true">&rarr;</span>
-                                </a>
-                                {% endif %}
+                                <div>
+                                    <a href="{% url 'project_detail' project.slug %}" class="view-code-link">
+                                        View Project <span aria-hidden="true">&rarr;</span>
+                                    </a>
+                                    {% if project.github_url %}
+                                    <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
+                                        View Code <span aria-hidden="true">&rarr;</span>
+                                    </a>
+                                    {% endif %}
+                                    {% if project.primary_live_url %}
+                                    <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
+                                        Live Demo <span aria-hidden="true">&rarr;</span>
+                                    </a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </article>
@@ -132,5 +141,6 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="{% static 'script.js' %}"></script>
+    {% include 'pet_widget.html' %}
 </body>
 </html>

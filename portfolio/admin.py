@@ -193,6 +193,14 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'hero_cta_secondary_url',
             )
         }),
+        ('Availability', {
+            'fields': (
+                'open_to_work',
+                'open_to_remote',
+                'open_to_internship',
+                'notice_period',
+            )
+        }),
         ('Social Links', {
             'fields': (
                 'github_url',

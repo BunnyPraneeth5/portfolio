@@ -1,0 +1,509 @@
+<!-- Pet Companion: rule-based chat widget, no LLM / no external API calls -->
+<div id="pet-widget-root">
+    <form id="pet-csrf-form" style="display:none" aria-hidden="true">{% csrf_token %}</form>
+
+    <div id="petCat" class="pet-cat" role="button" tabindex="0" aria-label="Ask Bunny about projects, skills, or hiring">
+        <svg viewBox="0 0 160 140" class="pet-cat-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="wallEBody" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2a2e39"/>
+              <stop offset="50%" stop-color="#1e222b"/>
+              <stop offset="100%" stop-color="#14171f"/>
+            </linearGradient>
+            <linearGradient id="wallEGold" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e5c365"/>
+              <stop offset="100%" stop-color="#c9a84c"/>
+            </linearGradient>
+            <linearGradient id="wallELens" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#181c24"/>
+              <stop offset="100%" stop-color="#080a0e"/>
+            </linearGradient>
+            <radialGradient id="eyeGlowGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fff5cf"/>
+              <stop offset="40%" stop-color="#e2bc53"/>
+              <stop offset="100%" stop-color="#c9a84c"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Ground Shadow -->
+          <ellipse cx="80" cy="134" rx="65" ry="5" fill="#000000" opacity="0.6"/>
+
+          <!-- Tread Base Assembly -->
+          <!-- Left Tread Outer Belt -->
+          <path d="M 18 131 L 58 131 Q 64 131 62 124 L 54 110 Q 51 105 44 105 L 26 105 Q 19 105 16 110 L 12 124 Q 10 131 18 131 Z" fill="#14161b" stroke="#c9a84c" stroke-width="1.2" opacity="0.9"/>
+          <!-- Right Tread Outer Belt -->
+          <path d="M 102 131 L 142 131 Q 150 131 148 124 L 144 110 Q 141 105 134 105 L 116 105 Q 109 105 106 110 L 98 124 Q 96 131 102 131 Z" fill="#14161b" stroke="#c9a84c" stroke-width="1.2" opacity="0.9"/>
+
+          <!-- Tread Wheels (Left) -->
+          <circle cx="23" cy="122" r="7" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1.2"/>
+          <circle cx="23" cy="122" r="3" fill="#c9a84c"/>
+          <circle cx="38" cy="122" r="7" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1.2"/>
+          <circle cx="38" cy="122" r="3" fill="#c9a84c"/>
+          <circle cx="53" cy="122" r="7" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1.2"/>
+          <circle cx="53" cy="122" r="3" fill="#c9a84c"/>
+          <circle cx="38" cy="111" r="5" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1"/>
+
+          <!-- Tread Wheels (Right) -->
+          <circle cx="107" cy="122" r="7" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1.2"/>
+          <circle cx="107" cy="122" r="3" fill="#c9a84c"/>
+          <circle cx="122" cy="122" r="7" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1.2"/>
+          <circle cx="122" cy="122" r="3" fill="#c9a84c"/>
+          <circle cx="137" cy="122" r="7" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1.2"/>
+          <circle cx="137" cy="122" r="3" fill="#c9a84c"/>
+          <circle cx="122" cy="111" r="5" fill="#0a0c0f" stroke="#c9a84c" stroke-width="1"/>
+
+          <!-- Center Axle Bar -->
+          <rect x="56" y="118" width="48" height="8" rx="3" fill="#181c24" stroke="#c9a84c" stroke-width="1" opacity="0.8"/>
+
+          <!-- Torso / Main Body Box -->
+          <rect x="42" y="65" width="76" height="44" rx="6" fill="url(#wallEBody)"/>
+          <rect x="42" y="65" width="76" height="44" rx="6" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
+          <!-- Top & Bottom Edge Accents -->
+          <line x1="46" y1="69" x2="114" y2="69" stroke="#c9a84c" stroke-width="1" opacity="0.4"/>
+          <line x1="46" y1="105" x2="114" y2="105" stroke="#c9a84c" stroke-width="1" opacity="0.4"/>
+          <!-- Corner Rivets -->
+          <circle cx="47" cy="70" r="1.5" fill="#c9a84c"/>
+          <circle cx="113" cy="70" r="1.5" fill="#c9a84c"/>
+          <circle cx="47" cy="104" r="1.5" fill="#c9a84c"/>
+          <circle cx="113" cy="104" r="1.5" fill="#c9a84c"/>
+
+          <!-- Chest Control Panel -->
+          <rect x="54" y="74" width="52" height="26" rx="4" fill="#0b0d11" stroke="#c9a84c" stroke-width="1.2"/>
+          <!-- Solar Charge Bar / Meter -->
+          <rect x="58" y="78" width="8" height="3" rx="1" fill="#c9a84c"/>
+          <rect x="68" y="78" width="8" height="3" rx="1" fill="#c9a84c"/>
+          <rect x="78" y="78" width="8" height="3" rx="1" fill="#c9a84c"/>
+          <rect x="88" y="78" width="8" height="3" rx="1" fill="#c9a84c"/>
+          <rect x="98" y="78" width="4" height="3" rx="1" fill="#c9a84c" opacity="0.4"/>
+          <!-- Gold Diamond Emblem (Signature Brand Glyph) -->
+          <path d="M 80 84 L 86 91 L 80 98 L 74 91 Z" fill="url(#wallEGold)"/>
+          <circle cx="80" cy="91" r="2" fill="#0b0d11"/>
+
+          <!-- Shoulder Joints & Articulated Arms -->
+          <!-- Left Shoulder Track & Arm -->
+          <rect x="34" y="71" width="8" height="20" rx="3" fill="#14171f" stroke="#c9a84c" stroke-width="1"/>
+          <path d="M 34 83 L 24 88 L 22 96" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Left Claw Hand -->
+          <path d="M 18 94 L 23 96 L 20 102 M 22 96 L 27 99" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+          <!-- Right Shoulder Track & Arm -->
+          <rect x="118" y="71" width="8" height="20" rx="3" fill="#14171f" stroke="#c9a84c" stroke-width="1"/>
+          <path d="M 126 83 L 136 88 L 138 96" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Right Claw Hand -->
+          <path d="M 142 94 L 137 96 L 140 102 M 138 96 L 133 99" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+          <!-- Hydraulic Neck Assembly -->
+          <rect x="74" y="49" width="12" height="17" rx="2" fill="#14171f" stroke="#c9a84c" stroke-width="1"/>
+          <line x1="74" y1="54" x2="86" y2="54" stroke="#c9a84c" stroke-width="1" opacity="0.6"/>
+          <line x1="74" y1="59" x2="86" y2="59" stroke="#c9a84c" stroke-width="1" opacity="0.6"/>
+          <line x1="74" y1="64" x2="86" y2="64" stroke="#c9a84c" stroke-width="1" opacity="0.6"/>
+
+          <!-- Binocular Eyes / Head Assembly -->
+          <!-- Center Pivot Bridge -->
+          <rect x="72" y="28" width="16" height="10" rx="2" fill="#12151c" stroke="#c9a84c" stroke-width="1"/>
+          <circle cx="80" cy="33" r="2.5" fill="#c9a84c"/>
+
+          <!-- Left Binocular Eye Housing -->
+          <path d="M 38 22 Q 58 15 74 22 L 72 44 Q 56 49 38 43 Z" fill="url(#wallEBody)" stroke="#c9a84c" stroke-width="1.5"/>
+          <!-- Left Lens Bezel & Pupil -->
+          <circle cx="56" cy="33" r="12" fill="url(#wallELens)" stroke="#c9a84c" stroke-width="1.5"/>
+          <circle cx="56" cy="33" r="8" fill="#080a0e" stroke="#c9a84c" stroke-width="1" opacity="0.8"/>
+          <circle cx="56" cy="33" r="5" fill="url(#eyeGlowGrad)" class="pet-eye-glow"/>
+          <!-- Specular Lens Highlight Arc -->
+          <path d="M 50 28 A 7 7 0 0 1 60 27" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.75"/>
+
+          <!-- Right Binocular Eye Housing -->
+          <path d="M 122 22 Q 102 15 86 22 L 88 44 Q 104 49 122 43 Z" fill="url(#wallEBody)" stroke="#c9a84c" stroke-width="1.5"/>
+          <!-- Right Lens Bezel & Pupil -->
+          <circle cx="104" cy="33" r="12" fill="url(#wallELens)" stroke="#c9a84c" stroke-width="1.5"/>
+          <circle cx="104" cy="33" r="8" fill="#080a0e" stroke="#c9a84c" stroke-width="1" opacity="0.8"/>
+          <circle cx="104" cy="33" r="5" fill="url(#eyeGlowGrad)" class="pet-eye-glow"/>
+          <!-- Specular Lens Highlight Arc -->
+          <path d="M 98 28 A 7 7 0 0 1 108 27" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.75"/>
+
+          <!-- Antenna & Beacon Light -->
+          <line x1="80" y1="20" x2="80" y2="6" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="80" cy="5" r="3.5" fill="#e5c365" stroke="#c9a84c" stroke-width="1" class="pet-antenna-pulse"/>
+        </svg>
+    </div>
+
+    <section id="pet-chat-panel" class="pet-chat-panel" style="display:none;">
+        <header class="pet-chat-header">
+            <div class="pet-chat-heading">
+                <span class="pet-chat-title">Ask Bunny</span>
+                <span class="pet-chat-subtitle">AI Portfolio Companion</span>
+            </div>
+            <button type="button" id="pet-chat-close" class="pet-chat-close" aria-label="Close chat">&times;</button>
+        </header>
+        <div id="pet-chat-messages" class="pet-chat-messages"></div>
+        <form id="pet-chat-form" class="pet-chat-input-row">
+            <input type="text" id="pet-chat-input" class="pet-chat-input" placeholder="Ask about projects, skills, availability…" autocomplete="off" maxlength="300">
+            <button type="submit" class="pet-chat-send">Send</button>
+        </form>
+    </section>
+</div>
+
+<style>
+    #pet-widget-root {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9990;
+    }
+
+    .pet-cat {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 96px;
+        height: 62.4px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        pointer-events: auto;
+        z-index: 9995;
+        transform: translateX(0);
+        transition: filter 200ms ease;
+        filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+    }
+
+    .pet-cat:focus-visible {
+        outline: 2px solid var(--warm);
+        outline-offset: 3px;
+        border-radius: 8px;
+    }
+
+    .pet-cat-svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .pet-cat.pet-cat--flip .pet-cat-svg {
+        transform: scaleX(-1);
+    }
+
+    .pet-eye-glow {
+        animation: petEyeGlow 2s ease-in-out infinite;
+    }
+    @keyframes petEyeGlow {
+        0%, 100% { opacity: 0.75; transform: scale(0.95); }
+        50% { opacity: 1; filter: drop-shadow(0 0 6px #c9a84c); transform: scale(1.05); }
+    }
+    .pet-antenna-pulse {
+        animation: petAntennaPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes petAntennaPulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; filter: drop-shadow(0 0 8px #e5c365); }
+    }
+
+    .pet-cat.pet-cat--bounce {
+        animation: pet-cat-bounce 320ms var(--ease-luxury, ease);
+    }
+
+    @keyframes pet-cat-bounce {
+        0% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        100% { transform: translateY(0); }
+    }
+
+    .pet-chat-panel {
+        position: fixed;
+        flex-direction: column;
+        width: 320px;
+        height: 380px;
+        max-height: calc(100vh - 120px);
+        border-radius: 10px;
+        border: 1px solid var(--glass-hairline, rgba(245, 241, 232, 0.13));
+        border-top-color: var(--glass-edge, rgba(245, 241, 232, 0.2));
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+            var(--deep-glass, rgba(9, 12, 16, 0.92));
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.74);
+        backdrop-filter: blur(18px) saturate(106%);
+        -webkit-backdrop-filter: blur(18px) saturate(106%);
+        z-index: 9999;
+        pointer-events: auto;
+        overflow: hidden;
+    }
+
+    .pet-chat-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 14px 14px 10px;
+        border-bottom: 1px solid var(--glass-hairline, rgba(245, 241, 232, 0.1));
+    }
+
+    .pet-chat-heading {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .pet-chat-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        color: var(--porcelain, #f4efe6);
+        letter-spacing: 0.02em;
+    }
+
+    .pet-chat-subtitle {
+        font-family: 'Outfit', sans-serif;
+        font-size: 11px;
+        color: var(--warm, #c9a84c);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .pet-chat-close {
+        background: transparent;
+        border: none;
+        color: var(--ash, #b6b0a7);
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 4px;
+    }
+
+    .pet-chat-close:hover {
+        color: var(--warm, #c9a84c);
+    }
+
+    .pet-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 120px;
+    }
+
+    .pet-chat-msg {
+        max-width: 85%;
+        padding: 8px 11px;
+        border-radius: 8px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--porcelain, #f4efe6);
+        white-space: pre-wrap;
+    }
+
+    .pet-chat-msg--user {
+        align-self: flex-end;
+        background: rgba(201, 168, 76, 0.16);
+        border: 1px solid rgba(201, 168, 76, 0.28);
+    }
+
+    .pet-chat-msg--reply {
+        align-self: flex-start;
+        background: rgba(255, 255, 255, 0.045);
+        border: 1px solid var(--glass-hairline, rgba(245, 241, 232, 0.1));
+    }
+
+    .pet-chat-input-row {
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px;
+        border-top: 1px solid var(--glass-hairline, rgba(245, 241, 232, 0.1));
+    }
+
+    .pet-chat-input {
+        flex: 1;
+        min-width: 0;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--glass-hairline, rgba(245, 241, 232, 0.13));
+        border-radius: 6px;
+        padding: 8px 10px;
+        color: var(--porcelain, #f4efe6);
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+    }
+
+    .pet-chat-input:focus {
+        outline: none;
+        border-color: var(--warm, #c9a84c);
+    }
+
+    .pet-chat-send {
+        background: var(--warm, #c9a84c);
+        color: var(--black, #020305);
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 200ms ease;
+    }
+
+    .pet-chat-send:hover {
+        opacity: 0.85;
+    }
+</style>
+
+<script>
+(function () {
+    var cat = document.getElementById('petCat');
+    var panel = document.getElementById('pet-chat-panel');
+    var closeBtn = document.getElementById('pet-chat-close');
+    var messages = document.getElementById('pet-chat-messages');
+    var form = document.getElementById('pet-chat-form');
+    var input = document.getElementById('pet-chat-input');
+
+    var posX = 40;
+    var direction = 1;
+    var speed = 1.4;
+    var walkTimer = null;
+    var scheduleTimer = null;
+    var isPanelOpen = false;
+
+    function boundsRight() {
+        return Math.max(0, window.innerWidth - cat.offsetWidth - 12);
+    }
+
+    function render() {
+        cat.style.transform = 'translateX(' + posX + 'px)';
+        cat.classList.toggle('pet-cat--flip', direction < 0);
+    }
+
+    function tick() {
+        var maxX = boundsRight();
+        posX += direction * speed;
+        if (posX >= maxX) {
+            posX = maxX;
+            direction = -1;
+        } else if (posX <= 0) {
+            posX = 0;
+            direction = 1;
+        }
+        render();
+    }
+
+    function pauseThenMaybeReverse() {
+        scheduleTimer = setTimeout(function () {
+            if (Math.random() < 0.5) {
+                direction *= -1;
+            }
+            scheduleWalk();
+        }, 1500 + Math.random() * 2500);
+    }
+
+    function scheduleWalk() {
+        scheduleTimer = setTimeout(pauseThenMaybeReverse, 2500 + Math.random() * 3500);
+    }
+
+    function startWalking() {
+        if (!walkTimer) {
+            walkTimer = setInterval(tick, 45);
+        }
+        scheduleWalk();
+    }
+
+    function stopWalking() {
+        if (walkTimer) {
+            clearInterval(walkTimer);
+            walkTimer = null;
+        }
+        if (scheduleTimer) {
+            clearTimeout(scheduleTimer);
+            scheduleTimer = null;
+        }
+    }
+
+    render();
+    startWalking();
+
+    window.addEventListener('resize', function () {
+        posX = Math.min(posX, boundsRight());
+        render();
+    });
+
+    function appendMessage(text, kind) {
+        var el = document.createElement('div');
+        el.className = 'pet-chat-msg pet-chat-msg--' + kind;
+        el.textContent = text;
+        messages.appendChild(el);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function setPanelOpen(open) {
+        isPanelOpen = open;
+        if (open) {
+            panel.style.display = 'flex';
+            stopWalking();
+            if (!messages.childElementCount) {
+                appendMessage("Hi! I'm Karu Praneeth Kumar (Bunny). Ask me anything about my projects, skills, experience, or availability!", 'reply');
+            }
+            input.focus();
+        } else {
+            panel.style.display = 'none';
+            messages.innerHTML = '';
+            startWalking();
+        }
+    }
+
+    function openChatAboveCat() {
+        // Read the cat's rect before touching classList: the bounce keyframes
+        // animate the `transform` property and momentarily clobber the
+        // translateX walk offset, which would corrupt catRect.left below.
+        const catRect = document.getElementById('petCat').getBoundingClientRect();
+        const panelWidth = 320; // match the panel's actual CSS width
+        const panelHeight = 380; // match the panel's actual CSS height
+        let leftPos = catRect.left + (catRect.width / 2) - (panelWidth / 2);
+        leftPos = Math.max(12, Math.min(leftPos, window.innerWidth - panelWidth - 12));
+        panel.style.left = leftPos + 'px';
+        panel.style.bottom = (window.innerHeight - catRect.top + 12) + 'px';
+        panel.style.right = 'auto';
+        panel.style.position = 'fixed';
+
+        cat.classList.add('pet-cat--bounce');
+        setTimeout(function () { cat.classList.remove('pet-cat--bounce'); }, 320);
+
+        setPanelOpen(true);
+    }
+
+    cat.addEventListener('click', openChatAboveCat);
+    cat.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openChatAboveCat();
+        }
+    });
+
+    closeBtn.addEventListener('click', function () {
+        setPanelOpen(false);
+    });
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var text = input.value.trim();
+        if (!text) return;
+        appendMessage(text, 'user');
+        input.value = '';
+
+        var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch('/api/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({ message: text }),
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                appendMessage(data.reply || "Didn't quite catch that.", 'reply');
+            })
+            .catch(function () {
+                appendMessage("Couldn't reach the server — try again in a moment.", 'reply');
+            });
+    });
+})();
+</script>

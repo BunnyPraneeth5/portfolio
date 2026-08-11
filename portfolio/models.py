@@ -124,6 +124,11 @@ class SiteSettings(models.Model):
     meta_title = models.CharField(max_length=100, blank=True)
     meta_description = models.CharField(max_length=300, blank=True)
 
+    open_to_work = models.BooleanField(default=True, help_text='Show as actively looking on the pet chat')
+    open_to_remote = models.BooleanField(default=True)
+    open_to_internship = models.BooleanField(default=True)
+    notice_period = models.CharField(max_length=100, blank=True, default='Immediate')
+
     class Meta:
         verbose_name = 'Site Settings'
         verbose_name_plural = 'Site Settings'

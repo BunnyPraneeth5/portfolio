@@ -1397,6 +1397,10 @@ img.hover\:scale-105:hover {
     .glass-card {
         padding: 1.25rem !important;
     }
+
+    .secondary-project-card-body {
+        padding: 24px 24px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1579,7 +1583,7 @@ body:not([data-chapter="home"]) main {
 }
 
 body[data-chapter="skills"] .skills-grid {
-    gap: 2px !important;
+    gap: 2rem !important;
 }
 
 body[data-chapter="skills"] .skill-card {
@@ -1658,7 +1662,7 @@ body[data-chapter="skills"] .skill-card ul > * + * {
 body[data-chapter="projects"] .projects-grid {
     display: grid !important;
     grid-template-columns: 1fr;
-    gap: 2px !important;
+    gap: 2rem !important;
     max-width: 72rem;
     margin: 0 auto;
 }
@@ -1856,18 +1860,42 @@ body[data-chapter="projects"] .projects-grid {
 .secondary-project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2px;
+    gap: 2rem !important;
 }
 
-.secondary-project-card {
+.glass-card.secondary-project-card {
     display: flex;
     flex-direction: column;
     min-height: 280px;
-    padding: 36px 40px !important;
+    padding: 0 !important;
     border: 1px solid rgba(201, 168, 76, 0.08) !important;
     border-radius: 4px !important;
     background: #0c0c0c !important;
     box-shadow: none !important;
+    overflow: hidden;
+}
+
+.secondary-project-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 36px 40px;
+}
+
+.glass-card.secondary-project-card .project-thumbnail {
+    width: 100% !important;
+    height: 152px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.12) !important;
+    border-radius: 0 !important;
+}
+
+.glass-card.secondary-project-card .project-thumbnail img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 0 !important;
 }
 
 .secondary-project-card h2 {
