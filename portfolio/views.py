@@ -8,19 +8,23 @@ from django.views.decorators.http import require_POST
 from . import chatbot
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage, SiteSettings,
-    ExperienceEntry,
+    EducationEntry, ExperienceEntry,
 )
 
 def index(request):
-    about = About.objects.first()
-    skills = Skill.objects.filter(is_featured=True)
-    projects = Project.objects.filter(is_featured=True, is_published=True)[:3]
-    recent_experience = ExperienceEntry.newest_first().first()
+    roster = list(Project.objects.filter(is_published=True).order_by('order'))
+    flagship = next((p for p in roster if p.status == 'flagship'), None)
+    if flagship is None:
+        flagship = next((p for p in roster if p.is_featured), roster[0] if roster else None)
     return render(request, 'index.html', {
-        'about': about,
-        'skills': skills,
-        'projects': projects,
-        'recent_experience': recent_experience,
+        'recent_experience': ExperienceEntry.newest_first().first(),
+        'education': EducationEntry.objects.first(),
+        'core_stack': Skill.objects.filter(is_featured=True)[:8],
+        'roster': roster,
+        'flagship': flagship,
+        'latest_posts': BlogPost.objects.filter(published=True)[:3],
+        # Filled in Phase 4 (ProjectReplay); the section stays hidden until then.
+        'replay_preview': None,
     })
 
 def about_view(request):

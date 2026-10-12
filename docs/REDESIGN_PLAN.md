@@ -173,6 +173,12 @@ Goal: get the latest internship live quickly and stop real experience being labe
 8. **Contact section + footer** on every page via `base.html`.
 9. Fix spacing: no huge empty gaps, one heading per section.
 
+**Decisions confirmed by Bunny (2026-10-12)**
+- Nav: Agents (homepage roster), Cases (/projects/), Logs (/blog/), About, Contact. Replay joins the nav in Phase 4. Skills page stays, reachable by link.
+- Replay preview: built as a hidden shell (`templates/partials/replay_preview.html`), rendered only once a replay exists (Phase 4).
+- Portrait removed from the homepage; it stays on About.
+- Homepage skills section removed; featured skills show as "Core stack" in the 30-second view.
+
 **Done when**
 - Homepage answers "who, what role, best work, how to contact" without scrolling on desktop
 - Works at 390px with no horizontal page scroll

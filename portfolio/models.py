@@ -115,6 +115,11 @@ class SiteSettings(models.Model):
     open_to_remote = models.BooleanField(default=True)
     open_to_internship = models.BooleanField(default=True)
     notice_period = models.CharField(max_length=100, blank=True, default='Immediate')
+    looking_for = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Shown in the homepage 30-second view, e.g. the kind of roles you want. Hidden when empty.'
+    )
 
     class Meta:
         verbose_name = 'Site Settings'
@@ -138,6 +143,13 @@ class SiteSettings(models.Model):
         return 'Site Settings'
 
 class Project(models.Model):
+    STATUS_CHOICES = [
+        ('flagship', 'Flagship'),
+        ('live', 'Live'),
+        ('benchmarking', 'Benchmarking'),
+        ('archived', 'Archived'),
+    ]
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     short_description = models.TextField(
@@ -162,6 +174,12 @@ class Project(models.Model):
     )
     is_featured = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        blank=True,
+        help_text='Shown in the homepage agent roster. Leave empty to hide.'
+    )
     order = models.PositiveIntegerField(
         default=0,
         help_text='Lower number appears first.'

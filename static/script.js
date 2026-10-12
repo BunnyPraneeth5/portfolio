@@ -14,19 +14,14 @@ localStorage.setItem('darkMode', 'true');
 
 document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
-    const chapter = body.dataset.chapter || 'home';
 
     setupAtmosphere();
-    setupLoadingScreen();
-    setupNavigation(chapter);
-    setupActiveNavigation(chapter);
-    setupScrollProgress();
+    setupNavigation();
     setupReveals();
     setupMaterialResponse();
     setupSkillEnvironment();
     setupContactFocus();
     setupInternalPageFade();
-    setupRoleCrossfade();
     setupMetricCountUps();
     setupRoadmap();
 
@@ -67,35 +62,16 @@ function setupAtmosphere() {
     }
 }
 
-function setupLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (!loadingScreen) return;
-
-    window.addEventListener('load', () => {
-        window.setTimeout(() => {
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.visibility = 'hidden';
-            window.setTimeout(() => loadingScreen.remove(), 760);
-        }, 520);
-    }, { once: true });
-}
-
-function setupNavigation(chapter) {
+function setupNavigation() {
     const nav = document.querySelector('nav');
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const mobileMenu = document.getElementById('mobileMenu');
 
-    document.querySelectorAll('.nav-link').forEach(link => {
-        const href = link.getAttribute('href') || '';
-        const normalized = href.toLowerCase();
-        const isHome = chapter === 'home' && (normalized === '/' || normalized.includes('index') || normalized === '');
-        const isCurrent = normalized.includes(chapter);
-        link.classList.toggle('active', isHome || isCurrent);
-    });
-
     if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.setAttribute('aria-expanded', 'false');
         mobileMenuToggle.addEventListener('click', () => {
-            mobileMenu.classList.toggle('active');
+            const open = mobileMenu.classList.toggle('active');
+            mobileMenuToggle.setAttribute('aria-expanded', String(open));
             const icon = mobileMenuToggle.querySelector('i');
             if (icon) {
                 icon.classList.toggle('fa-bars');
@@ -106,6 +82,7 @@ function setupNavigation(chapter) {
         mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.remove('active');
+                mobileMenuToggle.setAttribute('aria-expanded', 'false');
                 const icon = mobileMenuToggle.querySelector('i');
                 if (icon) {
                     icon.classList.remove('fa-times');
@@ -124,20 +101,6 @@ function setupNavigation(chapter) {
         updateNav();
         window.addEventListener('scroll', updateNav, { passive: true });
     }
-}
-
-function setupScrollProgress() {
-    const scrollProgress = document.getElementById('scrollProgress');
-    if (!scrollProgress) return;
-
-    const update = () => {
-        const max = document.body.scrollHeight - window.innerHeight;
-        const percent = max > 0 ? (window.scrollY / max) * 100 : 0;
-        scrollProgress.style.width = `${percent}%`;
-    };
-
-    update();
-    window.addEventListener('scroll', update, { passive: true });
 }
 
 function setupReveals() {
@@ -177,37 +140,6 @@ function setupMaterialResponse() {
     });
 }
 
-function setupActiveNavigation(chapter) {
-    const navLinks = Array.from(document.querySelectorAll('.nav-link'));
-    const sectionTargets = Array.from(document.querySelectorAll('[data-nav-target]'));
-
-    if (!sectionTargets.length) return;
-
-    const setActive = target => {
-        navLinks.forEach(link => {
-            const href = (link.getAttribute('href') || '').toLowerCase();
-            link.classList.toggle('active', href.includes(target));
-        });
-    };
-
-    const observer = new IntersectionObserver(entries => {
-        const visible = entries
-            .filter(entry => entry.isIntersecting)
-            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (visible) {
-            setActive(visible.target.dataset.navTarget);
-        } else if (chapter !== 'home') {
-            setActive(chapter);
-        }
-    }, {
-        threshold: [0.2],
-        rootMargin: '0px 0px -60% 0px'
-    });
-
-    sectionTargets.forEach(section => observer.observe(section));
-}
-
 function setupSkillEnvironment() {
     const skillSurfaces = document.querySelectorAll('body[data-chapter="skills"] .glass-card, body[data-chapter="skills"] li');
     if (!skillSurfaces.length) return;
@@ -242,6 +174,9 @@ function setupInternalPageFade() {
             const isExternal = target === '_blank' || !href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || /^https?:\/\//i.test(href);
             if (isExternal) return;
 
+            const url = new URL(href, window.location.href);
+            if (url.hash && url.pathname === window.location.pathname) return;
+
             event.preventDefault();
             document.body.style.transition = 'opacity 280ms ease';
             document.body.style.opacity = '0';
@@ -250,45 +185,6 @@ function setupInternalPageFade() {
             }, 230);
         });
     });
-}
-
-function setupRoleCrossfade() {
-    const container = document.getElementById('typewriter');
-    if (!container) return;
-
-    let items = Array.from(container.querySelectorAll('.role-crossfade__item'));
-    if (!items.length) {
-        const fallbackRoles = [
-            'AI Engineer',
-            'Machine Learning Practitioner',
-            'Full-Stack Builder',
-            'Security Systems Explorer'
-        ];
-        container.classList.add('role-crossfade');
-        fallbackRoles.forEach((role, index) => {
-            const item = document.createElement('span');
-            item.className = `role-crossfade__item${index === 0 ? ' active' : ''}`;
-            item.textContent = role;
-            container.appendChild(item);
-        });
-        items = Array.from(container.querySelectorAll('.role-crossfade__item'));
-    }
-
-    if (items.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        items[0]?.classList.add('active');
-        return;
-    }
-
-    let activeIndex = items.findIndex(item => item.classList.contains('active'));
-    if (activeIndex < 0) activeIndex = 0;
-    items.forEach((item, index) => item.classList.toggle('active', index === activeIndex));
-
-    window.setInterval(() => {
-        const nextIndex = (activeIndex + 1) % items.length;
-        items[activeIndex].classList.remove('active');
-        items[nextIndex].classList.add('active');
-        activeIndex = nextIndex;
-    }, 2800);
 }
 
 function setupMetricCountUps() {

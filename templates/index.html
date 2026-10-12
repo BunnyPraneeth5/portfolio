@@ -11,207 +11,165 @@
 
 {% block body_attrs %} data-chapter="home"{% endblock %}
 
-{% block before_nav %}
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-logo">
-                <span class="text-4xl font-display">KP</span>
-            </div>
-            <div class="loading-spinner">
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-            </div>
-            <p class="loading-text">Opening Sequence</p>
-        </div>
-    </div>
-    
-    <!-- Scroll Progress Bar -->
-    <div id="scrollProgress" class="scroll-progress"></div>
-{% endblock %}
-
 {% block content %}
-    <!-- Hero Section -->
-    <main class="min-h-screen flex items-center">
-        <div class="container mx-auto px-4 py-24">
-            <div class="max-w-4xl mx-auto text-center">
-                <!-- Profile Image -->
-                <div class="portrait-container" data-aos="fade-down">
-                    <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}" class="portrait-img">
-                </div>
-                
-                <!-- Hero Text -->
-                <h1 class="text-4xl md:text-6xl font-display font-bold mb-6" data-aos="fade-up">
-                    <span>
-                        {{ site_settings.hero_name_display }}
-                    </span>
-                </h1>
-                <p class="hero-role text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
-                    <span id="typewriter" class="role-crossfade" aria-live="polite">
-                        {% for phrase in site_settings.hero_roles_list %}
-                        <span class="role-crossfade__item{% if forloop.first %} active{% endif %}">{{ phrase }}</span>
-                        {% endfor %}
-                    </span>
-                </p>
-                {% if recent_experience %}
-                <p class="hero-recent mb-6" data-aos="fade-up" data-aos-delay="150">
-                    Recent: {{ recent_experience.role }} at {{ recent_experience.organization }}
+    <main class="home">
+        <!-- Hero + 30-second view -->
+        <section class="home-hero site-wrap" aria-labelledby="hero-name">
+            <div class="home-hero__intro">
+                {% if site_settings.open_to_work %}
+                <p class="status-line">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span class="label-mono">Open to roles{% if site_settings.contact_location %} · {{ site_settings.contact_location }}{% endif %}</span>
                 </p>
                 {% endif %}
-                <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-                    {{ site_settings.hero_description|linebreaksbr }}
-                </p>
-
-                <!-- CTA Buttons -->
-                <div class="flex flex-col md:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
-                    <a href="{{ site_settings.hero_cta_primary_url }}" 
-                       class="btn-primary">
-                        {{ site_settings.hero_cta_primary_label }}
-                    </a>
-                    <a href="{{ site_settings.hero_cta_secondary_url }}" 
-                       class="btn-ghost">
-                        {{ site_settings.hero_cta_secondary_label }}
-                    </a>
-                    <a href="{{ resume_url }}" target="_blank"
-                       class="btn-ghost">
-                        Resume
-                    </a>
-                </div>
-
-                <!-- Social Links -->
-                <div class="mt-12 flex justify-center space-x-6" data-aos="fade-up" data-aos-delay="400">
-                    {% if site_settings.github_url %}
-                    <a href="{{ site_settings.github_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-github text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.linkedin_url %}
-                    <a href="{{ site_settings.linkedin_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-linkedin text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.kaggle_url %}
-                    <a href="{{ site_settings.kaggle_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-kaggle text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.hackerrank_url %}
-                    <a href="{{ site_settings.hackerrank_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-hackerrank text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.leetcode_url %}
-                    <a href="{{ site_settings.leetcode_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-code text-2xl"></i>
-                    </a>
-                    {% endif %}
+                <h1 id="hero-name" class="home-hero__name">{{ site_settings.hero_name_display }}</h1>
+                <p class="home-hero__roles">{{ site_settings.hero_roles_list|join:" · " }}</p>
+                {% if recent_experience %}
+                <p class="home-hero__recent label-mono">Recent: {{ recent_experience.role }} at {{ recent_experience.organization }}</p>
+                {% endif %}
+                {% if site_settings.hero_description %}
+                <p class="home-hero__pitch">{{ site_settings.hero_description|linebreaksbr }}</p>
+                {% endif %}
+                <div class="home-hero__actions">
+                    <a href="#agents" class="btn-primary">View agents</a>
+                    <a href="{{ resume_url }}" target="_blank" rel="noopener" class="btn-ghost">Resume</a>
+                    <a href="#contact" class="btn-ghost">Contact</a>
                 </div>
             </div>
-        </div>
-    </main>
 
-    <!-- Featured Projects -->
-    <section class="pb-20" data-nav-target="projects" data-aos="fade-up">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <p class="featured-label text-center">SELECTED WORK</p>
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-center mb-8">
-                    <span>
-                        Selected Work
-                    </span>
-                </h2>
-                <div class="space-y-6">
-                    {% for project in projects %}
-                    <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
-                        <span class="featured-badge">Featured</span>
-                        <div class="pr-20">
-                            <h3 class="text-2xl font-display mb-3">{{ project.title }}</h3>
-                            {% if project.tech_tags_list %}
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                {% for tag in project.tech_tags_list %}
-                                <span class="tag">{{ tag }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            <p class="text-gray-300 mb-5">
-                                {{ project.card_description|linebreaksbr }}
-                            </p>
-                            <div class="flex flex-wrap gap-4">
-                                {% if project.github_url %}
-                                <a href="{{ project.github_url }}" target="_blank"
-                                   class="text-accent">
-                                    <i class="fab fa-github mr-1"></i> View Code
-                                </a>
-                                {% endif %}
-                                {% if project.primary_live_url %}
-                                <a href="{{ project.primary_live_url }}" target="_blank"
-                                   class="text-accent">
-                                    <i class="fas fa-external-link-alt mr-1"></i> Live Demo
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
+            <aside class="panel quick-view" aria-labelledby="quick-view-heading">
+                <h2 id="quick-view-heading" class="label-mono quick-view__title">30-second view</h2>
+                <dl class="kv-list">
+                    {% if site_settings.looking_for %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Looking for</dt>
+                        <dd>{{ site_settings.looking_for }}</dd>
                     </div>
-                    {% empty %}
-                    <div class="glass-card p-6 text-center">
-                        <p class="text-gray-400">No featured projects available.</p>
+                    {% endif %}
+                    {% if flagship %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Best work</dt>
+                        <dd><a href="{% url 'project_detail' flagship.slug %}" class="text-accent">{{ flagship.title }}</a></dd>
                     </div>
-                    {% endfor %}
-                </div>
-                <div class="text-center mt-8">
-                    <a href="{% url 'projects' %}" class="text-accent">
-                        Continue to Projects
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+                    {% endif %}
+                    {% if education %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Degree</dt>
+                        <dd>
+                            {{ education.degree }}{% if education.field_of_study %}, {{ education.field_of_study }}{% endif %}
+                            <span class="kv-sub">{{ education.institution }}{% if education.year_range %} · {{ education.year_range }}{% endif %}</span>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if core_stack %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Core stack</dt>
+                        <dd>{% for skill in core_stack %}{{ skill.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</dd>
+                    </div>
+                    {% endif %}
+                    {% if site_settings.contact_location %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Location</dt>
+                        <dd>{{ site_settings.contact_location }}{% if site_settings.open_to_remote %} · Open to remote{% endif %}</dd>
+                    </div>
+                    {% endif %}
+                    {% if site_settings.notice_period %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Notice period</dt>
+                        <dd>{{ site_settings.notice_period }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Links</dt>
+                        <dd class="link-row">
+                            {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                            {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+                            {% if site_settings.kaggle_url %}<a href="{{ site_settings.kaggle_url }}" target="_blank" rel="noopener">Kaggle</a>{% endif %}
+                            {% if site_settings.leetcode_url %}<a href="{{ site_settings.leetcode_url }}" target="_blank" rel="noopener">LeetCode</a>{% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </aside>
+        </section>
 
-    <!-- Skills Section -->
-    <section class="pb-20" data-nav-target="skills" data-aos="fade-up">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <p class="featured-label text-center">CAPABILITIES</p>
-                <h2 class="text-3xl md:text-4xl font-display font-bold text-center mb-8">
-                    <span>
-                        Skills & Technologies
-                    </span>
-                </h2>
-                <div class="glass-card p-6" data-aos="fade-up">
-                    {% regroup skills by get_category_display as skill_groups %}
-                    {% for group in skill_groups %}
-                    <div class="mb-4 last:mb-0">
-                        <h3 class="label-mono text-accent mb-2">{{ group.grouper }}</h3>
-                        <div class="flex flex-wrap gap-2">
-                            {% for skill in group.list %}
-                            <span class="px-3 py-1 bg-gray-800 border border-gray-700/60 rounded-full text-sm text-gray-300">
-                                {{ skill.name }}
-                            </span>
+        <!-- Agent roster -->
+        {% if roster %}
+        <section id="agents" class="site-section" aria-labelledby="agents-heading">
+            <div class="site-wrap">
+                <div class="section-head">
+                    <span class="label-mono">Roster · {{ roster|length }} published</span>
+                    <h2 id="agents-heading">Agents</h2>
+                </div>
+                <div class="roster-scroll" tabindex="0" role="region" aria-label="Agent roster">
+                    <table class="roster">
+                        <thead>
+                            <tr>
+                                <th scope="col">Agent</th>
+                                <th scope="col">Stack</th>
+                                <th scope="col">Key metric</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in roster %}
+                            <tr>
+                                <td class="roster__agent">
+                                    <a href="{% url 'project_detail' project.slug %}" class="roster__link">{{ project.title }}</a>
+                                    {% if project.short_description %}
+                                    <span class="roster__desc">{{ project.short_description|truncatechars:120 }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="roster__stack">{{ project.tech_tags_list|slice:":4"|join:" · " }}</td>
+                                <td>
+                                    {% if project.metric_1_value %}
+                                    <span class="roster__metric">{{ project.metric_1_value }}</span>
+                                    <span class="roster__metric-label">{{ project.metric_1_label }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if project.status %}
+                                    <span class="roster-status roster-status--{{ project.status }}">{{ project.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
                             {% endfor %}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="flex flex-wrap justify-center gap-2">
-                        {% for skill in skills %}
-                        <span class="px-3 py-1 bg-gray-800 border border-gray-700/60 rounded-full text-sm text-gray-300">
-                            {{ skill.name }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="text-center mt-8">
-                    <a href="{% url 'skills' %}" class="text-accent">
-                        View All Skills
-                    </a>
-                </div>
+                <p class="section-more"><a href="{% url 'projects' %}" class="text-accent">All case files <span aria-hidden="true">→</span></a></p>
             </div>
-        </div>
-    </section>
+        </section>
+        {% endif %}
+
+        <!-- Replay preview: shell only until Phase 4 provides a replay -->
+        {% if replay_preview %}
+        {% include 'partials/replay_preview.html' %}
+        {% endif %}
+
+        <!-- From the logs -->
+        {% if latest_posts %}
+        <section id="logs" class="site-section" aria-labelledby="logs-heading">
+            <div class="site-wrap">
+                <div class="section-head">
+                    <span class="label-mono">Logs</span>
+                    <h2 id="logs-heading">From the logs</h2>
+                </div>
+                <ul class="log-list">
+                    {% for post in latest_posts %}
+                    <li>
+                        <a href="{% url 'blog_detail' post.slug %}" class="log-item">
+                            <span class="label-mono">{{ post.event_date|date:"d M Y" }}</span>
+                            <span class="log-item__title">{{ post.title }}</span>
+                            {% if post.excerpt %}
+                            <span class="log-item__excerpt">{{ post.excerpt|truncatechars:150 }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p class="section-more"><a href="{% url 'blog' %}" class="text-accent">All logs <span aria-hidden="true">→</span></a></p>
+            </div>
+        </section>
+        {% endif %}
+    </main>
 {% endblock %}

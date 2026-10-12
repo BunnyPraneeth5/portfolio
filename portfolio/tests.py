@@ -9,7 +9,7 @@ from . import chatbot
 from .admin import ExperienceEntryAdminForm
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
-    Certification, EventEntry, ExperienceEntry,
+    Certification, EventEntry, ExperienceEntry, SiteSettings,
 )
 
 class PortfolioViewsTestCase(TestCase):
@@ -128,8 +128,74 @@ class BaseLayoutTests(TestCase):
     def test_nav_marks_section_active_on_detail_page(self):
         Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
         response = self.client.get(reverse('project_detail', args=['gargantua-probe']))
-        self.assertContains(response, 'class="nav-link active">Projects</a>')
+        self.assertContains(response, 'class="nav-link active">Cases</a>')
         self.assertContains(response, 'class="nav-link">About</a>')
+
+    def test_contact_section_and_footer(self):
+        for url in [reverse('index'), reverse('about'), reverse('blog')]:
+            response = self.client.get(url)
+            self.assertContains(response, 'id="contact"', msg_prefix=url)
+            self.assertContains(response, 'class="site-footer"', msg_prefix=url)
+        response = self.client.get(reverse('contact'))
+        self.assertNotContains(response, 'id="contact"')
+        self.assertContains(response, 'class="site-footer"')
+
+
+class HomepageTests(TestCase):
+    def setUp(self):
+        self.settings_obj = SiteSettings.load()
+        Project.objects.create(title="Second Agent", slug="second-agent", order=2, status="live",
+                               metric_1_value="84", metric_1_label="Features")
+        Project.objects.create(title="First Agent", slug="first-agent", order=1, status="flagship",
+                               tech_tags="Python, MCP, PyQt6, Django, Extra")
+        Project.objects.create(title="Hidden Agent", slug="hidden-agent", is_published=False)
+
+    def test_roster_lists_published_projects_in_order(self):
+        response = self.client.get(reverse('index'))
+        titles = [p.title for p in response.context['roster']]
+        self.assertLess(titles.index("First Agent"), titles.index("Second Agent"))
+        self.assertNotIn("Hidden Agent", titles)
+        self.assertContains(response, reverse('project_detail', args=['first-agent']))
+        self.assertContains(response, 'roster-status--flagship')
+        self.assertContains(response, "Python · MCP · PyQt6 · Django")
+        self.assertNotContains(response, "Extra")
+        self.assertContains(response, "84")
+
+    def test_best_work_is_flagship(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.context['flagship'].slug, "first-agent")
+
+    def test_quick_view_rows_follow_settings(self):
+        self.settings_obj.looking_for = ""
+        self.settings_obj.save()
+        response = self.client.get(reverse('index'))
+        self.assertNotContains(response, "Looking for")
+        self.settings_obj.looking_for = "Agentic AI roles"
+        self.settings_obj.save()
+        response = self.client.get(reverse('index'))
+        self.assertContains(response, "Looking for")
+        self.assertContains(response, "Agentic AI roles")
+
+    def test_status_line_follows_open_to_work(self):
+        self.settings_obj.open_to_work = True
+        self.settings_obj.save()
+        self.assertContains(self.client.get(reverse('index')), "Open to roles")
+        self.settings_obj.open_to_work = False
+        self.settings_obj.save()
+        self.assertNotContains(self.client.get(reverse('index')), "Open to roles")
+
+    def test_latest_three_published_logs(self):
+        for i in range(4):
+            BlogPost.objects.create(title=f"Log {i}", slug=f"log-{i}", content="x", excerpt="x", published=True)
+        BlogPost.objects.create(title="Draft log", slug="draft-log", content="x", excerpt="x")
+        response = self.client.get(reverse('index'))
+        self.assertEqual(len(response.context['latest_posts']), 3)
+        self.assertNotContains(response, "Draft log")
+
+    def test_no_splash_and_replay_hidden(self):
+        response = self.client.get(reverse('index'))
+        self.assertNotContains(response, 'loadingScreen')
+        self.assertNotContains(response, 'id="replay"')
 
 
 class ExperienceEntryModelTests(TestCase):

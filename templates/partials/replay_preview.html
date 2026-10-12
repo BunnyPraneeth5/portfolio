@@ -1,0 +1,19 @@
+{% comment %}
+Replay preview shell (Phase 2). Rendered only when the view passes `replay_preview`,
+which happens from Phase 4 (ProjectReplay). static/replay.js will fill [data-replay-console].
+{% endcomment %}
+<section id="replay" class="site-section" aria-labelledby="replay-heading">
+    <div class="site-wrap">
+        <div class="section-head">
+            <span class="label-mono">Replay · recorded run</span>
+            <h2 id="replay-heading">{{ replay_preview.title }}</h2>
+        </div>
+        <div class="panel panel--deep replay-shell">
+            <div class="replay-shell__bar">
+                <span class="label-mono">{{ replay_preview.project.title }}</span>
+                {% if replay_preview.duration_s %}<span class="label-mono">{{ replay_preview.duration_s }}s</span>{% endif %}
+            </div>
+            <div class="replay-shell__console" data-replay-console aria-live="polite"></div>
+        </div>
+    </div>
+</section>

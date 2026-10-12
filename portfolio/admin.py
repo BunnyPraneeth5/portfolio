@@ -46,9 +46,9 @@ class SkillAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'slug', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
-    list_filter = ['is_featured', 'is_published']
-    list_editable = ['is_featured', 'is_published', 'order']
+    list_display = ['title', 'slug', 'status', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
+    list_filter = ['status', 'is_featured', 'is_published']
+    list_editable = ['status', 'is_featured', 'is_published', 'order']
     search_fields = ['title', 'short_description', 'long_description', 'tech_tags']
     ordering = ['order']
     prepopulated_fields = {'slug': ('title',)}
@@ -62,6 +62,7 @@ class ProjectAdmin(admin.ModelAdmin):
                 'thumbnail',
                 'tech_tags',
                 'order',
+                'status',
                 'is_featured',
                 'is_published',
             )
@@ -218,6 +219,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'open_to_remote',
                 'open_to_internship',
                 'notice_period',
+                'looking_for',
             )
         }),
         ('Social Links', {

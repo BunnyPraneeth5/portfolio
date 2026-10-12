@@ -1,7 +1,7 @@
 # TASKS
 
-Current phase: **Phase 1 — Cleanup and design system** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review.** Phase 0 confirmed done by Bunny on 2026-10-12.
+Current phase: **Phase 2 — Homepage rebuild (ops console)** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phase 0 and Phase 1 committed on `redesign/phase-0`.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -114,8 +114,53 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting o
 - [x] 27 tests pass; `makemigrations --check` clean.
 - [x] No horizontal scroll at 390px on all 8 pages; desktop checked at 1440px.
 
-## Phase 2 notes carried forward
-- Homepage splash ("Opening Sequence") and fade-in animations still delay content; Phase 2 task 1.
+## Phase 2 — Homepage rebuild (ops console)
+Decisions (Bunny, 2026-10-12): nav = Agents, Cases, Logs, About, Contact; replay shell hidden until Phase 4; no portrait on the homepage.
+
+## 2.1 Splash
+- [x] Opening splash removed (markup, CSS, JS). Homepage content has no fade-in delay.
+
+## 2.2 Header
+- [x] `KP` + `OPS://BUNNY` brand; nav Agents (`/#agents`), Cases, Logs, About, Contact. Mobile menu kept (now sets `aria-expanded`).
+- [x] Active link set server-side only; script.js no longer overrides it. Same-page anchors scroll instead of fade + reload.
+
+## 2.3 Hero
+- [x] Teal status line "Open to roles · <location>" when `open_to_work`; name; roles on one line; Recent role line; pitch; buttons View agents / Resume / Contact.
+- [x] Rotating-role animation removed (and its hardcoded fallback roles).
+
+## 2.4 30-second view
+- [x] Looking for (new `SiteSettings.looking_for`, hidden when empty), Best work (Flagship project, else first featured), Degree (first `EducationEntry`), Core stack (featured skills, max 8), Location (+ open to remote), Notice period, Links.
+
+## 2.5 Agent roster
+- [x] Table of published projects by `order`: agent (title + short description), stack (first 4 tags), key metric (metric 1), status. Whole row links to the case file. Scrolls inside its box on phone.
+- [x] New `Project.status` (flagship, live, benchmarking, archived; blank hides the badge) in admin list + form.
+
+## 2.6 Replay preview
+- [x] Shell partial `templates/partials/replay_preview.html`, rendered only when `replay_preview` is set (Phase 4).
+
+## 2.7 From the logs
+- [x] Latest 3 published posts; section hidden when none.
+
+## 2.8 Contact section + footer
+- [x] `partials/contact_section.html` on every page except /contact/ (email, location, links, Send a message / Resume). Heading = `SiteSettings.contact_tagline`.
+- [x] `partials/site_footer.html` on every page.
+
+## 2.9 Spacing
+- [x] One heading per section (mono label + different heading text). Consistent section spacing; anchored sections clear the fixed header.
+
+## Phase 2 checks
+- [x] Migration `0019_sitesettings_looking_for_project_status`. 34 tests pass.
+- [x] 1440x900: who, role, best work and contact visible without scrolling.
+- [x] 390px: no horizontal page scroll on all pages; roster scrolls inside its own box.
+- [x] Computed-colour audit on the homepage: no blue/purple; only the three fonts.
+
+## Content for Bunny (not code)
+- `Looking for` is empty: fill it in Site Settings to show the row.
+- Set `Status` on each project (SOC Copilot as Flagship?) so roster badges and Best work are deliberate.
+- The hero pitch (`Hero description`) is three lines with manual line breaks; the plan asks for one line.
+
+## Phase 5 notes carried forward
+- The robot still sits over content (e.g. the roster's first row at 1440x900). Phase 5 parks it.
 
 ## Before Phase 5
 - [ ] Run a critique pass on the Phase 5 plan (robot + chatbot) first. Share findings and wait for Bunny's OK before writing any Phase 5 code.

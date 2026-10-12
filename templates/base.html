@@ -23,25 +23,23 @@
     {% block before_nav %}{% endblock %}
     {% with nav=request.resolver_match.url_name %}
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
+    <nav class="fixed top-0 left-0 right-0 z-50" aria-label="Main">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-display">KP</a>
+                <a href="{% url 'index' %}" class="nav-brand">
+                    <span class="nav-brand__mark font-display">KP</span>
+                    <span class="nav-brand__label">OPS://BUNNY</span>
+                </a>
                 <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'index' %}#agents" class="nav-link{% if nav == 'index' %} active{% endif %}">Agents</a>
+                    <a href="{% url 'projects' %}" class="nav-link{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Cases</a>
+                    <a href="{% url 'blog' %}" class="nav-link{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Logs</a>
                     <a href="{% url 'about' %}" class="nav-link{% if nav == 'about' %} active{% endif %}">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link{% if nav == 'skills' %} active{% endif %}">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Blog</a>
                     <a href="{% url 'contact' %}" class="nav-link{% if nav == 'contact' %} active{% endif %}">Contact</a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+                <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" aria-label="Open menu" aria-controls="mobileMenu">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -49,16 +47,19 @@
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="mobile-menu md:hidden">
         <div class="p-4">
+            <a href="{% url 'index' %}#agents" class="block py-2 text-gray-300 hover:text-white{% if nav == 'index' %} active{% endif %}">Agents</a>
+            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Cases</a>
+            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Logs</a>
             <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'about' %} active{% endif %}">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'skills' %} active{% endif %}">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Blog</a>
             <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'contact' %} active{% endif %}">Contact</a>
         </div>
     </div>
     {% endwith %}
 
     {% block content %}{% endblock %}
+
+    {% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}
+    {% include 'partials/site_footer.html' %}
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="{% static 'script.js' %}"></script>

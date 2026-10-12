@@ -4,6 +4,28 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 3: Phase 1 committed, Phase 2 implemented
+
+**Phase 1:** committed as `34039c1` on `redesign/phase-0`.
+
+**Phase 2:** done locally, waiting for review.
+
+**Decisions from Bunny:** nav = Agents, Cases, Logs, About, Contact; replay shell hidden until Phase 4; portrait off the homepage.
+
+**Done**
+- Homepage rebuilt: status line, name, roles, recent role, pitch, three buttons, 30-second view panel, agent roster table, hidden replay shell, latest 3 logs.
+- New fields: `SiteSettings.looking_for`, `Project.status` (migration 0019). Admin updated; `ADMIN_GUIDE.md` updated.
+- Header: `KP OPS://BUNNY` brand and new nav. Contact section + footer added to every page via `base.html` (contact section skipped on /contact/).
+- Removed: splash screen, scroll progress bar, rotating roles (incl. a hardcoded fallback role list in JS), old homepage CSS, client-side nav active override.
+- Tests 27 → 34, all pass.
+- Browser checks: desktop 1440x900 shows who/role/best work/contact above the fold; 390px has no page overflow (roster scrolls inside); nav highlighting correct on each page; mobile menu works; homepage colours/fonts clean.
+
+**Deploy note for Bunny:** back up MySQL, pull, `migrate` (0019), `collectstatic`, reload. Browsers may need a hard refresh for the new `script.js`.
+
+**Next**
+- Bunny: review Phase 2; fill `Looking for` and project `Status` in admin.
+- Then Phase 3 (case file project pages).
+
 ## 2026-10-12 — Session 2: Phase 1 implemented
 
 **Phase:** 1 (done locally, waiting for review). Same branch `redesign/phase-0`.

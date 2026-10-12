@@ -31,14 +31,15 @@ Use your superuser credentials.
 ### 1. Site Settings (Singleton)
 - **Purpose**: Manages hero text, rotating titles, profile image, resume download link, social media profiles, and contact page settings.
 - **Fields**:
-  - `Profile image`: Upload image for homepage hero.
-  - `Resume`: Upload resume PDF linked across navbar/footer.
-  - `Hero name display`: Display name shown in hero.
-  - `Hero roles`: Multiline string (one role per line, rotates in hero animation).
-  - `Hero description`: Short intro paragraph.
-  - `Hero CTA primary/secondary`: Custom button labels and target URLs (`/about/`, `/projects/`).
-  - `Social URLs`: GitHub, LinkedIn, Kaggle, HackerRank, LeetCode.
-  - `Contact Info`: Email, Location, Tagline, and `Contact form active` toggle switch.
+  - `Profile image`: Portrait shown on the About page.
+  - `Resume`: Upload resume PDF linked from the hero, contact section and footer.
+  - `Hero name display`: Display name shown in the homepage hero.
+  - `Hero roles`: One role per line, shown in the hero as one line joined with " · ".
+  - `Hero description`: The one-line pitch under the name. Keep it short.
+  - `Hero CTA primary/secondary`: Not used on the homepage since the Phase 2 rebuild (buttons are View agents, Resume, Contact).
+  - `Availability`: `Open to work` shows the teal "Open to roles · <location>" status line. `Open to remote`, `Notice period` and `Looking for` appear in the homepage "30-second view" (empty fields are hidden).
+  - `Social URLs`: GitHub, LinkedIn, Kaggle, HackerRank, LeetCode. Shown in the 30-second view, contact section and footer.
+  - `Contact Info`: Email, Location, Tagline (used as the contact section heading on every page), and `Contact form active` toggle switch.
   - `SEO Meta`: Meta title & Meta description.
 
 ### 2. About Section
@@ -54,12 +55,12 @@ Use your superuser credentials.
 - **Fields**:
   - `Name`: Skill title (e.g., "Django", "PyTorch").
   - `Category`: `Agentic AI & MCP`, `ML & Data`, `Web & APIs`, `Languages`, `Security`, `Tools`, `Soft Skills`.
-  - `Is featured`: Checkbox to show skill on homepage.
+  - `Is featured`: Shown as "Core stack" in the homepage 30-second view (first 8).
   - `Order`: Sorting position.
 - **Inline Editing**: Category, Is Featured, and Order can be edited directly in the list view.
 
 ### 4. Projects
-- **Purpose**: Featured showcase, secondary cards, and project archive on `/projects/` page and homepage hero.
+- **Purpose**: Case files on `/projects/` and the homepage agent roster (every published project, by `Order`).
 - **Fields**:
   - `Title`
   - `Short description`: Card summary.
@@ -69,7 +70,8 @@ Use your superuser credentials.
   - `Live demo URL` & `GitHub URL`
   - `Is featured` & `Is published`
   - `Order`: Display priority (lower number appears first).
-  - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy).
+  - `Status`: Flagship, Live, Benchmarking or Archived. Shown as a badge in the roster; empty hides it. The Flagship project is the "Best work" link in the 30-second view (otherwise the first featured project).
+  - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy). Metric 1 is the "Key metric" column in the roster.
 
 ### 5. Education Entries
 - **Purpose**: Education timeline on `/about/` page.
