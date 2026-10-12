@@ -838,3 +838,64 @@ class ChatWidgetTemplateTests(TestCase):
         self.assertContains(response, 'chat_widget.js')
         self.assertNotContains(response, 'AI Portfolio Companion')
         self.assertNotContains(response, "I'm Karu Praneeth Kumar (Bunny). Ask me")
+
+
+class LogsTests(TestCase):
+    def setUp(self):
+        BlogPost.objects.all().delete()
+        self.old = BlogPost.objects.create(title="Old note", slug="old-note", content="x", excerpt="Old excerpt",
+                                           published=True, event_date=date(2024, 1, 5))
+        self.decision = BlogPost.objects.create(title="Why MCP", slug="why-mcp", content="Body text", excerpt="A choice",
+                                                published=True, log_type='decision', event_date=date(2026, 2, 1))
+        self.incident = BlogPost.objects.create(title="Queue stall", slug="queue-stall", content="x", excerpt="x",
+                                                published=True, log_type='incident', event_date=date(2025, 6, 1))
+        BlogPost.objects.create(title="Draft decision", slug="draft-decision", content="x", excerpt="x",
+                                log_type='decision')
+
+    def test_default_type_is_note(self):
+        self.assertEqual(self.old.log_type, 'note')
+        response = self.client.get(reverse('blog'))
+        self.assertContains(response, 'log-type--note">Note</span> · 05 Jan 2024')
+
+    def test_ordered_by_event_date(self):
+        titles = [p.title for p in self.client.get(reverse('blog')).context['posts']]
+        self.assertEqual(titles, ["Why MCP", "Queue stall", "Old note"])
+
+    def test_filter_by_type(self):
+        response = self.client.get(reverse('blog') + '?type=decision')
+        self.assertEqual([p.title for p in response.context['posts']], ["Why MCP"])
+        self.assertContains(response, 'aria-current="page">Decision')
+        self.assertNotContains(response, "Draft decision")
+
+    def test_filters_only_list_types_with_posts_and_ignore_bad_values(self):
+        response = self.client.get(reverse('blog') + '?type=bogus')
+        self.assertEqual(response.context['active_type'], '')
+        self.assertEqual(len(response.context['posts']), 3)
+        self.assertEqual([f['value'] for f in response.context['filters']], ['decision', 'incident', 'note'])
+        self.assertEqual(response.context['total_count'], 3)
+
+    def test_empty_states_and_no_placeholders(self):
+        response = self.client.get(reverse('blog') + '?type=build_log')
+        self.assertContains(response, "Nothing filed under Build log yet.")
+        BlogPost.objects.all().delete()
+        response = self.client.get(reverse('blog'))
+        self.assertContains(response, "No logs published yet.")
+        for invented in ["Coming Soon", "Designing Agentic SOC Workflows", "What Accuracy Hides",
+                         "Building Calm Engineering Tools"]:
+            self.assertNotContains(response, invented)
+
+    def test_detail_uses_case_file_layout(self):
+        response = self.client.get(reverse('blog_detail', args=['why-mcp']))
+        self.assertContains(response, 'Logs</a> / <a href="/blog/?type=decision">Decision</a>')
+        self.assertContains(response, '<h1 class="case-title">Why MCP</h1>')
+        self.assertContains(response, "Body text")
+
+    def test_homepage_shows_log_type(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual([p.title for p in response.context['latest_posts']], ["Why MCP", "Queue stall", "Old note"])
+        self.assertContains(response, 'log-type--decision">Decision</span>')
+
+    def test_blog_url_unchanged_and_nav_says_logs(self):
+        self.assertEqual(reverse('blog'), '/blog/')
+        response = self.client.get(reverse('blog'))
+        self.assertContains(response, 'class="nav-link active">Logs</a>')

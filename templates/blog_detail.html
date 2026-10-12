@@ -3,66 +3,50 @@
 
 {% block title %}{{ post.title }} | Karu Praneeth Kumar{% endblock %}
 
+{% block meta %}
+    {% if post.excerpt %}
+    <meta name="description" content="{{ post.excerpt|truncatechars:160 }}">
+    {% endif %}
+{% endblock %}
+
 {% block atmosphere %}{% endblock %}
 
 {% block content %}
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl mx-auto">
-                
-                <!-- Back button -->
-                <div class="mb-8" data-aos="fade-up">
-                    <a href="{% url 'blog' %}" 
-                       class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Blog
-                    </a>
-                </div>
-                
-                <!-- Post header -->
-                <div class="glass-card p-8 mb-8" data-aos="fade-up">
-                    
-                    {% if post.image %}
-                    <div class="w-full h-64 overflow-hidden rounded-xl mb-6">
-                        <img src="{{ post.image.url }}" 
-                             alt="{{ post.title }}"
-                             class="w-full h-full object-cover">
-                    </div>
-                    {% endif %}
-                    
-                    <h1 class="text-3xl md:text-4xl font-display font-bold mb-4">
-                        <span>
-                            {{ post.title }}
-                        </span>
-                    </h1>
-                    
-                    <div class="flex items-center gap-4 text-sm text-gray-400 mb-6 pb-6 border-b border-gray-700/50">
-                        <span>
-                            <i class="fas fa-calendar mr-1"></i>
-                            {{ post.event_date|date:"F d, Y" }}
-                        </span>
-                        <span>
-                            <i class="fas fa-clock mr-1"></i>
-                            {{ post.updated_at|date:"F d, Y" }}
-                        </span>
-                    </div>
-                    
-                    <!-- Post content -->
-                    <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed">
-                        {{ post.content|safe|linebreaks }}
-                    </div>
-                    
-                </div>
-                
-                <!-- Back to blog CTA -->
-                <div class="text-center" data-aos="fade-up">
-                    <a href="{% url 'blog' %}" 
-                       class="btn-primary">
-                        <i class="fas fa-th-large mr-2"></i>All Posts
-                    </a>
-                </div>
-                
+    <main class="case log-detail">
+        <div class="site-wrap">
+            <div class="case-topbar">
+                <a href="{% url 'blog' %}" class="label-mono case-topbar__back"><span aria-hidden="true">←</span> All logs</a>
+                <p class="label-mono case-topbar__crumb" aria-label="Breadcrumb">
+                    <a href="{% url 'blog' %}">Logs</a> / <a href="{% url 'blog' %}?type={{ post.log_type }}">{{ post.get_log_type_display }}</a>
+                </p>
             </div>
+
+            <article class="log-article">
+                <header class="log-article__header">
+                    <p class="label-mono case-header__kicker">
+                        <span class="log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span> · {{ post.event_date|date:"d M Y" }}
+                    </p>
+                    <h1 class="case-title">{{ post.title }}</h1>
+                    {% if post.excerpt %}
+                    <p class="case-summary">{{ post.excerpt }}</p>
+                    {% endif %}
+                    {% if post.updated_at|date:"Ymd" != post.created_at|date:"Ymd" %}
+                    <p class="label-mono log-article__updated">Updated {{ post.updated_at|date:"d M Y" }}</p>
+                    {% endif %}
+                </header>
+
+                {% if post.image %}
+                <figure class="case-thumb log-article__image">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                </figure>
+                {% endif %}
+
+                <div class="case-prose log-article__body">
+                    {{ post.content|safe|linebreaks }}
+                </div>
+            </article>
+
+            <p class="section-more"><a href="{% url 'blog' %}" class="text-accent"><span aria-hidden="true">←</span> All logs</a></p>
         </div>
     </main>
 {% endblock %}

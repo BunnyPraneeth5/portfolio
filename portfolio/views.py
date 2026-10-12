@@ -7,6 +7,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -101,8 +102,24 @@ def projects_view(request):
     })
 
 def blog_view(request):
-    posts = BlogPost.objects.filter(published=True)
-    return render(request, 'blog.html', {'posts': posts})
+    published = BlogPost.objects.filter(published=True)
+    labels = dict(BlogPost.LOG_TYPE_CHOICES)
+    active_type = request.GET.get('type', '')
+    if active_type not in labels:
+        active_type = ''
+    counts = {row['log_type']: row['n'] for row in published.order_by().values('log_type').annotate(n=Count('id'))}
+    filters = [
+        {'value': value, 'label': label, 'count': counts[value]}
+        for value, label in BlogPost.LOG_TYPE_CHOICES if counts.get(value)
+    ]
+    posts = published.filter(log_type=active_type) if active_type else published
+    return render(request, 'blog.html', {
+        'posts': posts,
+        'filters': filters,
+        'active_type': active_type,
+        'active_label': labels.get(active_type, ''),
+        'total_count': sum(counts.values()),
+    })
 
 def blog_detail(request, slug):
     post = get_object_or_404(BlogPost, slug=slug, published=True)

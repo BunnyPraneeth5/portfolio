@@ -1,7 +1,7 @@
 # TASKS
 
-Current phase: **Phase 5a — Chat helper: robot, dialog, honesty, logging** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review.** Phases 0 to 4 committed on `redesign/phase-0`.
+Current phase: **Phase 6 — Blog as "Logs"** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phases 0 to 5a committed on `redesign/phase-0`; 5b waits for Bunny's eval questions.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -244,7 +244,19 @@ Decision (Bunny, 2026-10-12): validator also blocks obvious leaks (emails, token
 - [ ] Eval test: 30 to 50 recruiter questions, each with its expected intent. Bunny supplies the questions; do not write them.
       **Acceptance:** one test runs every question through intent matching and reports each mismatch (question, expected, actual).
 
+## Phase 6 — Blog as "Logs" (done, waiting for review)
+Decisions (Bunny, 2026-10-12): remove "Coming Soon" placeholder cards; sort by event date.
+- [x] `BlogPost.log_type` (decision, incident, build_log, note; default note) + ordering by event date. Migration `0024_blogpost_log_type`. Admin list/filter/form updated.
+- [x] Logs index: mono `TYPE · date` label + serif title + excerpt; filter links (`?type=`) for types that have posts; honest empty states.
+- [x] Log detail in case-file typography (breadcrumb LOGS / TYPE, kicker, title, excerpt, image, body).
+- [x] Homepage "From the logs" shows the type. Nav already "Logs"; `/blog/` URL unchanged.
+- [x] 85 tests pass. Browser: desktop + 390px, filter and empty state checked.
+- Phase 7: old blog card CSS (`blog-card-visual--*`, `blog-placeholder-card`) is now unused; remove in the CSS cleanup.
+
 ## Phase 7 (later) — notes carried forward
+- Performance audit (2026-10-12, measured): full Tailwind 2.2.19 CSS from CDN on every page (2.9 MB raw) for a few utilities; `aos@next` resolves to a floating beta (3.0.0-beta.6) and looks mostly unused (script.js strips data-aos); atmosphere background updates every 180 ms on every page; site settings queried twice per page (5 to 10 queries/page otherwise fine). Fix together with a before/after Lighthouse score.
+- Plan gap: About, Skills and Contact pages have the new tokens/fonts but not a rebuilt layout (glass cards, "Behind the Work" hero, count-up stats). Decide with Bunny: restyle in Phase 7 or a separate phase.
+- Decide with Bunny: keep the contact section on every page, or only on some pages (see PROGRESS.md session 7).
 - `ARCHITECTURE.md` still describes the old `ExperienceEntry` / `AdditionalCertification` fields. Rewrite with the Phase 7 docs update.
 - `SiteAppearance` is still mentioned in `README.md`, `QUICK_START.md`, `SETUP_GUIDE.md`, `DJANGO_SETUP.md`, `DEPLOYMENT_CHECKLIST.md`, `ARCHITECTURE.md`. Clean up in Phase 7.
 - Django admin's calendar/clock icons are Django's own blue-grey SVGs; leave or recolour in Phase 7.

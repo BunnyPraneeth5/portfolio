@@ -413,8 +413,18 @@ class ChatQuery(models.Model):
         return self.question[:60]
 
 class BlogPost(models.Model):
+    LOG_TYPE_CHOICES = [
+        ('decision', 'Decision'),
+        ('incident', 'Incident'),
+        ('build_log', 'Build log'),
+        ('note', 'Note'),
+    ]
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+    log_type = models.CharField(
+        max_length=20, choices=LOG_TYPE_CHOICES, default='note',
+        help_text='Shown as the label on the Logs page and used by its filter.')
     event_date = models.DateField(default=date.today)
     content = models.TextField()
     excerpt = models.TextField(max_length=300)
@@ -424,7 +434,7 @@ class BlogPost(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-event_date', '-created_at']
     
     def __str__(self):
         return self.title

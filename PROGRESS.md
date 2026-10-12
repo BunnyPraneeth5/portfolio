@@ -4,6 +4,25 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 7: Phase 5a committed, Phase 6 implemented
+
+**Phase 5a:** committed as `f68ccdd` (local; Phases 4 and 5a not pushed yet).
+
+**Checks Bunny asked for:** every contact link is conditional; emptying LeetCode (in a rolled-back transaction) removed it from all 7 pages and the chat reply. Measured performance issues recorded for Phase 7 in TASKS.md.
+
+**Contact section on every page (Bunny to decide in Phase 7):** recommendation is footer links on every page, the full contact section only on the homepage, case files and log posts (where a reader has just seen work), not on About/Skills/Cases list/Logs index.
+
+**Phase 6:** done locally, waiting for review.
+- `BlogPost.log_type` + event-date ordering (migration 0024); Logs index with type labels and filters; log detail in case-file style; homepage log cards show the type.
+- Removed the three hardcoded "Coming Soon" cards (Bunny's decision).
+- Tests 77 → 85, all pass. Browser checked at desktop and 390px (used port 8001: something else was already running on 8000).
+
+**Deploy note for Bunny:** back up MySQL, pull, `migrate` (0024), `collectstatic`, reload.
+
+**Next**
+- Bunny: review Phase 6; send eval questions for 5b; decide the contact section placement.
+- Then Phase 7.
+
 ## 2026-10-12 — Session 6: history cleanup, Phase 4 committed, Phase 5a implemented
 
 **History:** removed the "Co-Authored-By: Claude" trailer from all branch commits (filter-branch; backup branch `backup/before-coauthor-removal`), force-pushed `redesign/phase-0`. Phase 4 committed as `63e409f` (local, not pushed).

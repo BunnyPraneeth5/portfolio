@@ -31,4 +31,4 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - No heavy animations. Avoid the generic template look.
 
 ## Current focus
-Phase 5a implemented, waiting for Bunny's review. Phase 5b waits for Bunny's 30 to 50 eval questions.
+Phase 6 implemented, waiting for Bunny's review. Phase 5b waits for Bunny's eval questions. Next: Phase 7 (polish, performance, launch checks).

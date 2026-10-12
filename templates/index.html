@@ -158,7 +158,7 @@
                     {% for post in latest_posts %}
                     <li>
                         <a href="{% url 'blog_detail' post.slug %}" class="log-item">
-                            <span class="label-mono">{{ post.event_date|date:"d M Y" }}</span>
+                            <span class="label-mono"><span class="log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span> · {{ post.event_date|date:"d M Y" }}</span>
                             <span class="log-item__title">{{ post.title }}</span>
                             {% if post.excerpt %}
                             <span class="log-item__excerpt">{{ post.excerpt|truncatechars:150 }}</span>

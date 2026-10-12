@@ -107,9 +107,10 @@ Use your superuser credentials.
 ### 9. What I Do
 - **Purpose**: Checklist items under "What I Do" section on `/about/` page.
 
-### 10. Blog Posts
-- **Purpose**: Technical articles on `/blog/` and `/blog/<slug>/`.
-- **Fields**: `Title`, `Slug` (auto-generated), `Event date`, `Content` (HTML supported), `Excerpt`, `Image`, `Published`.
+### 10. Blog Posts (shown as "Logs")
+- **Purpose**: The Logs page (`/blog/`, nav label "Logs") and the homepage "From the logs" section (latest 3).
+- **Fields**: `Title`, `Slug`, `Log type` (Decision, Incident, Build log, Note; default Note), `Event date` (logs are sorted by this, newest first), `Content` (HTML allowed), `Excerpt`, `Image`, `Published`.
+- **Filter**: the Logs page shows a filter for each type that has published posts (e.g. `/blog/?type=decision`).
 
 ### 11. Contact Messages
 - **Purpose**: Read-only log of visitor messages submitted via the `/contact/` form.

@@ -211,14 +211,15 @@ class ChatQueryAdmin(admin.ModelAdmin):
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'event_date', 'published', 'created_at', 'thumbnail_preview']
-    list_filter = ['published', 'created_at']
+    list_display = ['title', 'log_type', 'event_date', 'published', 'created_at', 'thumbnail_preview']
+    list_filter = ['log_type', 'published', 'created_at']
     list_editable = ['published']
     search_fields = ['title', 'content', 'excerpt']
     prepopulated_fields = {'slug': ('title',)}
     fields = [
         'title',
         'slug',
+        'log_type',
         'event_date',
         'content',
         'excerpt',

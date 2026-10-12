@@ -323,6 +323,10 @@ Goal: get the latest internship live quickly and stop real experience being labe
 4. Filter by log type on the index.
 5. Rename nav label to "Logs". Keep the `/blog/` URL so old links don't break.
 
+**Decisions confirmed by Bunny (2026-10-12)**
+- Removed the three hardcoded "Coming Soon" cards (invented titles); empty state says "No logs published yet."
+- Logs sorted by event date, newest first (ties by creation time), on the Logs page and homepage.
+
 **Done when**
 - Existing posts display correctly with default type
 - Filters work
