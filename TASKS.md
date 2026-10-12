@@ -1,7 +1,7 @@
 # TASKS
 
-Current phase: **Phase 6 — Blog as "Logs"** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review.** Phases 0 to 5a committed on `redesign/phase-0`; 5b waits for Bunny's eval questions.
+Current phase: **Phase 5b — Chat answers in admin, smarter matching, job search mode** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phases 0 to 6 committed and pushed on `redesign/phase-0`.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -232,13 +232,15 @@ Decision (Bunny, 2026-10-12): validator also blocks obvious leaks (emails, token
 - [x] Rate limit 20/min per visitor via hashed `X-Real-IP` / `REMOTE_ADDR` in cache; 429 with a friendly reply. CSRF kept.
 - [x] 77 tests pass. Browser: keyboard open/close, chips, links, typed question, desktop gutter placement, phone layout.
 
-## Phase 5b — waits for Bunny's eval questions
-- [ ] Bunny sends 30 to 50 recruiter questions with expected intents.
-- [ ] Baseline test of today's intent per question, before any matching change.
-- [ ] `ChatAnswer` in admin (keywords, synonyms, answer, links, priority, is_active, needs_review), data migration preserving current order; placeholders filled safely; cache with short timeout.
-- [ ] "Create answer from this question" admin action on `ChatQuery`.
-- [ ] Matching: normalise questions and keywords the same way; synonyms; difflib fuzzy match only for words of 4+ characters with a high cutoff; baseline must still pass.
-- Known matching quirks to handle in 5b: project-tag matching runs before `is_ai` (a project tagged "ChatGPT" catches "is this chatgpt"); `who_is_bunny` matches "about you" inside "about your ...".
+## Phase 5b — done, waiting for review
+- [x] Eval set researched and approved: 74 topics, 259 phrasings (`portfolio/chat_eval.py`, readable `docs/CHATBOT_EVAL_QUESTIONS.md`). Baseline before changes: 116 ok / 66 wrong / 33 missing topics.
+- [x] `ChatAnswer` model: keywords, synonyms, answer text with safe placeholders, link, priority, is_active, needs_review, follows_job_search_mode. 65 rows seeded (migrations 0025, 0026); 16 story texts copied verbatim (verified), all 26 story/personal topics need review.
+- [x] Matching: same normalisation for questions and keywords, shorthand synonyms, typo correction (5+ letters; long words need a closer match), plural only for 3+ letter words (fixes "his" = greeting), longest specific phrase wins, overlapping keywords count once. Result: 259/259.
+- [x] Job search mode (Open / Quiet / Not looking, default Quiet) replaces "Open to work": homepage, chips and replies follow it; editable mode replies; availability timestamp.
+- [x] Neutral answers for salary, work authorization, other offers, leading questions.
+- [x] Admin: Chat answers editor with "Answer comes from" column, "Try a question" page, "Create a chat answer" action on Chat queries; cache cleared on save.
+- [x] 108 tests pass (eval, mode, admin edits, review flow, validation, admin pages).
+- Bunny: review the 26 "needs review" topics; About bio paragraph 3 says "actively seeking ... roles", which contradicts Quiet mode.
 
 ## Phase 5 (later) — tasks carried forward
 - [ ] Eval test: 30 to 50 recruiter questions, each with its expected intent. Bunny supplies the questions; do not write them.

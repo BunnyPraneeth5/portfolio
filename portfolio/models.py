@@ -111,7 +111,32 @@ class SiteSettings(models.Model):
     meta_title = models.CharField(max_length=100, blank=True)
     meta_description = models.CharField(max_length=300, blank=True)
 
-    open_to_work = models.BooleanField(default=True, help_text='Show as actively looking on the pet chat')
+    JOB_SEARCH_CHOICES = [
+        ('open', 'Open: actively looking'),
+        ('quiet', 'Quiet: employed, open to the right offer'),
+        ('not_looking', 'Not looking'),
+    ]
+    job_search_mode = models.CharField(
+        max_length=20,
+        choices=JOB_SEARCH_CHOICES,
+        default='quiet',
+        help_text=(
+            'Open: homepage shows "Open to roles", notice period and remote; the chat helper answers availability. '
+            'Quiet / Not looking: those are hidden and the chat helper gives the reply below instead.'
+        ),
+    )
+    quiet_reply = models.TextField(
+        default='For opportunities, please contact Bunny directly at {contact_email}.',
+        help_text='Chat reply to availability questions in Quiet mode. Placeholders: {name}, {contact_email}, {location}.',
+    )
+    not_looking_reply = models.TextField(
+        default="Bunny isn't looking for new roles right now. You can still get in touch at {contact_email}.",
+        help_text='Chat reply to availability questions in Not looking mode. Same placeholders.',
+    )
+    availability_updated_at = models.DateTimeField(
+        null=True, blank=True, editable=False,
+        help_text='Set automatically when the mode, notice period or preferences change.',
+    )
     open_to_remote = models.BooleanField(default=True)
     open_to_internship = models.BooleanField(default=True)
     notice_period = models.CharField(max_length=100, blank=True, default='Immediate')
@@ -125,9 +150,20 @@ class SiteSettings(models.Model):
         verbose_name = 'Site Settings'
         verbose_name_plural = 'Site Settings'
 
+    AVAILABILITY_FIELDS = ('job_search_mode', 'notice_period', 'looking_for', 'open_to_remote', 'open_to_internship')
+
     def save(self, *args, **kwargs):
         self.pk = 1
+        previous = SiteSettings.objects.filter(pk=1).values(*self.AVAILABILITY_FIELDS).first()
+        current = {field: getattr(self, field) for field in self.AVAILABILITY_FIELDS}
+        if previous is None or previous != current:
+            from django.utils import timezone
+            self.availability_updated_at = timezone.now()
         super().save(*args, **kwargs)
+
+    @property
+    def is_job_hunting(self):
+        return self.job_search_mode == 'open'
 
     @classmethod
     def load(cls):
@@ -411,6 +447,70 @@ class ChatQuery(models.Model):
 
     def __str__(self):
         return self.question[:60]
+
+class ChatAnswer(models.Model):
+    """One topic the chat helper can answer. Fully editable in admin."""
+
+    intent = models.SlugField(max_length=60, unique=True, help_text='Internal name, e.g. notice_period. Do not rename seeded ones.')
+    topic = models.CharField(max_length=100, help_text='Readable name shown in admin.')
+    keywords = models.TextField(
+        blank=True,
+        help_text=(
+            'One phrase per line. A question matches when it contains a phrase as whole words '
+            '(case and punctuation ignored, small typos tolerated). Longer, more specific phrases win.'
+        ),
+    )
+    synonyms = models.TextField(
+        blank=True,
+        help_text=(
+            'Shorthand, one per line as "short = meaning", e.g. "np = notice period" or "wfh = work from home". '
+            'Applied to every question before matching, so they help all topics.'
+        ),
+    )
+    answer = models.TextField(
+        blank=True,
+        help_text=(
+            'Leave empty to build the answer from site data (topics marked "live data"). '
+            'Text here replaces that. Placeholders: {name}, {contact_email}, {location}, {notice_period}, '
+            '{looking_for}, {resume_url}.'
+        ),
+    )
+    link_label = models.CharField(max_length=60, blank=True)
+    link_url = models.CharField(max_length=300, blank=True, help_text='A site path like /contact/ or a full https:// link.')
+    priority = models.IntegerField(default=0, help_text='Breaks ties between topics that match equally well. Higher wins.')
+    is_active = models.BooleanField(default=True, help_text='Off: this topic is ignored completely.')
+    needs_review = models.BooleanField(
+        default=False,
+        help_text='On: matched, but the answer is not shown ("no approved answer yet"). Turn off once the answer is true and approved.',
+    )
+    follows_job_search_mode = models.BooleanField(
+        default=False,
+        help_text='On: when the job search mode is not Open, reply with the Quiet / Not looking message instead.',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['topic']
+        verbose_name = 'Chat answer'
+        verbose_name_plural = 'Chat answers'
+
+    def __str__(self):
+        return self.topic
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        url = (self.link_url or '').strip()
+        if url and not (url.startswith('/') and not url.startswith('//')) and not url.startswith(('https://', 'http://', 'mailto:')):
+            raise ValidationError({'link_url': 'Use a site path like /contact/ or a full https:// link.'})
+        if bool(self.link_label.strip()) != bool(url):
+            raise ValidationError({'link_label': 'Fill in both the link label and the link URL, or neither.'})
+        for line in self.synonyms.splitlines():
+            if line.strip() and '=' not in line:
+                raise ValidationError({'synonyms': f'"{line.strip()}" needs the form "short = meaning".'})
+
+    @property
+    def keyword_list(self):
+        return [line.strip() for line in self.keywords.splitlines() if line.strip()]
 
 class BlogPost(models.Model):
     LOG_TYPE_CHOICES = [

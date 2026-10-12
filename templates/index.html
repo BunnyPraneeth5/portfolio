@@ -16,7 +16,7 @@
         <!-- Hero + 30-second view -->
         <section class="home-hero site-wrap" aria-labelledby="hero-name">
             <div class="home-hero__intro">
-                {% if site_settings.open_to_work %}
+                {% if site_settings.is_job_hunting %}
                 <p class="status-line">
                     <span class="status-dot" aria-hidden="true"></span>
                     <span class="label-mono">Open to roles{% if site_settings.contact_location %} · {{ site_settings.contact_location }}{% endif %}</span>
@@ -40,7 +40,7 @@
             <aside class="panel quick-view" aria-labelledby="quick-view-heading">
                 <h2 id="quick-view-heading" class="label-mono quick-view__title">30-second view</h2>
                 <dl class="kv-list">
-                    {% if site_settings.looking_for %}
+                    {% if site_settings.is_job_hunting and site_settings.looking_for %}
                     <div class="kv-row">
                         <dt class="label-mono">Looking for</dt>
                         <dd>{{ site_settings.looking_for }}</dd>
@@ -70,10 +70,10 @@
                     {% if site_settings.contact_location %}
                     <div class="kv-row">
                         <dt class="label-mono">Location</dt>
-                        <dd>{{ site_settings.contact_location }}{% if site_settings.open_to_remote %} · Open to remote{% endif %}</dd>
+                        <dd>{{ site_settings.contact_location }}{% if site_settings.is_job_hunting and site_settings.open_to_remote %} · Open to remote{% endif %}</dd>
                     </div>
                     {% endif %}
-                    {% if site_settings.notice_period %}
+                    {% if site_settings.is_job_hunting and site_settings.notice_period %}
                     <div class="kv-row">
                         <dt class="label-mono">Notice period</dt>
                         <dd>{{ site_settings.notice_period }}</dd>

@@ -37,7 +37,12 @@ Use your superuser credentials.
   - `Hero roles`: One role per line, shown in the hero as one line joined with " · ".
   - `Hero description`: The one-line pitch under the name. Keep it short.
   - `Hero CTA primary/secondary`: Not used on the homepage since the Phase 2 rebuild (buttons are View agents, Resume, Contact).
-  - `Availability`: `Open to work` shows the teal "Open to roles · <location>" status line. `Open to remote`, `Notice period` and `Looking for` appear in the homepage "30-second view" (empty fields are hidden).
+  - `Job search mode` (one switch for the whole site):
+    - **Open**: homepage shows the teal "Open to roles · <location>" line, notice period, "Open to remote" and "Looking for"; the chat helper answers availability, notice period, remote and internship questions from these fields.
+    - **Quiet** (recommended while employed): all of that is hidden, availability chips are hidden, and the chat helper answers those questions with the "Quiet reply" (default: "For opportunities, please contact Bunny directly at ..."). It never says "available".
+    - **Not looking**: same, with the "Not looking reply".
+    - `Availability last updated` is set automatically when the mode, notice period or preferences change. Check it when you change jobs.
+    - Your own texts (hero description, About bio, resume PDF) are not changed by the mode: keep them consistent with it.
   - `Social URLs`: GitHub, LinkedIn, Kaggle, HackerRank, LeetCode. Shown in the 30-second view, contact section and footer.
   - `Contact Info`: Email, Location, Tagline (used as the contact section heading on every page), and `Contact form active` toggle switch.
   - `SEO Meta`: Meta title & Meta description.
@@ -133,9 +138,24 @@ Use your superuser credentials.
 - **Purpose**: Questions visitors asked the chat helper, to spot gaps. Filter by `Was fallback` to see what it could not answer.
 - **Privacy**: emails and phone numbers are replaced with [email] / [phone] before saving; no IP addresses are stored; rows older than 90 days are deleted automatically.
 
+### 15. Chat Answers (everything the chat helper says)
+- **One row per topic** (65 seeded). Edit any of them; changes apply on the next message, no deploy.
+- **Answer comes from** (column): *Your text* (the Answer field), *Live site data* (built from your projects, skills, experience, settings), or *Nothing yet* (shows "no approved answer yet").
+- **Fields**:
+  - `Keywords`: phrases that point to the topic, one per line. Case, punctuation and small typos are ignored; longer, more specific phrases win.
+  - `Synonyms`: shorthand rewrites applied to every question, one per line as `short = meaning` (e.g. `np = notice period`, `wfh = work from home`, `ctc = salary`).
+  - `Answer`: your text. Leave empty to use live data. Placeholders: `{name}`, `{contact_email}`, `{location}`, `{notice_period}`, `{looking_for}`, `{resume_url}`.
+  - `Link label` + `Link URL`: an extra link under the answer (`/contact/` or `https://...`).
+  - `Priority`: breaks ties between topics that match equally well.
+  - `Is active`: off = topic ignored. `Needs review`: on = matched but not shown. `Follows job search mode`: on = Quiet / Not looking reply when not Open.
+- **Stories and personal topics start with Needs review on** (26 rows: hardest bug, conflict, deadlines, weakness, failure, why AI, career goals, backlogs, bond, shifts, languages, open source, etc.). The 16 old ones contain the original text: check each, edit it to be true, then untick Needs review. The 10 new ones are empty: write your answer, then untick.
+- **Neutral topics** (salary, visa / work authorization, other offers, leading questions) answer "please contact Bunny directly". Keep them that way.
+- **Try a question** (button on the Chat answers list): type any question to see how it is read, which topic it matches and the exact reply. Nothing is logged.
+- **Chat queries → "Create a chat answer from the selected questions"**: turns missed questions into a new topic with those questions as keywords.
+- **Eval set**: `portfolio/chat_eval.py` (readable copy in `docs/CHATBOT_EVAL_QUESTIONS.md`) holds 259 recruiter phrasings the tests check.
+
 **Chat helper notes**
 - The helper is rule-based (not AI) and answers in the third person from data on this site.
-- Story-style replies (hardest bug, conflict, deadlines, etc.) are switched off until you review them in Phase 5b; questions about them get "no approved answer yet" plus the chips.
 - Limit: 20 messages per minute per visitor.
 
 ## Common Administrative Tasks

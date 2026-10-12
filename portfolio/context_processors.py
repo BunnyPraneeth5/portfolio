@@ -28,9 +28,9 @@ def site_settings(request):
 
 
 def chat_helper(request):
-    from .chatbot import _reply_greeting, suggested_chips  # chatbot imports this module
+    from .chatbot import greeting_text, suggested_chips  # chatbot imports this module
 
     return {
-        'chat_greeting': _reply_greeting('')[0],
+        'chat_greeting': greeting_text(),
         'chat_chips': suggested_chips(),
     }

@@ -18,7 +18,7 @@ from .admin import ExperienceEntryAdminForm, ProjectReplayAdminForm
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     Certification, EventEntry, ExperienceEntry, SiteSettings,
-    CaseDecision, CaseIncident, ProjectReplay, SuggestedQuestion, ChatQuery,
+    CaseDecision, CaseIncident, ProjectReplay, SuggestedQuestion, ChatQuery, ChatAnswer,
 )
 from .replays import MAX_STEPS, ReplayValidationError, parse_replay_json, validate_replay
 
@@ -176,6 +176,7 @@ class HomepageTests(TestCase):
         self.assertEqual(response.context['flagship'].slug, "first-agent")
 
     def test_quick_view_rows_follow_settings(self):
+        self.settings_obj.job_search_mode = 'open'
         self.settings_obj.looking_for = ""
         self.settings_obj.save()
         response = self.client.get(reverse('index'))
@@ -186,13 +187,20 @@ class HomepageTests(TestCase):
         self.assertContains(response, "Looking for")
         self.assertContains(response, "Agentic AI roles")
 
-    def test_status_line_follows_open_to_work(self):
-        self.settings_obj.open_to_work = True
+    def test_availability_on_homepage_follows_job_search_mode(self):
+        self.settings_obj.notice_period = "30 days"
+        self.settings_obj.looking_for = "Agentic AI roles"
+        self.settings_obj.job_search_mode = 'open'
         self.settings_obj.save()
-        self.assertContains(self.client.get(reverse('index')), "Open to roles")
-        self.settings_obj.open_to_work = False
-        self.settings_obj.save()
-        self.assertNotContains(self.client.get(reverse('index')), "Open to roles")
+        response = self.client.get(reverse('index'))
+        for text in ["Open to roles", "30 days", "Agentic AI roles", "Open to remote"]:
+            self.assertContains(response, text)
+        for mode in ('quiet', 'not_looking'):
+            self.settings_obj.job_search_mode = mode
+            self.settings_obj.save()
+            response = self.client.get(reverse('index'))
+            for text in ["Open to roles", "30 days", "Agentic AI roles", "Open to remote"]:
+                self.assertNotContains(response, text, msg_prefix=mode)
 
     def test_latest_three_published_logs(self):
         for i in range(4):
@@ -356,10 +364,10 @@ class ChatbotExperienceTests(TestCase):
         self.assertNotIn("MCP Certified", result['reply'])
 
     def test_routing_availability_vs_past_work(self):
-        self.assertEqual(chatbot._match_intent("are you open to internships"), 'internship')
+        self.assertEqual(chatbot.get_reply("are you open to internships")['intent'], 'internship')
         for question in ["tell me about your internship", "where did you work",
                          "work experience", "where have you worked before"]:
-            self.assertIn(chatbot._match_intent(question), ('past_work', 'experience'), question)
+            self.assertEqual(chatbot.get_reply(question)['intent'], 'experience', question)
 
 
 class CertificationDataMigrationTests(TransactionTestCase):
@@ -718,7 +726,7 @@ class ChatHelperReplyTests(TestCase):
             ("what is your favorite library", "PyTorch and Django"),
         ]:
             result = chatbot.get_reply(question)
-            self.assertIn(result['intent'], chatbot.PENDING_REVIEW_INTENTS, question)
+            self.assertTrue(ChatAnswer.objects.get(intent=result['intent']).needs_review, question)
             self.assertTrue(result['fallback'])
             self.assertIn("no approved answer", result['reply'])
             self.assertNotIn(story_text, result['reply'])
@@ -760,6 +768,9 @@ class ChatHelperReplyTests(TestCase):
         self.assertEqual(labels.get('Play the replay'), url + '#replay')
 
     def test_chips_come_from_active_suggested_questions(self):
+        settings_obj = SiteSettings.load()
+        settings_obj.job_search_mode = 'open'
+        settings_obj.save()
         SuggestedQuestion.objects.update(is_active=True)
         first = SuggestedQuestion.objects.first()
         first.is_active = False
@@ -774,7 +785,7 @@ class ChatHelperReplyTests(TestCase):
         for text in texts:
             result = chatbot.get_reply(text)
             self.assertFalse(result['fallback'], text)
-            self.assertNotIn(result['intent'], chatbot.PENDING_REVIEW_INTENTS, text)
+            self.assertFalse(ChatAnswer.objects.get(intent=result['intent']).needs_review, text)
 
 
 class ChatApiTests(TestCase):
@@ -899,3 +910,188 @@ class LogsTests(TestCase):
         self.assertEqual(reverse('blog'), '/blog/')
         response = self.client.get(reverse('blog'))
         self.assertContains(response, 'class="nav-link active">Logs</a>')
+
+
+class ChatEvalTests(TestCase):
+    """Every recruiter phrasing in portfolio/chat_eval.py must reach its expected topic."""
+
+    def setUp(self):
+        chatbot.clear_cache()
+
+    def test_all_eval_phrasings(self):
+        from .chat_eval import QUESTIONS
+        misses = []
+        for topic, expected, kind, phrasings in QUESTIONS:
+            accepted = expected if isinstance(expected, tuple) else (expected,)
+            for text in phrasings:
+                result = chatbot.get_reply(text)
+                ok = result['fallback'] if kind == 'guard' else result['intent'] in accepted
+                if not ok:
+                    misses.append(f"{text!r}: expected {accepted}, got {result['intent']}")
+        self.assertEqual(misses, [], "\n".join(misses))
+
+    def test_eval_covers_enough(self):
+        from .chat_eval import QUESTIONS
+        self.assertGreaterEqual(len(QUESTIONS), 74)
+        self.assertGreaterEqual(sum(len(q[3]) for q in QUESTIONS), 250)
+
+
+class JobSearchModeTests(TestCase):
+    def setUp(self):
+        chatbot.clear_cache()
+        self.settings_obj = SiteSettings.load()
+
+    def set_mode(self, mode):
+        self.settings_obj.job_search_mode = mode
+        self.settings_obj.save()
+
+    def test_default_mode_is_quiet(self):
+        self.assertEqual(SiteSettings._meta.get_field('job_search_mode').default, 'quiet')
+
+    def test_quiet_mode_gives_neutral_reply(self):
+        self.set_mode('quiet')
+        for question in ["is he open to new roles", "notice period?", "wfh possible?", "open to internships?"]:
+            result = chatbot.get_reply(question)
+            self.assertIn("contact Bunny directly", result['reply'], question)
+            self.assertNotIn("open to new roles", result['reply'].lower(), question)
+            self.assertNotIn(self.settings_obj.notice_period or 'zz', result['reply'], question)
+
+    def test_not_looking_mode(self):
+        self.set_mode('not_looking')
+        self.assertIn("isn't looking for new roles", chatbot.get_reply("is he available")['reply'])
+
+    def test_open_mode_answers_from_data(self):
+        self.settings_obj.notice_period = "30 days"
+        self.set_mode('open')
+        self.assertIn("Bunny is open to new roles", chatbot.get_reply("is he available")['reply'])
+        self.assertIn("30 days", chatbot.get_reply("notice period?")['reply'])
+
+    def test_mode_replies_are_editable(self):
+        self.settings_obj.quiet_reply = "Reach out to {name} at {contact_email}."
+        self.set_mode('quiet')
+        reply = chatbot.get_reply("is he available")['reply']
+        self.assertEqual(reply, f"Reach out to {self.settings_obj.hero_name_display} at {self.settings_obj.contact_email}.")
+
+    def test_availability_chips_hidden_unless_open(self):
+        self.set_mode('quiet')
+        self.assertNotIn('Is Bunny open to roles?', chatbot.get_reply("hi")['chips'])
+        self.set_mode('open')
+        self.assertIn('Is Bunny open to roles?', chatbot.get_reply("hi")['chips'])
+
+    def test_why_hire_mentions_open_to_roles_only_in_open_mode(self):
+        self.set_mode('quiet')
+        self.assertNotIn("Open to roles", chatbot.get_reply("why should we hire him")['reply'])
+        self.set_mode('open')
+        self.assertIn("Open to roles", chatbot.get_reply("why should we hire him")['reply'])
+
+    def test_neutral_topics_never_give_specifics(self):
+        self.set_mode('open')
+        for question in ["expected ctc?", "does he need visa sponsorship", "any competing offers?",
+                         "is he planning to leave his company?"]:
+            result = chatbot.get_reply(question)
+            self.assertIn(self.settings_obj.contact_email, result['reply'], question)
+            self.assertIn('/contact/', [link['url'] for link in result['links']], question)
+
+    def test_availability_timestamp(self):
+        self.set_mode('open')
+        first = SiteSettings.load().availability_updated_at
+        self.assertIsNotNone(first)
+        settings_obj = SiteSettings.load()
+        settings_obj.contact_tagline = "Unrelated change"
+        settings_obj.save()
+        self.assertEqual(SiteSettings.load().availability_updated_at, first)
+        settings_obj.notice_period = "60 days"
+        settings_obj.save()
+        self.assertGreater(SiteSettings.load().availability_updated_at, first)
+
+
+class ChatAnswerAdminEditTests(TestCase):
+    def setUp(self):
+        chatbot.clear_cache()
+
+    def test_text_edit_takes_effect_immediately(self):
+        chatbot.get_reply("what is this website built with")  # warm the cache
+        answer = ChatAnswer.objects.get(intent='site_tech')
+        answer.answer = "Built by {name} with Django."
+        answer.save()
+        reply = chatbot.get_reply("what is this website built with")['reply']
+        self.assertEqual(reply, f"Built by {SiteSettings.load().hero_name_display} with Django.")
+
+    def test_text_overrides_live_data_and_link_is_added(self):
+        answer = ChatAnswer.objects.get(intent='resume')
+        answer.answer = "Ask for the latest resume."
+        answer.link_label, answer.link_url = 'Contact', '/contact/'
+        answer.save()
+        result = chatbot.get_reply("send me the cv")
+        self.assertEqual(result['reply'], "Ask for the latest resume.")
+        self.assertEqual(result['links'], [{'label': 'Contact', 'url': '/contact/'}])
+
+    def test_new_keyword_and_synonym(self):
+        self.assertTrue(chatbot.get_reply("zorbleflux")['fallback'])
+        answer = ChatAnswer.objects.get(intent='resume')
+        answer.synonyms += "\nzorbleflux = resume"
+        answer.save()
+        self.assertEqual(chatbot.get_reply("zorbleflux")['intent'], 'resume')
+
+    def test_inactive_topic_is_ignored(self):
+        ChatAnswer.objects.filter(intent='site_tech').update(is_active=False)
+        chatbot.clear_cache()
+        self.assertNotEqual(chatbot.get_reply("how was this site made")['intent'], 'site_tech')
+
+    def test_story_served_only_after_review(self):
+        question = "what is the hardest bug he fixed"
+        result = chatbot.get_reply(question)
+        self.assertEqual(result['intent'], 'hardest_bug')
+        self.assertIn("no approved answer", result['reply'])
+        answer = ChatAnswer.objects.get(intent='hardest_bug')
+        answer.answer = "Approved answer text."
+        answer.needs_review = False
+        answer.save()
+        self.assertEqual(chatbot.get_reply(question)['reply'], "Approved answer text.")
+
+    def test_new_story_topic_without_text_stays_pending(self):
+        ChatAnswer.objects.filter(intent='weakness').update(needs_review=False)
+        chatbot.clear_cache()
+        self.assertIn("no approved answer", chatbot.get_reply("what is his biggest weakness")['reply'])
+
+    def test_placeholders(self):
+        self.assertEqual(chatbot.fill_placeholders("{unknown} {contact_email}"),
+                         "{unknown} " + SiteSettings.load().contact_email)
+
+    def test_validation(self):
+        from django.core.exceptions import ValidationError
+        answer = ChatAnswer(intent='x', topic='X', link_label='Bad', link_url='javascript:alert(1)')
+        with self.assertRaises(ValidationError):
+            answer.full_clean()
+        answer = ChatAnswer(intent='x', topic='X', synonyms='no equals sign')
+        with self.assertRaises(ValidationError):
+            answer.full_clean()
+
+    def test_his_is_not_a_greeting(self):
+        for question in ["whats his cgpa", "is bunny his real name"]:
+            self.assertNotEqual(chatbot.get_reply(question)['intent'], 'greeting', question)
+
+
+class ChatAdminViewTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+        self.admin = get_user_model().objects.create_superuser('boss', 'boss@example.com', 'unused-test-pass')
+        self.client.force_login(self.admin)
+
+    def test_try_question_page(self):
+        response = self.client.get(reverse('admin:portfolio_chatanswer_try') + '?question=NP%3F')
+        self.assertContains(response, 'notice period')
+        self.assertContains(response, 'Notice period / start date')
+
+    def test_changelist_has_try_button_and_source_column(self):
+        response = self.client.get(reverse('admin:portfolio_chatanswer_changelist'))
+        self.assertContains(response, 'Try a question')
+        self.assertContains(response, 'Live site data')
+
+    def test_create_answer_from_logged_questions(self):
+        q = ChatQuery.objects.create(question="Do you do night shifts in winter?", was_fallback=True)
+        response = self.client.post(reverse('admin:portfolio_chatquery_changelist'), {
+            'action': 'create_answer_from_questions', '_selected_action': [q.pk]})
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('admin:portfolio_chatanswer_add'), response['Location'])
+        self.assertIn('night+shifts', response['Location'])

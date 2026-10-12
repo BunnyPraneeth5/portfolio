@@ -5,7 +5,7 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 ## Stack
 - Django 5.2, project `config`, single app `portfolio`. Venv: `venv/Scripts/python.exe`. SQLite locally, MySQL on PythonAnywhere (DB switched by hand in `config/settings.py`).
 - Pages in `templates/` extend `base.html` (head, nav, scripts, pet widget). CSS in `static/styles.css` (design tokens at the top; use them, no new hardcoded colours), admin CSS in `static/admin.css`. Tailwind 2 + Font Awesome via CDN. Vanilla JS, no build step.
-- Chat helper: `templates/pet_widget.html` + `static/chat_widget.js` -> `POST /api/chat/` -> `portfolio/chatbot.py` (rule-based, no LLM, third person, data-only replies).
+- Chat helper: `templates/pet_widget.html` + `static/chat_widget.js` -> `POST /api/chat/` -> `portfolio/chatbot.py`. Topics/keywords/answers live in `ChatAnswer` (admin); eval set in `portfolio/chat_eval.py`. Respect `SiteSettings.job_search_mode`.
 - Replays: `ProjectReplay` + shared validator `portfolio/replays.py` (admin upload and `import_replay` command), player `static/replay.js`. Format: `docs/REPLAY_FORMAT.md`.
 
 ## Key models (`portfolio/models.py`)
@@ -31,4 +31,4 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - No heavy animations. Avoid the generic template look.
 
 ## Current focus
-Phase 6 implemented, waiting for Bunny's review. Phase 5b waits for Bunny's eval questions. Next: Phase 7 (polish, performance, launch checks).
+Phase 5b implemented, waiting for Bunny's review. Next: Phase 7 (polish, performance, launch checks).

@@ -4,6 +4,27 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 8: Phase 6 committed + pushed, recruiter research, Phase 5b implemented
+
+**Git:** Phase 6 committed (`f4b7289`); branch pushed (Phases 0 to 6 on GitHub, no co-author lines).
+
+**Research:** recruiter phone-screen, Indian fresher AI/ML, portfolio/GitHub, agentic-AI, logistics and behavioural sources → 62 topics; Bunny approved and asked for 12 more → 74 topics, 259 phrasings with twisted variants. Baseline on the 5a bot: 116 ok, 66 wrong, 33 missing.
+
+**Phase 5b:** done locally, waiting for review.
+- Everything the chat helper says moved to admin (`ChatAnswer`, 65 rows); "Try a question" admin page; create-answer action from chat logs.
+- New matcher; all 259 phrasings pass. Fixed root causes: "his" read as "hi", British spellings, shorthand (NP, WFH, CTC, YOE, certs), generic "experience"/"his work" beating specific topics, over-eager typo fixes.
+- Job search mode (default Quiet) controls homepage availability, chips and replies; neutral answers for salary / visa / offers / leading questions.
+- Checked: 16 story texts identical to the original; a keyword-diff against the 5a table found 12 accidentally dropped keywords, restored.
+- Tests 85 → 108, all pass. Browser: homepage in Quiet mode, chat chips, admin Chat answers, Try a question, Site Settings.
+
+**For Bunny**
+- Review the 26 "needs review" topics in admin (Chat answers → filter Needs review: Yes).
+- About bio paragraph 3 says "actively seeking agentic AI engineering roles and startup internships": edit it if you stay in Quiet mode.
+- Deploy: back up MySQL, pull, `migrate` (0025, 0026), `collectstatic`, reload; then open Site Settings once and Save (sets "availability last updated").
+
+**Next**
+- Phase 7.
+
 ## 2026-10-12 — Session 7: Phase 5a committed, Phase 6 implemented
 
 **Phase 5a:** committed as `f68ccdd` (local; Phases 4 and 5a not pushed yet).

@@ -304,6 +304,12 @@ Goal: get the latest internship live quickly and stop real experience being labe
 - Rate limit: 20/min per visitor, keyed by a salted hash of `X-Real-IP` (PythonAnywhere) or `REMOTE_ADDR`, stored only in the cache.
 - `ChatQuery`: emails/phones scrubbed, no IP, 90-day retention.
 
+**5b decisions confirmed by Bunny (2026-10-12)**
+- Eval set: 74 topics / 259 phrasings (researched recruiter, fresher, AI-engineering and logistics questions, plus 12 added after review), stored in `portfolio/chat_eval.py` and run by the tests.
+- Job search mode (Open / Quiet / Not looking) replaces "Open to work"; default and current setting: Quiet.
+- Salary, work authorization, other offers and leading questions always get a neutral "please contact Bunny directly".
+- Everything the helper says is editable in admin (ChatAnswer), with a "Try a question" page.
+
 **Done when**
 - Robot never covers text while idle
 - Chips work, links work, fallback offers chips

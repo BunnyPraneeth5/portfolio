@@ -1,11 +1,15 @@
 from django.contrib import admin
 from django import forms
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils.html import format_html
+from urllib.parse import urlencode
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
     Certification, SiteSettings, CaseDecision, CaseIncident, ProjectReplay,
-    SuggestedQuestion, ChatQuery,
+    SuggestedQuestion, ChatQuery, ChatAnswer,
 )
 from .replays import MAX_FILE_BYTES, ReplayValidationError, load_replay_file
 
@@ -193,6 +197,68 @@ class SuggestedQuestionAdmin(admin.ModelAdmin):
     list_editable = ['order', 'is_active']
 
 
+class TryQuestionForm(forms.Form):
+    question = forms.CharField(max_length=300, widget=forms.TextInput(attrs={'size': 60, 'autofocus': True}))
+
+
+@admin.register(ChatAnswer)
+class ChatAnswerAdmin(admin.ModelAdmin):
+    list_display = ['topic', 'intent', 'source', 'is_active', 'needs_review', 'follows_job_search_mode', 'priority', 'updated_at']
+    list_editable = ['is_active', 'needs_review']
+    list_filter = ['needs_review', 'is_active', 'follows_job_search_mode']
+    search_fields = ['topic', 'intent', 'keywords', 'synonyms', 'answer']
+    readonly_fields = ['updated_at', 'source']
+    fieldsets = (
+        ('Topic', {
+            'fields': ('topic', 'intent', 'source', 'is_active', 'needs_review'),
+        }),
+        ('When does it match?', {
+            'description': (
+                'Keywords: phrases that point to this topic, one per line. Synonyms: shorthand rewrites like '
+                '"np = notice period", applied to every question first. Use "Try a question" (top right) to check.'
+            ),
+            'fields': ('keywords', 'synonyms', 'priority'),
+        }),
+        ('Answer', {
+            'fields': ('answer', 'link_label', 'link_url', 'follows_job_search_mode', 'updated_at'),
+        }),
+    )
+
+    @admin.display(description='Answer comes from')
+    def source(self, obj):
+        from .chatbot import LIVE_BUILDERS
+        if obj.answer.strip():
+            return 'Your text'
+        if obj.intent in LIVE_BUILDERS:
+            return 'Live site data'
+        return 'Nothing yet (shows "no approved answer")'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [path('try/', self.admin_site.admin_view(self.try_view), name='portfolio_chatanswer_try')]
+        return custom + urls
+
+    def try_view(self, request):
+        from . import chatbot
+        form = TryQuestionForm(request.GET or None)
+        result = tokens = entry = None
+        if form.is_valid():
+            question = form.cleaned_data['question']
+            tokens = chatbot.prepare(question)
+            result = chatbot.get_reply(question)
+            entry = ChatAnswer.objects.filter(intent=result['intent']).first()
+        context = {
+            **self.admin_site.each_context(request),
+            'title': 'Try a question',
+            'opts': self.model._meta,
+            'form': form,
+            'result': result,
+            'tokens': ' '.join(tokens or []),
+            'entry': entry,
+        }
+        return TemplateResponse(request, 'admin/portfolio/chatanswer/try.html', context)
+
+
 @admin.register(ChatQuery)
 class ChatQueryAdmin(admin.ModelAdmin):
     """Questions asked in the chat helper (emails/phones scrubbed, no IPs, kept 90 days)."""
@@ -201,12 +267,19 @@ class ChatQueryAdmin(admin.ModelAdmin):
     search_fields = ['question']
     date_hierarchy = 'created_at'
     readonly_fields = ['question', 'matched_intent', 'was_fallback', 'created_at']
+    actions = ['create_answer_from_questions']
 
     def has_add_permission(self, request):
         return False
 
     def has_change_permission(self, request, obj=None):
         return False
+
+    @admin.action(description='Create a chat answer from the selected questions')
+    def create_answer_from_questions(self, request, queryset):
+        keywords = '\n'.join(dict.fromkeys(q.question.strip().lower() for q in queryset if q.question.strip()))
+        url = reverse('admin:portfolio_chatanswer_add') + '?' + urlencode({'keywords': keywords, 'topic': 'New topic'})
+        return redirect(url)
 
 
 @admin.register(BlogPost)
@@ -313,6 +386,7 @@ class CertificationAdmin(admin.ModelAdmin):
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
+    readonly_fields = ['availability_updated_at']
     fieldsets = (
         ('Profile & Resume', {
             'fields': (
@@ -331,9 +405,21 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'hero_cta_secondary_url',
             )
         }),
-        ('Availability', {
+        ('Job search mode', {
+            'description': (
+                'Open: the homepage shows "Open to roles", notice period and remote, and the chat helper answers '
+                'availability questions. Quiet (recommended while employed) and Not looking hide those, and the '
+                'chat helper gives the matching reply below instead.'
+            ),
             'fields': (
-                'open_to_work',
+                'job_search_mode',
+                'availability_updated_at',
+                'quiet_reply',
+                'not_looking_reply',
+            )
+        }),
+        ('Availability details (shown only in Open mode)', {
+            'fields': (
                 'open_to_remote',
                 'open_to_internship',
                 'notice_period',
