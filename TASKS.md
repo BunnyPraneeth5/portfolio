@@ -1,8 +1,7 @@
 # TASKS
 
-Current phase: **Phase 0 — Split Experience and Certifications** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review + MySQL migration test.** Bunny still needs to add the internship in admin.
-Uses current styling. No redesign work.
+Current phase: **Phase 1 — Cleanup and design system** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phase 0 confirmed done by Bunny on 2026-10-12.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -74,10 +73,49 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting o
 
 ---
 
-## Phase 1 (later) — notes carried forward
-- [ ] **First task:** convert all public templates to extend `base.html`.
-- Note: `SiteAppearance` vars are injected into all 8 public templates + admin "Appearance" shortcut.
-- Note: fonts — Outfit/Cormorant/JetBrains via `styles.css`, Orbitron/Space Grotesk via templates; IBM Plex Sans not loaded.
+## Phase 1 — Cleanup and design system
+
+## 1.0 Templates extend `base.html`
+- [x] All 8 public templates extend `base.html` (head, nav, mobile menu, scripts, pet widget). Active nav link comes from the URL name.
+
+**Acceptance:** rendered HTML of all 8 pages identical to before (whitespace ignored). Verified.
+
+## 1.1 Remove leftover file
+- [x] `portfolio/_tmp_widget_smoke.py` (done in Phase 0).
+
+## 1.2 Design tokens
+- [x] Tokens at the top of `static/styles.css`: colours, three font families, spacing scale (`--space-1..8`), radius (4px buttons, 6px panels). Old variable names aliased onto tokens.
+- [x] Hardcoded hex colours and fonts in `styles.css` replaced with tokens; faint blue glows turned gold.
+
+## 1.3 Fonts
+- [x] Cormorant Garamond, IBM Plex Sans, JetBrains Mono loaded once in `base.html`. Orbitron, Space Grotesk, Outfit and the CSS `@import` removed. `font-['Orbitron']` class renamed `font-display`.
+
+**Acceptance:** computed fonts on all 8 pages are only the three fonts (+ Font Awesome). Verified.
+
+## 1.4 Remove blue/purple/cyan + `SiteAppearance` (Bunny chose: delete)
+- [x] `SiteAppearance` model, admin, context processor, settings entry, admin shortcut, `ADMIN_GUIDE.md` section removed. Migration `0018_delete_siteappearance`.
+- [x] Blue/purple Tailwind classes in templates replaced with design-system classes. Decorative ping dots and a dead `{% comment %}` block in `about.html` removed.
+
+**Acceptance:** computed-colour audit finds no blue/purple/cyan on any of the 8 pages or the admin. Verified.
+
+## 1.5 Components
+- [x] `.btn-primary`, `.btn-ghost`, `.panel` (+ `.panel--deep`), `.label-mono`, `.status-dot`, `.stat-tile`, `.section-head`, `.text-accent`, `.form-input`.
+- Primary/secondary buttons, accent links and contact inputs already use them. `.panel`, `.status-dot`, `.stat-tile`, `.section-head` are ready for Phase 2.
+
+## 1.6 Dead CSS
+- [x] Removed 71 selectors for classes no template, script or Python file uses (old colour overrides, engineering/project-node visuals, old project/skill card classes). Kept the Tailwind utility shims and the new components.
+
+## 1.7 / 1.8 Admin
+- [x] `static/admin.css` rewritten on the same tokens and fonts (Django admin variables overridden for light and dark themes; theme toggle hidden). Admin header fonts swapped; Appearance link removed.
+
+**Acceptance:** admin index, changelist and add form readable; no blue/purple in computed styles. Verified.
+
+## Phase 1 checks
+- [x] 27 tests pass; `makemigrations --check` clean.
+- [x] No horizontal scroll at 390px on all 8 pages; desktop checked at 1440px.
+
+## Phase 2 notes carried forward
+- Homepage splash ("Opening Sequence") and fade-in animations still delay content; Phase 2 task 1.
 
 ## Before Phase 5
 - [ ] Run a critique pass on the Phase 5 plan (robot + chatbot) first. Share findings and wait for Bunny's OK before writing any Phase 5 code.
@@ -88,3 +126,6 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting o
 
 ## Phase 7 (later) — notes carried forward
 - `ARCHITECTURE.md` still describes the old `ExperienceEntry` / `AdditionalCertification` fields. Rewrite with the Phase 7 docs update.
+- `SiteAppearance` is still mentioned in `README.md`, `QUICK_START.md`, `SETUP_GUIDE.md`, `DJANGO_SETUP.md`, `DEPLOYMENT_CHECKLIST.md`, `ARCHITECTURE.md`. Clean up in Phase 7.
+- Django admin's calendar/clock icons are Django's own blue-grey SVGs; leave or recolour in Phase 7.
+- Unused Tailwind utility shims remain at the top of `styles.css` (e.g. `.h-3`, `.w-6`); remove in Phase 7 if still unused.

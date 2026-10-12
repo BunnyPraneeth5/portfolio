@@ -2,7 +2,7 @@
 
 ## ✅ Admin Dashboard Overview
 
-All models (**Site Settings**, **Site Appearance**, **About**, **Skills**, **Projects**, **Blog Posts**, **Contact Messages**, **Education**, **Professional Experience**, **Events**, **What I Do**, **Certifications**) are fully functional in the Django Admin panel.
+All models (**Site Settings**, **About**, **Skills**, **Projects**, **Blog Posts**, **Contact Messages**, **Education**, **Professional Experience**, **Events**, **What I Do**, **Certifications**) are fully functional in the Django Admin panel.
 
 Admin Header: **KP Portfolio Administration**  
 Admin Title: **KP Admin**
@@ -41,14 +41,7 @@ Use your superuser credentials.
   - `Contact Info`: Email, Location, Tagline, and `Contact form active` toggle switch.
   - `SEO Meta`: Meta title & Meta description.
 
-### 2. Site Appearance (Singleton)
-- **Purpose**: Controls site CSS theme accent colors dynamically across all templates.
-- **Fields**:
-  - `Primary color` (Hex color picker, default `#3b82f6`)
-  - `Secondary color` (Hex color picker, default `#8b5cf6`)
-  - `Accent color` (Hex color picker, default `#06b6d4`)
-
-### 3. About Section
+### 2. About Section
 - **Purpose**: Powers personal bio and key performance metric counters on the `/about/` page.
 - **Fields**:
   - `Title`: Header text.
@@ -56,7 +49,7 @@ Use your superuser credentials.
   - `Bio Paragraphs 1, 2, 3`: Separate bio text blocks.
   - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels.
 
-### 4. Skills
+### 3. Skills
 - **Purpose**: Categorized skill matrix displayed on `/skills/` page and featured on homepage.
 - **Fields**:
   - `Name`: Skill title (e.g., "Django", "PyTorch").
@@ -65,7 +58,7 @@ Use your superuser credentials.
   - `Order`: Sorting position.
 - **Inline Editing**: Category, Is Featured, and Order can be edited directly in the list view.
 
-### 5. Projects
+### 4. Projects
 - **Purpose**: Featured showcase, secondary cards, and project archive on `/projects/` page and homepage hero.
 - **Fields**:
   - `Title`
@@ -78,11 +71,11 @@ Use your superuser credentials.
   - `Order`: Display priority (lower number appears first).
   - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy).
 
-### 6. Education Entries
+### 5. Education Entries
 - **Purpose**: Education timeline on `/about/` page.
 - **Fields**: `Degree`, `Field of study`, `Institution`, `Year range`, `Bullet 1`, `Bullet 2`, `Order`.
 
-### 7. Professional Experience
+### 6. Professional Experience
 - **Purpose**: Real roles only (internships, jobs, contracts). Shown in the "Professional Experience" timeline on `/about/`. The newest role also appears on the homepage as "Recent: <role> at <organization>". The chat widget uses it for experience questions.
 - **Fields**:
   - Role: `Organization`, `Role`, `Employment type` (Internship, Part-time, Full-time, Contract, Freelance)
@@ -92,22 +85,22 @@ Use your superuser credentials.
 - **Order**: lower `Order` first; equal values are sorted newest first.
 - Certificates do not go here. Use **Certifications**.
 
-### 8. Events & Leadership Entries
+### 7. Events & Leadership Entries
 - **Purpose**: Cards for hackathons, events, and leadership roles.
 - **Fields**: `Title`, `Role`, `Year`, `Location`, `Description`, `Stats 1-3` (value & label), `Order`.
 
-### 9. Certifications
+### 8. Certifications
 - **Purpose**: All certificates (courses, virtual internships, badges). Shown in the "Certifications" list on `/about/` and in the chat widget.
 - **Fields**: `Title`, `Issuer`, `Category` (optional group label, e.g. Virtual Internship), `Issued date`, `Certificate file`, `Certificate file 2` (optional), `Credential URL` (optional), `Order`.
 
-### 10. What I Do
+### 9. What I Do
 - **Purpose**: Checklist items under "What I Do" section on `/about/` page.
 
-### 11. Blog Posts
+### 10. Blog Posts
 - **Purpose**: Technical articles on `/blog/` and `/blog/<slug>/`.
 - **Fields**: `Title`, `Slug` (auto-generated), `Event date`, `Content` (HTML supported), `Excerpt`, `Image`, `Published`.
 
-### 12. Contact Messages
+### 11. Contact Messages
 - **Purpose**: Read-only log of visitor messages submitted via the `/contact/` form.
 
 ---

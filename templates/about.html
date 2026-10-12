@@ -1,82 +1,22 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About | Karu Praneeth Kumar</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="about">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link active">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white active">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
+{% block title %}About | Karu Praneeth Kumar{% endblock %}
 
+{% block body_attrs %} data-chapter="about"{% endblock %}
+
+{% block content %}
     <!-- About Content -->
     <main class="pt-24 pb-12">
         <div class="container mx-auto px-4">
             <div class="max-w-4xl mx-auto">
                 <!-- Header -->
                 <div class="text-center mb-12" data-aos="fade-up">
-                    <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+                    <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
+                        <span>
                             Behind the Work
                         </span>
                     </h1>
-                    <div class="flex justify-center gap-2 mb-4">
-                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping" style="animation-delay:0ms"></span>
-                        <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping" style="animation-delay:200ms"></span>
-                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping" style="animation-delay:400ms"></span>
-                    </div>
                     <p class="text-xl text-gray-400">
                         {% if about.subtitle %}{{ about.subtitle }}{% else %}Agentic AI Engineer / B.Tech CSE-AI / Kurnool, India{% endif %}
                     </p>
@@ -102,7 +42,7 @@
                             </p>
 
                             {% if what_i_do %}
-                            <h2 class="text-xl font-['Orbitron'] mb-3 mt-2">What I Do</h2>
+                            <h2 class="text-xl font-display mb-3 mt-2">What I Do</h2>
                             <ul class="about-checklist space-y-2">
                                 {% for item in what_i_do %}
                                 <li>
@@ -166,7 +106,7 @@
 
                 <!-- Timeline -->
                 <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Education Journey</h2>
+                    <h2 class="text-2xl font-display mb-8 text-center">Education Journey</h2>
                     <div class="roadmap education-roadmap">
                         <div class="roadmap-line"><div class="timeline-progress"></div></div>
 
@@ -193,55 +133,6 @@
                                 {% endif %}
                             </div>
                         </article>
-                        {% comment %}
-                        <div class="relative mb-12">
-                            <div class="flex items-center mb-4">
-                                <div class="w-1/2 pr-8 text-right">
-                                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium border border-blue-500/30">
-                                        {{ entry.year_range }}
-                                    </span>
-                                </div>
-                                <div class="timeline-node absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-gray-900">
-                                </div>
-                                <div class="w-1/2 pl-8"></div>
-                            </div>
-                            <div class="flex">
-                                <div class="w-1/2 pr-8">
-                                    <div class="glass-card p-6 ml-auto border-l-2 border-blue-400" data-aos="fade-right">
-                                        <div class="space-y-2 text-right">
-                                            <div class="flex items-center justify-end">
-                                                <h3 class="text-xl font-['Orbitron']">
-                                                    {{ entry.degree }}
-                                                </h3>
-                                            </div>
-                                            <p class="text-gray-300">{{ entry.field_of_study }}</p>
-                                            <p class="text-sm text-gray-400">{{ entry.institution }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="w-1/2 pl-8">
-                                    {% if entry.bullet_1 or entry.bullet_2 %}
-                                    <div class="glass-card p-6 border-r-2 border-purple-400" data-aos="fade-left">
-                                        <ul class="space-y-2 text-gray-300">
-                                            {% if entry.bullet_1 %}
-                                            <li class="flex items-start">
-                                                <span class="about-check">✓</span>
-                                                <span>{{ entry.bullet_1 }}</span>
-                                            </li>
-                                            {% endif %}
-                                            {% if entry.bullet_2 %}
-                                            <li class="flex items-start">
-                                                <span class="about-check">✓</span>
-                                                <span>{{ entry.bullet_2 }}</span>
-                                            </li>
-                                            {% endif %}
-                                        </ul>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endcomment %}
                         {% endfor %}
                     </div>
                 </div>
@@ -249,7 +140,7 @@
                 <!-- Experience Timeline -->
                 {% if experience_all %}
                 <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Professional Experience</h2>
+                    <h2 class="text-2xl font-display mb-8 text-center">Professional Experience</h2>
                     <div class="roadmap">
                         <div class="roadmap-line"><div class="timeline-progress"></div></div>
                         {% for entry in experience_all %}
@@ -299,48 +190,48 @@
 
                 <!-- Events & Leadership -->
                 <div class="events-section mb-12" data-aos="fade-up" data-aos-delay="350">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Events & Leadership</h2>
+                    <h2 class="text-2xl font-display mb-8 text-center">Events & Leadership</h2>
                     {% for event in events %}
                     <div class="glass-card p-8 max-w-3xl mx-auto relative overflow-hidden mb-6">
                         <span class="featured-badge">Organizer</span>
-                        <div class="timeline-line absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-purple-600">
+                        <div class="timeline-line absolute left-0 top-0 bottom-0 w-1">
                         </div>
                         <div class="flex flex-col md:flex-row items-start pl-4">
-                            <div class="timeline-node w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center mr-6 flex-shrink-0 mb-4 md:mb-0">
-                                <i class="fas fa-code text-3xl text-blue-400"></i>
+                            <div class="timeline-node w-16 h-16 rounded-full border border-gray-700 flex items-center justify-center mr-6 flex-shrink-0 mb-4 md:mb-0">
+                                <i class="fas fa-code text-3xl text-accent"></i>
                             </div>
                             <div class="flex-1">
                                 <div class="flex flex-wrap items-center gap-3 mb-2">
-                                    <h3 class="text-2xl font-['Orbitron']">{{ event.title }}</h3>
-                                    <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs border border-green-500/30">
+                                    <h3 class="text-2xl font-display">{{ event.title }}</h3>
+                                    <span class="tag">
                                         College Level
                                     </span>
                                 </div>
-                                <p class="text-purple-400 text-sm font-medium mb-3">
+                                <p class="text-accent text-sm font-medium mb-3">
                                     {{ event.role }} · {{ event.year }}
                                 </p>
                                 <p class="text-gray-300 mb-4">{{ event.description|linebreaksbr }}</p>
                                 <div class="flex flex-wrap gap-4">
                                     {% if event.stat_1_value %}
                                     <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-users text-blue-400"></i>
+                                        <i class="fas fa-users text-accent"></i>
                                         <span>{{ event.stat_1_value }} {{ event.stat_1_label }}</span>
                                     </div>
                                     {% endif %}
                                     {% if event.stat_2_value %}
                                     <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-trophy text-yellow-400"></i>
+                                        <i class="fas fa-trophy text-accent"></i>
                                         <span>{{ event.stat_2_value }} {{ event.stat_2_label }}</span>
                                     </div>
                                     {% endif %}
                                     {% if event.stat_3_value %}
                                     <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-calendar text-purple-400"></i>
+                                        <i class="fas fa-calendar text-accent"></i>
                                         <span>{{ event.stat_3_value }} {{ event.stat_3_label }}</span>
                                     </div>
                                     {% endif %}
                                     <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-map-marker-alt text-green-400"></i>
+                                        <i class="fas fa-map-marker-alt text-accent"></i>
                                         <span>{{ event.location }}</span>
                                     </div>
                                 </div>
@@ -353,12 +244,12 @@
                 <!-- Certifications -->
                 {% if certifications %}
                 <div class="mb-12" data-aos="fade-up" data-aos-delay="400">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Certifications</h2>
+                    <h2 class="text-2xl font-display mb-8 text-center">Certifications</h2>
                     <div class="glass-card p-6 max-w-5xl mx-auto">
                         <ul class="certification-list">
                             {% for cert in certifications %}
                             <li class="certification-item">
-                                <h4 class="font-['Orbitron'] text-lg">{{ cert.title }}</h4>
+                                <h4 class="font-display text-lg">{{ cert.title }}</h4>
                                 {% if cert.issuer or cert.issued_date %}
                                 <p class="certification-meta">
                                     {{ cert.issuer }}{% if cert.issuer and cert.issued_date %} · {% endif %}{% if cert.issued_date %}{{ cert.issued_date|date:"M Y" }}{% endif %}
@@ -389,24 +280,19 @@
                 <!-- Call to Action -->
                 <div class="text-center" data-aos="fade-up" data-aos-delay="500">
                     <a href="{% url 'contact' %}" 
-                       class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity mr-4">
+                       class="btn-primary mr-4">
                         <i class="fas fa-paper-plane mr-2"></i>Let's Work Together
                     </a>
                     <a href="{% url 'projects' %}" 
-                       class="inline-block px-8 py-3 border border-blue-500/50 rounded-full text-blue-400 hover:bg-blue-500/10 transition-colors">
+                       class="btn-ghost">
                         <i class="fas fa-code-branch mr-2"></i>View My Projects
                     </a>
                     <a href="{{ resume_url }}" target="_blank"
-                       class="inline-block px-8 py-3 border border-blue-500/50 rounded-full text-blue-400 hover:bg-blue-500/10 transition-colors mt-4 md:mt-0">
+                       class="btn-ghost mt-4 md:mt-0">
                         <i class="fas fa-file-alt mr-2"></i>Resume
                     </a>
                 </div>
             </div>
         </div>
     </main>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% endblock %}

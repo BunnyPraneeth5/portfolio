@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from django.utils.html import format_html
 from .models import (
-    About, Skill, Project, BlogPost, ContactMessage, SiteAppearance,
+    About, Skill, Project, BlogPost, ContactMessage,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
     Certification, SiteSettings,
 )
@@ -191,29 +191,6 @@ class CertificationAdmin(admin.ModelAdmin):
     @admin.display(boolean=True, description='Has file')
     def has_file(self, obj):
         return obj.has_file
-
-@admin.register(SiteAppearance)
-class SiteAppearanceAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Colors', {
-            'fields': ('primary_color', 'secondary_color', 'accent_color')
-        }),
-    )
-    list_display = ['primary_color', 'secondary_color', 'accent_color', 'updated_at']
-    readonly_fields = ['updated_at']
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in ['primary_color', 'secondary_color', 'accent_color']:
-            kwargs['widget'] = forms.TextInput(attrs={'type': 'color'})
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-    def has_add_permission(self, request):
-        if SiteAppearance.objects.exists():
-            return False
-        return super().has_add_permission(request)
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):

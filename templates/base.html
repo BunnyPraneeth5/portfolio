@@ -4,16 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Portfolio{% endblock %}</title>
+    <title>{% block title %}{{ site_settings.hero_name_display }}{% endblock %}</title>
+    {% block meta %}{% endblock %}
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
-<body>
+<body class="bg-gray-900 text-white"{% block body_attrs %}{% endblock %}>
+    {% block atmosphere %}<div id="atmosphere-container" class="atmosphere-container"></div>{% endblock %}
+    {% block before_nav %}{% endblock %}
+    {% with nav=request.resolver_match.url_name %}
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'index' %}" class="text-xl font-display">KP</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'about' %}" class="nav-link{% if nav == 'about' %} active{% endif %}">About</a>
+                    <a href="{% url 'skills' %}" class="nav-link{% if nav == 'skills' %} active{% endif %}">Skills</a>
+                    <a href="{% url 'projects' %}" class="nav-link{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Projects</a>
+                    <a href="{% url 'blog' %}" class="nav-link{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Blog</a>
+                    <a href="{% url 'contact' %}" class="nav-link{% if nav == 'contact' %} active{% endif %}">Contact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu md:hidden">
+        <div class="p-4">
+            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'about' %} active{% endif %}">About</a>
+            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'skills' %} active{% endif %}">Skills</a>
+            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Projects</a>
+            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Blog</a>
+            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'contact' %} active{% endif %}">Contact</a>
+        </div>
+    </div>
+    {% endwith %}
+
     {% block content %}{% endblock %}
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="{% static 'script.js' %}"></script>
+    {% include 'pet_widget.html' %}
 </body>
 </html>

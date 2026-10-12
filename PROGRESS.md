@@ -4,6 +4,29 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 2: Phase 1 implemented
+
+**Phase:** 1 (done locally, waiting for review). Same branch `redesign/phase-0`.
+
+**Decision from Bunny:** delete `SiteAppearance` entirely.
+
+**Done**
+- All 8 public templates extend `base.html`. Verified by snapshotting rendered HTML before and after: identical apart from whitespace.
+- Design tokens + spacing/radius scale at the top of `styles.css`; old variable names aliased; hardcoded colours/fonts swapped for tokens.
+- Fonts: Cormorant Garamond / IBM Plex Sans / JetBrains Mono loaded once in `base.html`; Orbitron, Space Grotesk, Outfit removed.
+- `SiteAppearance` removed (model, admin, context processor, settings, admin link, ADMIN_GUIDE). Migration `0018_delete_siteappearance` applied locally.
+- Components: `.btn-primary`, `.btn-ghost`, `.panel`, `.label-mono`, `.status-dot`, `.stat-tile`, `.section-head` (+ `.text-accent`, `.form-input`). Template buttons/links/inputs moved onto them.
+- Dead CSS: 71 unused selectors removed (2702 → ~2340 lines before components were added).
+- Admin restyled on the same tokens.
+- Fixes found while checking: page titles were rendering in the body font (global `span` rule); contact submit button was overridden by an old generic rule.
+- Tests 25 → 27, all pass.
+- Browser checks: computed-colour audit on all 8 pages + admin finds no blue/purple/cyan; only the three fonts in use; no horizontal scroll at 390px. A temporary admin user/session used for the admin check was deleted afterwards.
+
+**Deploy note for Bunny:** back up MySQL, pull, `python manage.py migrate` (applies 0018), `collectstatic`, reload.
+
+**Next**
+- Bunny: review Phase 1. Then Phase 2 (homepage rebuild).
+
 ## 2026-10-12 — Session 1b: Phase 0 implemented
 
 **Phase:** 0 (done locally, waiting for review)

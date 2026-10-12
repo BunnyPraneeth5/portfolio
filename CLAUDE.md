@@ -4,12 +4,12 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 
 ## Stack
 - Django 5.2, project `config`, single app `portfolio`. Venv: `venv/Scripts/python.exe`. SQLite locally, MySQL on PythonAnywhere (DB switched by hand in `config/settings.py`).
-- Standalone templates in `templates/` (they do NOT extend `base.html` yet), CSS in `static/styles.css`, JS in `static/script.js`. Tailwind 2 + Font Awesome via CDN. Vanilla JS, no build step.
+- Pages in `templates/` extend `base.html` (head, nav, scripts, pet widget). CSS in `static/styles.css` (design tokens at the top; use them, no new hardcoded colours), admin CSS in `static/admin.css`. Tailwind 2 + Font Awesome via CDN. Vanilla JS, no build step.
 - Chat widget: `templates/pet_widget.html` -> `POST /api/chat/` -> `portfolio/chatbot.py` (rule-based keywords, no LLM).
 
 ## Key models (`portfolio/models.py`)
 - `SiteSettings` (singleton, `load()`), `About`, `Project` (slug, `/projects/<slug>/`), `Skill`, `BlogPost`, `ContactMessage`
-- `ExperienceEntry` (real roles only), `Certification`, `EducationEntry`, `EventEntry`, `WhatIDo`, `SiteAppearance` (legacy, Phase 1)
+- `ExperienceEntry` (real roles only), `Certification`, `EducationEntry`, `EventEntry`, `WhatIDo`
 
 ## Boundaries
 - Never read, print, create or edit `.env` or any secret. Never hardcode keys, emails or passwords.
@@ -30,4 +30,4 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - No heavy animations. Avoid the generic template look.
 
 ## Current focus
-Phase 0 committed, waiting for Bunny's MySQL check. Next: Phase 1 (first task: templates extend `base.html`).
+Phase 1 implemented, waiting for Bunny's review. Next: Phase 2 (homepage rebuild).

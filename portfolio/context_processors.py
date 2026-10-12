@@ -1,11 +1,6 @@
 from django.templatetags.static import static
 
-from .models import SiteAppearance, SiteSettings
-
-
-def site_appearance(request):
-    appearance = SiteAppearance.objects.first()
-    return {'site_appearance': appearance}
+from .models import SiteSettings
 
 
 def site_settings(request):

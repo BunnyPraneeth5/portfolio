@@ -49,19 +49,6 @@ class Skill(models.Model):
     def __str__(self):
         return self.name
 
-class SiteAppearance(models.Model):
-    primary_color = models.CharField(max_length=7, default='#3b82f6', help_text='Hex color, for example #3b82f6')
-    secondary_color = models.CharField(max_length=7, default='#8b5cf6', help_text='Hex color, for example #8b5cf6')
-    accent_color = models.CharField(max_length=7, default='#06b6d4', help_text='Hex color, for example #06b6d4')
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = 'Site Appearance'
-        verbose_name_plural = 'Site Appearance'
-
-    def __str__(self):
-        return 'Site Appearance'
-
 class SiteSettings(models.Model):
     profile_image = models.ImageField(
         upload_to='appearance/',

@@ -113,6 +113,25 @@ class PortfolioViewsTestCase(TestCase):
         self.assertEqual(message.message, 'We need the data from the event horizon.')
 
 
+class BaseLayoutTests(TestCase):
+    def test_pages_share_base_layout_and_fonts(self):
+        Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
+        for url in [reverse('index'), reverse('about'), reverse('skills'), reverse('projects'),
+                    reverse('project_detail', args=['gargantua-probe']), reverse('blog'),
+                    reverse('contact')]:
+            response = self.client.get(url)
+            self.assertContains(response, 'id="mobileMenu"', count=1, msg_prefix=url)
+            self.assertContains(response, 'IBM+Plex+Sans', msg_prefix=url)
+            self.assertNotContains(response, 'Orbitron', msg_prefix=url)
+            self.assertNotContains(response, '--accent-blue', msg_prefix=url)
+
+    def test_nav_marks_section_active_on_detail_page(self):
+        Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
+        response = self.client.get(reverse('project_detail', args=['gargantua-probe']))
+        self.assertContains(response, 'class="nav-link active">Projects</a>')
+        self.assertContains(response, 'class="nav-link">About</a>')
+
+
 class ExperienceEntryModelTests(TestCase):
     def test_date_range_label(self):
         current = ExperienceEntry(
