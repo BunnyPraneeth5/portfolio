@@ -1,22 +1,24 @@
 import json
 import tempfile
-from datetime import date
+from datetime import date, timedelta
 from io import StringIO
 from pathlib import Path
 
+from django.core.cache import cache
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase, TransactionTestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 
 from . import chatbot
 from .admin import ExperienceEntryAdminForm, ProjectReplayAdminForm
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     Certification, EventEntry, ExperienceEntry, SiteSettings,
-    CaseDecision, CaseIncident, ProjectReplay,
+    CaseDecision, CaseIncident, ProjectReplay, SuggestedQuestion, ChatQuery,
 )
 from .replays import MAX_STEPS, ReplayValidationError, parse_replay_json, validate_replay
 
@@ -327,7 +329,7 @@ class ChatbotExperienceTests(TestCase):
         EventEntry.objects.create(
             title="Hackathon X", role="Lead", year="2025", location="Bengaluru",
             description="Ran it.")
-        reply = chatbot.get_reply("tell me about your experience")
+        reply = chatbot.get_reply("tell me about your experience")['reply']
         self.assertIn("AI Intern @ Lazarus Labs (Internship, Mar 2026 – Present)", reply)
         self.assertIn("Built docking tools.", reply)
         self.assertLess(reply.index("Lazarus Labs"), reply.index("Old Co"))
@@ -335,23 +337,23 @@ class ChatbotExperienceTests(TestCase):
         self.assertLess(reply.index("Old Co"), reply.index("Hackathon X"))
 
     def test_experience_empty(self):
-        reply = chatbot.get_reply("work experience")
-        self.assertIn("haven't added", reply)
-        self.assertIn("/about/", reply)
-        self.assertNotIn("TechTrotter", reply)
+        result = chatbot.get_reply("work experience")
+        self.assertIn("hasn't added", result['reply'])
+        self.assertIn(reverse('about'), [link['url'] for link in result['links']])
+        self.assertNotIn("TechTrotter", result['reply'])
 
     def test_certifications(self):
         Certification.objects.create(title="SQL Advanced", issuer="HackerRank")
         Certification.objects.create(title="CSS")
-        reply = chatbot.get_reply("do you have any certifications?")
+        reply = chatbot.get_reply("do you have any certifications?")['reply']
         self.assertIn("• SQL Advanced (HackerRank)", reply)
         self.assertIn("• CSS", reply)
 
     def test_certifications_empty(self):
-        reply = chatbot.get_reply("certifications")
-        self.assertIn("haven't listed", reply)
-        self.assertIn("/about/", reply)
-        self.assertNotIn("MCP Certified", reply)
+        result = chatbot.get_reply("certifications")
+        self.assertIn("hasn't listed", result['reply'])
+        self.assertIn(reverse('about'), [link['url'] for link in result['links']])
+        self.assertNotIn("MCP Certified", result['reply'])
 
     def test_routing_availability_vs_past_work(self):
         self.assertEqual(chatbot._match_intent("are you open to internships"), 'internship')
@@ -706,3 +708,133 @@ class ReplayPageTests(TestCase):
         self.assertNotContains(response, '<img src=x')
         self.assertContains(response, '&lt;img src=x')
         self.assertContains(response, '\\u003Cimg src=x')
+
+
+class ChatHelperReplyTests(TestCase):
+    def test_story_replies_wait_for_review(self):
+        for question, story_text in [
+            ("what's the hardest bug you fixed", "async state synchronization"),
+            ("tell me about a conflict in your team", "15-minute benchmarks"),
+            ("what is your favorite library", "PyTorch and Django"),
+        ]:
+            result = chatbot.get_reply(question)
+            self.assertIn(result['intent'], chatbot.PENDING_REVIEW_INTENTS, question)
+            self.assertTrue(result['fallback'])
+            self.assertIn("no approved answer", result['reply'])
+            self.assertNotIn(story_text, result['reply'])
+            self.assertTrue(result['chips'])
+
+    def test_is_ai_is_honest(self):
+        for question in ["are you an ai?", "is this a bot", "are you human", "who is answering"]:
+            result = chatbot.get_reply(question)
+            self.assertEqual(result['intent'], 'is_ai', question)
+            self.assertIn("scripted helper", result['reply'])
+            self.assertNotIn("AI portfolio assistant", result['reply'])
+
+    def test_replies_are_third_person(self):
+        questions = ["hi", "tell me about yourself", "why should we hire you", "notice period",
+                     "are you remote", "are you available", "internship", "education", "resume",
+                     "contact", "skills", "python", "projects", "tell me about soc copilot"]
+        for question in questions:
+            reply = chatbot.get_reply(question)['reply']
+            self.assertNotIn("I'm Karu", reply, question)
+            self.assertNotRegex(reply, r"\b(my|My) (projects|skills|resume|notice|education)\b", question)
+
+    def test_no_hardcoded_fallback_content(self):
+        Project.objects.all().delete()
+        Skill.objects.all().delete()
+        self.assertIn("No projects are published", chatbot.get_reply("projects")['reply'])
+        self.assertIn("aren't listed", chatbot.get_reply("skills")['reply'])
+        self.assertIn("hasn't listed Python", chatbot.get_reply("python")['reply'])
+        self.assertIn("isn't published", chatbot.get_reply("tell me about soc copilot")['reply'])
+
+    def test_project_reply_links_case_file_and_replay(self):
+        project = Project.objects.get(slug='soc-copilot')
+        url = reverse('project_detail', args=['soc-copilot'])
+        labels = {link['label']: link['url'] for link in chatbot.get_reply("tell me about soc copilot")['links']}
+        self.assertEqual(labels.get('SOC Copilot case file'), url)
+        self.assertNotIn('Play the replay', labels)
+        ProjectReplay.objects.create(project=project, title='Run', duration_s=5, is_published=True,
+                                     steps=[{'t': 0, 'actor': 'a', 'kind': 'info', 'text': 'x'}])
+        labels = {link['label']: link['url'] for link in chatbot.get_reply("tell me about soc copilot")['links']}
+        self.assertEqual(labels.get('Play the replay'), url + '#replay')
+
+    def test_chips_come_from_active_suggested_questions(self):
+        SuggestedQuestion.objects.update(is_active=True)
+        first = SuggestedQuestion.objects.first()
+        first.is_active = False
+        first.save()
+        chips = chatbot.get_reply("hi")['chips']
+        self.assertNotIn(first.text, chips)
+        self.assertEqual(len(chips), SuggestedQuestion.objects.filter(is_active=True).count())
+
+    def test_seeded_chips_all_get_real_answers(self):
+        texts = list(SuggestedQuestion.objects.values_list('text', flat=True))
+        self.assertIn('How does SOC Copilot work?', texts)
+        for text in texts:
+            result = chatbot.get_reply(text)
+            self.assertFalse(result['fallback'], text)
+            self.assertNotIn(result['intent'], chatbot.PENDING_REVIEW_INTENTS, text)
+
+
+class ChatApiTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def post(self, message, ip='203.0.113.5'):
+        return self.client.post(reverse('chat_reply'), data=json.dumps({'message': message}),
+                                content_type='application/json', HTTP_X_REAL_IP=ip)
+
+    def test_response_shape(self):
+        data = self.post("hi").json()
+        self.assertEqual(set(data), {'reply', 'links', 'chips'})
+        self.assertTrue(data['chips'])
+
+    def test_logs_scrubbed_question_without_ip(self):
+        question = "email me at bob@example.com or +91 98765 43210 about python"
+        self.post(question)
+        query = ChatQuery.objects.get()
+        self.assertNotIn("bob@example.com", query.question)
+        self.assertNotIn("98765", query.question)
+        self.assertIn("[email]", query.question)
+        self.assertEqual(query.matched_intent, chatbot.get_reply(question)['intent'])
+        self.assertFalse(query.was_fallback)
+        self.assertNotIn('ip', [f.name for f in ChatQuery._meta.get_fields()])
+
+    def test_logs_fallbacks_and_skips_empty(self):
+        self.post("zzqx blorp")
+        self.post("   ")
+        self.assertEqual(ChatQuery.objects.count(), 1)
+        self.assertTrue(ChatQuery.objects.get().was_fallback)
+
+    def test_old_queries_are_purged(self):
+        old = ChatQuery.objects.create(question="old")
+        ChatQuery.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=91))
+        self.post("python")
+        self.assertFalse(ChatQuery.objects.filter(pk=old.pk).exists())
+
+    def test_rate_limit_per_visitor(self):
+        for _ in range(20):
+            self.assertEqual(self.post("hi").status_code, 200)
+        limited = self.post("hi")
+        self.assertEqual(limited.status_code, 429)
+        self.assertIn("wait a minute", limited.json()['reply'])
+        self.assertEqual(self.post("hi", ip='198.51.100.9').status_code, 200)
+
+    def test_requires_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        response = client.post(reverse('chat_reply'), data=json.dumps({'message': 'hi'}),
+                               content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+
+class ChatWidgetTemplateTests(TestCase):
+    def test_widget_markup(self):
+        response = self.client.get(reverse('about'))
+        self.assertContains(response, 'role="dialog"')
+        self.assertContains(response, 'aria-controls="pet-chat-panel"')
+        self.assertContains(response, 'Scripted helper · not AI')
+        self.assertContains(response, 'id="pet-chat-chips"')
+        self.assertContains(response, 'chat_widget.js')
+        self.assertNotContains(response, 'AI Portfolio Companion')
+        self.assertNotContains(response, "I'm Karu Praneeth Kumar (Bunny). Ask me")

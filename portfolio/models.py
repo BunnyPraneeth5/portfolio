@@ -382,6 +382,36 @@ class ProjectReplay(models.Model):
             'steps': self.steps,
         }
 
+class SuggestedQuestion(models.Model):
+    text = models.CharField(max_length=120, help_text='Shown as a clickable chip in the chat helper.')
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Suggested question'
+        verbose_name_plural = 'Suggested questions'
+
+    def __str__(self):
+        return self.text
+
+class ChatQuery(models.Model):
+    """A question asked in the chat helper. Emails and phone numbers are scrubbed; no IP is stored."""
+    RETENTION_DAYS = 90
+
+    question = models.CharField(max_length=300)
+    matched_intent = models.CharField(max_length=60, blank=True)
+    was_fallback = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Chat query'
+        verbose_name_plural = 'Chat queries'
+
+    def __str__(self):
+        return self.question[:60]
+
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)

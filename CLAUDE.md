@@ -5,7 +5,7 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 ## Stack
 - Django 5.2, project `config`, single app `portfolio`. Venv: `venv/Scripts/python.exe`. SQLite locally, MySQL on PythonAnywhere (DB switched by hand in `config/settings.py`).
 - Pages in `templates/` extend `base.html` (head, nav, scripts, pet widget). CSS in `static/styles.css` (design tokens at the top; use them, no new hardcoded colours), admin CSS in `static/admin.css`. Tailwind 2 + Font Awesome via CDN. Vanilla JS, no build step.
-- Chat widget: `templates/pet_widget.html` -> `POST /api/chat/` -> `portfolio/chatbot.py` (rule-based keywords, no LLM).
+- Chat helper: `templates/pet_widget.html` + `static/chat_widget.js` -> `POST /api/chat/` -> `portfolio/chatbot.py` (rule-based, no LLM, third person, data-only replies).
 - Replays: `ProjectReplay` + shared validator `portfolio/replays.py` (admin upload and `import_replay` command), player `static/replay.js`. Format: `docs/REPLAY_FORMAT.md`.
 
 ## Key models (`portfolio/models.py`)
@@ -31,4 +31,4 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - No heavy animations. Avoid the generic template look.
 
 ## Current focus
-Phase 4 implemented, waiting for Bunny's review. Next: Before Phase 5 critique pass (see TASKS.md), then Phase 5.
+Phase 5a implemented, waiting for Bunny's review. Phase 5b waits for Bunny's 30 to 50 eval questions.

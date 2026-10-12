@@ -1,7 +1,7 @@
 # TASKS
 
-Current phase: **Phase 4 — Replay feature** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review.** Phases 0 to 3 committed on `redesign/phase-0`.
+Current phase: **Phase 5a — Chat helper: robot, dialog, honesty, logging** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phases 0 to 4 committed on `redesign/phase-0`.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -220,7 +220,25 @@ Decision (Bunny, 2026-10-12): validator also blocks obvious leaks (emails, token
 - The robot still sits over content (e.g. the roster's first row at 1440x900). Phase 5 parks it.
 
 ## Before Phase 5
-- [ ] Run a critique pass on the Phase 5 plan (robot + chatbot) first. Share findings and wait for Bunny's OK before writing any Phase 5 code.
+- [x] Critique pass shared 2026-10-12; Bunny approved all recommendations (split into 5a / 5b).
+
+## Phase 5a — Chat helper (done, waiting for review)
+- [x] Robot parked bottom-right (72px / 56px phone), idle bob + blink off under reduced motion; footer keeps a bottom strip clear.
+- [x] Robot is a real button (Enter/Space); console-style `role="dialog"`; focus moves to the input; Esc closes and returns focus; history kept while the page is open.
+- [x] `SuggestedQuestion` chips (admin-editable, seeded with 6 questions; SOC Copilot chip only if that project exists). Migrations 0022, 0023.
+- [x] `/api/chat/` returns `{reply, links, chips}`; project answers link the case file and "Play the replay" when one is published. Links rendered only for safe URLs; all text via textContent.
+- [x] Third-person, data-only replies; no hardcoded claims or fallback content. 16 story replies pending review (kept verbatim in code). Honest "is this AI" reply (+ a few extra phrasings).
+- [x] `ChatQuery` log (scrubbed, no IP, 90-day purge) with read-only admin, filter by fallback.
+- [x] Rate limit 20/min per visitor via hashed `X-Real-IP` / `REMOTE_ADDR` in cache; 429 with a friendly reply. CSRF kept.
+- [x] 77 tests pass. Browser: keyboard open/close, chips, links, typed question, desktop gutter placement, phone layout.
+
+## Phase 5b — waits for Bunny's eval questions
+- [ ] Bunny sends 30 to 50 recruiter questions with expected intents.
+- [ ] Baseline test of today's intent per question, before any matching change.
+- [ ] `ChatAnswer` in admin (keywords, synonyms, answer, links, priority, is_active, needs_review), data migration preserving current order; placeholders filled safely; cache with short timeout.
+- [ ] "Create answer from this question" admin action on `ChatQuery`.
+- [ ] Matching: normalise questions and keywords the same way; synonyms; difflib fuzzy match only for words of 4+ characters with a high cutoff; baseline must still pass.
+- Known matching quirks to handle in 5b: project-tag matching runs before `is_ai` (a project tagged "ChatGPT" catches "is this chatgpt"); `who_is_bunny` matches "about you" inside "about your ...".
 
 ## Phase 5 (later) — tasks carried forward
 - [ ] Eval test: 30 to 50 recruiter questions, each with its expected intent. Bunny supplies the questions; do not write them.

@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'portfolio.context_processors.site_settings',
+                'portfolio.context_processors.chat_helper',
             ],
         },
     },

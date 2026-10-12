@@ -4,6 +4,24 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 6: history cleanup, Phase 4 committed, Phase 5a implemented
+
+**History:** removed the "Co-Authored-By: Claude" trailer from all branch commits (filter-branch; backup branch `backup/before-coauthor-removal`), force-pushed `redesign/phase-0`. Phase 4 committed as `63e409f` (local, not pushed).
+
+**Phase 5 critique:** shared and approved; Phase 5 split into 5a (now) and 5b (after Bunny's eval questions).
+
+**Phase 5a:** done locally, waiting for review.
+- Chat helper rebuilt: parked robot button, console-style dialog, chips from `SuggestedQuestion`, links in answers, `{reply, links, chips}` API.
+- `chatbot.py`: third person, data-only replies; 16 story replies kept verbatim but not served (pending review); old static claim texts kept as `_review_reply_*` for 5b. Keyword table and matching code copied verbatim (checked byte for byte); only change: extra phrasings for the honest "is this AI" intent.
+- `ChatQuery` log with scrubbing, no IP, 90-day purge. Rate limit via `X-Real-IP` (confirmed on PythonAnywhere's help page) or `REMOTE_ADDR`.
+- Fixed while testing: legacy submit-button CSS overrode the chat Send button; long contact values overflowed their panel on phones.
+- Tests 63 → 77, all pass. Browser checks done; test chat logs deleted afterwards.
+
+**Deploy note for Bunny:** back up MySQL, pull, `migrate` (0022, 0023), `collectstatic`, reload.
+
+**Next**
+- Bunny: review 5a; send 30 to 50 eval questions for 5b.
+
 ## 2026-10-12 — Session 5: Phase 3 committed, Phase 4 implemented
 
 **Phase 3:** committed as `337bcf9` on `redesign/phase-0`.

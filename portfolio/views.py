@@ -1,14 +1,20 @@
+import hashlib
 import json
+import re
 from collections import OrderedDict
+from datetime import timedelta
 
+from django.conf import settings
+from django.contrib import messages
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from . import chatbot
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage, SiteSettings,
-    EducationEntry, ExperienceEntry, ProjectReplay,
+    EducationEntry, ExperienceEntry, ProjectReplay, ChatQuery,
 )
 
 def index(request):
@@ -138,8 +144,48 @@ def contact_view(request):
     
     return render(request, 'contact.html')
 
+CHAT_RATE_LIMIT = 20          # messages
+CHAT_RATE_WINDOW_S = 60       # per this many seconds, per visitor
+CHAT_MAX_MESSAGE = 300
+
+_EMAIL_RE = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}')
+_PHONE_RE = re.compile(r'\+?\(?\d[\d\s().-]{6,}\d')
+
+
+def scrub_question(text):
+    """Remove emails and phone numbers before a question is stored."""
+    text = _EMAIL_RE.sub('[email]', text)
+    text = _PHONE_RE.sub('[phone]', text)
+    return text[:CHAT_MAX_MESSAGE]
+
+
+def _client_key(request):
+    # PythonAnywhere puts the visitor's address in X-Real-IP (REMOTE_ADDR is its load balancer).
+    ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', '')
+    digest = hashlib.sha256(f'{settings.SECRET_KEY}:{ip}'.encode()).hexdigest()[:32]
+    return f'chat-rate:{digest}'
+
+
+def _rate_limited(request):
+    key = _client_key(request)
+    cache.add(key, 0, CHAT_RATE_WINDOW_S)
+    try:
+        count = cache.incr(key)
+    except ValueError:  # expired between add and incr
+        cache.set(key, 1, CHAT_RATE_WINDOW_S)
+        count = 1
+    return count > CHAT_RATE_LIMIT
+
+
 @require_POST
 def chat_reply(request):
+    if _rate_limited(request):
+        return JsonResponse({
+            'reply': "You're sending messages quickly. Please wait a minute and try again.",
+            'links': [],
+            'chips': [],
+        }, status=429)
+
     message = request.POST.get('message', '')
     if not message and request.body:
         try:
@@ -147,5 +193,18 @@ def chat_reply(request):
             message = payload.get('message', '')
         except (ValueError, AttributeError):
             message = ''
-    reply = chatbot.get_reply(message)
-    return JsonResponse({'reply': reply})
+    if not isinstance(message, str):
+        message = ''
+    message = message.strip()[:CHAT_MAX_MESSAGE]
+
+    result = chatbot.get_reply(message)
+    if message:
+        ChatQuery.objects.create(
+            question=scrub_question(message),
+            matched_intent=result['intent'],
+            was_fallback=result['fallback'],
+        )
+        ChatQuery.objects.filter(
+            created_at__lt=timezone.now() - timedelta(days=ChatQuery.RETENTION_DAYS)
+        ).delete()
+    return JsonResponse({'reply': result['reply'], 'links': result['links'], 'chips': result['chips']})

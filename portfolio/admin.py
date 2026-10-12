@@ -5,6 +5,7 @@ from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
     Certification, SiteSettings, CaseDecision, CaseIncident, ProjectReplay,
+    SuggestedQuestion, ChatQuery,
 )
 from .replays import MAX_FILE_BYTES, ReplayValidationError, load_replay_file
 
@@ -184,6 +185,28 @@ class ProjectReplayAdmin(admin.ModelAdmin):
     @admin.display(description='Duration')
     def duration_label(self, obj):
         return obj.duration_label
+
+
+@admin.register(SuggestedQuestion)
+class SuggestedQuestionAdmin(admin.ModelAdmin):
+    list_display = ['text', 'order', 'is_active']
+    list_editable = ['order', 'is_active']
+
+
+@admin.register(ChatQuery)
+class ChatQueryAdmin(admin.ModelAdmin):
+    """Questions asked in the chat helper (emails/phones scrubbed, no IPs, kept 90 days)."""
+    list_display = ['question', 'matched_intent', 'was_fallback', 'created_at']
+    list_filter = ['was_fallback', 'matched_intent']
+    search_fields = ['question']
+    date_hierarchy = 'created_at'
+    readonly_fields = ['question', 'matched_intent', 'was_fallback', 'created_at']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(BlogPost)

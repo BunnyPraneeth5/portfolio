@@ -1,18 +1,21 @@
-"""Grounded, first-person Q&A engine for the portfolio pet chat widget.
+"""Rule-based chat helper for the portfolio (no LLM, no external calls).
 
-Every reply is dynamically queried from live DB models (Project, Skill,
-SiteSettings, About, EducationEntry, ExperienceEntry, etc.) and written
-in first person as Karu Praneeth Kumar (Bunny), addressing standard and
-unique recruiter queries with natural, confident, and conversational depth.
+Replies are written in the third person and built only from data on this site.
+Story replies that make claims about Bunny are kept below unchanged but are not
+served: they wait for Bunny's review (Phase 5b moves them into admin with a
+needs_review flag). get_reply() returns {reply, links, chips, intent, fallback}.
 """
 
 import re
 from collections import OrderedDict
-from django.db.models import Q
 
+from django.db.models import Q
+from django.urls import reverse
+
+from .context_processors import get_resume_url
 from .models import (
-    About, Certification, EducationEntry, EventEntry,
-    ExperienceEntry, Project, Skill, SiteSettings,
+    Certification, EducationEntry, EventEntry, ExperienceEntry, Project,
+    Skill, SiteSettings, SuggestedQuestion,
 )
 
 INTENT_KEYWORDS = OrderedDict([
@@ -65,7 +68,7 @@ INTENT_KEYWORDS = OrderedDict([
     ('projects_general', ['projects', 'built', 'portfolio project', 'github', 'work', 'case studies', 'recent work']),
 
     # Conversational & meta
-    ('is_ai', ['are you real', 'are you ai', 'are you a bot', 'human', 'llm', 'gpt', 'chatgpt', 'who is answering']),
+    ('is_ai', ['are you real', 'are you ai', 'are you an ai', 'is this ai', 'is this an ai', 'is this a bot', 'are you a robot', 'are you a bot', 'human', 'llm', 'gpt', 'chatgpt', 'who is answering']),
     ('greeting', ['hi', 'hello', 'hey', 'greetings', 'help', 'who are you', 'good morning', 'good afternoon']),
     ('walle_fun', ['directive', 'eva', 'plant', 'solar', 'garbage', 'trash', 'favorite movie', 'movie']),
 ])
@@ -112,108 +115,197 @@ def _match_intent(text):
     return 'fallback'
 
 
+FALLBACK_TEXT = "Sorry, I didn't catch that. Try one of these topics:"
+
+# ---------------------------------------------------------------------------
+# Replies. Third person, built only from data on this site (no invented claims).
+# Each builder returns (text, links) where links is a list of (label, url).
+# ---------------------------------------------------------------------------
+
+def _settings():
+    return SiteSettings.load()
+
+
+def _full_name():
+    return _settings().hero_name_display or 'Bunny'
+
+
+def _case_links(project):
+    """Case file link, plus the replay when a published one exists."""
+    url = reverse('project_detail', args=[project.slug])
+    links = [(f'{project.title} case file', url)]
+    if project.replays.filter(is_published=True).exists():
+        links.append(('Play the replay', url + '#replay'))
+    return links
+
+
+def _published_projects():
+    return list(Project.objects.filter(is_published=True).order_by('order', 'id'))
+
+
+def _find_project(*phrases):
+    for project in _published_projects():
+        title = project.title.lower()
+        if project.slug in phrases or any(phrase in title for phrase in phrases):
+            return project
+    return None
+
+
+def _project_reply(project):
+    lines = [f"{project.title}"]
+    summary = project.short_description or project.brief_text
+    if summary:
+        lines.append(summary)
+    if project.metrics:
+        lines.append('Metrics: ' + ' · '.join(f"{m['value']} {m['label']}".strip() for m in project.metrics))
+    if project.tech_tags_list:
+        lines.append('Stack: ' + ', '.join(project.tech_tags_list))
+    links = _case_links(project)
+    if project.github_url:
+        links.append(('Code', project.github_url))
+    if project.live_demo_url:
+        links.append(('Live demo', project.live_demo_url))
+    return '\n\n'.join(lines), links
+
+
 def _reply_greeting(text):
-    about = About.objects.first()
-    title = about.subtitle if about else "Agentic AI Engineer · B.Tech CSE-AI"
     return (
-        f"Hi there! I'm Karu Praneeth Kumar (Bunny).\n\n"
-        f"I'm an {title}. I specialize in building autonomous multi-agent systems using Model Context Protocol (MCP), deep learning models, and full-stack software.\n\n"
-        f"What would you like to explore about my projects, skills, hackathon leadership, or availability?"
+        f"Hi! This is a scripted helper for {_full_name()} (Bunny)'s portfolio. "
+        "It answers from the data on this site and is not an AI. Pick a topic below or type a question."
+    ), []
+
+
+def _reply_is_ai(text):
+    settings = _settings()
+    reply = (
+        "This is a scripted helper: not an AI and not Bunny in person. It matches keywords in your "
+        "question and answers from Bunny's portfolio data on this site."
     )
+    if settings.contact_email:
+        reply += f"\n\nTo reach Bunny directly: {settings.contact_email}"
+    return reply, [('Contact page', reverse('contact'))]
 
 
 def _reply_who_is_bunny(text):
-    about = About.objects.first()
-    settings = SiteSettings.load()
-    roles = ", ".join(settings.hero_roles_list)
-    bio = settings.hero_description
-    if about and about.description and len(about.description.strip()) > 5 and about.description.strip() != '-----':
-        bio = about.description.strip()
-    return (
-        f"I'm Karu Praneeth Kumar (Bunny), a final-year B.Tech CSE (AI) student at SJCET Bengaluru based in {settings.contact_location}.\n\n"
-        f"• Primary Focus: {roles}\n"
-        f"• Background: {bio}\n\n"
-        f"I love bridging advanced AI concepts—like multi-agent threat intelligence or neural network price prediction—with clean, production-ready software. Feel free to ask me about my projects or tech stack!"
-    )
+    settings = _settings()
+    lines = [f"{_full_name()} goes by Bunny."]
+    lines.append('Roles: ' + ', '.join(settings.hero_roles_list))
+    education = EducationEntry.objects.first()
+    if education:
+        detail = f"{education.degree}, {education.field_of_study}" if education.field_of_study else education.degree
+        lines.append(f"Education: {detail}, {education.institution} ({education.year_range})")
+    if settings.contact_location:
+        lines.append(f"Based in {settings.contact_location}.")
+    if settings.hero_description:
+        lines.append(f"In Bunny's words: “{' '.join(settings.hero_description.split())}”")
+    return '\n\n'.join(lines), [('About page', reverse('about'))]
 
 
 def _reply_why_hire(text):
-    about = About.objects.first()
-    settings = SiteSettings.load()
-    acc = about.stat_accuracy if about else "99.88%"
-    agents = about.stat_agents if about else "4"
-    teams = about.stat_teams if about else "25+"
-    notice = settings.notice_period or "Immediate"
-    return (
-        f"Here is why I'd be a strong addition to your engineering team:\n\n"
-        f"1. Cutting-Edge Agentic AI Expertise: I've built autonomous {agents}-agent MCP pipelines achieving {acc} intrusion detection accuracy on the CICIDS2017 dataset.\n"
-        f"2. End-to-End Execution: I don't just train ML models; I build complete products with Django backends, PyQt6 GUIs, and REST APIs.\n"
-        f"3. Leadership & Ownership: As Hackathon Lead for TechTrotter 2K25, I mentored and organized {teams} competing teams under tight deadlines.\n"
-        f"4. Rapid Onboarding: I have an {notice} notice period and am ready to make an impact on Day 1."
-    )
+    settings = _settings()
+    lines = ["Here is what Bunny's portfolio shows:"]
+    links = []
+    projects = _published_projects()
+    flagship = next((p for p in projects if p.status == 'flagship'), None) or \
+        next((p for p in projects if p.is_featured), projects[0] if projects else None)
+    if flagship:
+        line = f"• Flagship work: {flagship.title}"
+        if flagship.metric_1_value:
+            line += f" ({flagship.metric_1_value} {flagship.metric_1_label})".rstrip()
+        lines.append(line)
+        links += _case_links(flagship)
+    if projects:
+        lines.append(f"• {len(projects)} published projects")
+        links.append(('All case files', reverse('projects')))
+    recent = ExperienceEntry.newest_first().first()
+    if recent:
+        lines.append(f"• Recent role: {recent.role} at {recent.organization}")
+    event = EventEntry.objects.first()
+    if event:
+        lines.append(f"• {event.title} ({event.role}, {event.year})")
+    if settings.open_to_work:
+        lines.append(f"• Open to roles{f', notice period: {settings.notice_period}' if settings.notice_period else ''}")
+    links.append(('Resume', get_resume_url(settings)))
+    return '\n'.join(lines), links
 
 
 def _reply_availability(text):
-    settings = SiteSettings.load()
-    status = "Actively looking for Agentic AI & ML engineering roles" if settings.open_to_work else "Open to strategic engineering opportunities"
-    notice = settings.notice_period or "Immediate"
-    remote = "Fully open to Remote roles worldwide & Relocation to tech hubs (Bengaluru/India)" if settings.open_to_remote else "Open to hybrid and on-site roles"
-    return (
-        f"My Current Availability:\n\n"
-        f"• Status: {status}\n"
-        f"• Notice Period: {notice}\n"
-        f"• Work Preference: {remote}\n"
-        f"• Email: {settings.contact_email}\n\n"
-        f"You can reach me directly at {settings.contact_email} or via the /contact/ page!"
-    )
+    settings = _settings()
+    if not settings.open_to_work:
+        reply = "Bunny isn't marked as looking for a role right now."
+        if settings.contact_email:
+            reply += f" You can still get in touch: {settings.contact_email}"
+        return reply, [('Contact page', reverse('contact'))]
+    lines = ["Bunny is open to new roles."]
+    if settings.looking_for:
+        lines.append(f"Looking for: {settings.looking_for}")
+    if settings.notice_period:
+        lines.append(f"Notice period: {settings.notice_period}")
+    lines.append('Open to remote: yes' if settings.open_to_remote else 'Open to remote: not marked')
+    if settings.contact_email:
+        lines.append(f"Email: {settings.contact_email}")
+    return '\n'.join(lines), [('Contact page', reverse('contact')), ('Resume', get_resume_url(settings))]
 
 
 def _reply_internship(text):
-    settings = SiteSettings.load()
+    settings = _settings()
     if settings.open_to_internship:
-        return (
-            f"Yes! I'm open to high-impact Agentic AI & ML engineering internships and startup roles. "
-            f"With an immediate notice period ({settings.notice_period or 'Immediate'}), I can onboard rapidly and start building production agent pipelines right away. "
-            f"Reach out to me directly at {settings.contact_email}!"
-        )
-    return f"I'm currently focused on full-time Agentic AI Engineer roles. Feel free to get in touch at {settings.contact_email}!"
+        reply = "Yes, Bunny is open to internships."
+        if settings.looking_for:
+            reply += f"\n\nLooking for: {settings.looking_for}"
+    else:
+        reply = "Bunny isn't marked as open to internships right now."
+    if settings.contact_email:
+        reply += f"\n\nEmail: {settings.contact_email}"
+    return reply, [('Contact page', reverse('contact'))]
 
 
 def _reply_remote(text):
-    settings = SiteSettings.load()
-    if settings.open_to_remote:
-        return (
-            "Yes, absolutely! I am fully equipped for remote engineering collaboration across timezones, "
-            "and I'm also enthusiastic about relocating to major tech hubs like Bengaluru for the right on-site or hybrid role."
-        )
-    return "I am currently focused on on-site and hybrid roles in Bengaluru / India."
+    settings = _settings()
+    reply = "Yes, Bunny is open to remote work." if settings.open_to_remote else \
+        "Bunny hasn't marked remote work as an option."
+    if settings.contact_location:
+        reply += f" Based in {settings.contact_location}."
+    return reply, [('Contact page', reverse('contact'))]
 
 
 def _reply_notice_period(text):
-    settings = SiteSettings.load()
-    period = settings.notice_period or 'Immediate'
-    return f"My notice period is {period}! I can complete onboarding quickly and start delivering value on your team immediately."
+    settings = _settings()
+    if settings.notice_period:
+        return f"Bunny's notice period: {settings.notice_period}.", [('Contact page', reverse('contact'))]
+    return "Bunny hasn't listed a notice period yet.", [('Contact page', reverse('contact'))]
 
 
 def _reply_education(text):
     entries = list(EducationEntry.objects.all())
     if not entries:
-        return "I am a final-year B.Tech CSE (AI) student at SJCET Bengaluru (2022–2026), focusing on artificial intelligence, machine learning, and software engineering."
+        return "Education details aren't listed here yet.", [('About page', reverse('about'))]
     parts = []
     for e in entries:
-        bullets = f" — {e.bullet_1}" if e.bullet_1 else ""
-        parts.append(f"🎓 {e.degree} in {e.field_of_study}\n  {e.institution} ({e.year_range}){bullets}")
-    return "My Educational Background:\n\n" + "\n\n".join(parts)
+        line = f"• {e.degree}" + (f" in {e.field_of_study}" if e.field_of_study else '')
+        line += f"\n  {e.institution} ({e.year_range})"
+        parts.append(line)
+    return "Bunny's education:\n\n" + "\n\n".join(parts), [('About page', reverse('about'))]
 
 
 def _reply_resume(text):
-    settings = SiteSettings.load()
-    if settings.resume:
-        return (
-            f"You can download my official Resume here: {settings.resume.url}\n\n"
-            f"You can also browse my complete background on my /about/ page or contact me directly at {settings.contact_email}."
-        )
-    return f"You can request my resume directly at {settings.contact_email} or review my background on my /about/ page!"
+    return "Bunny's resume is linked below.", [('Resume', get_resume_url(_settings())), ('About page', reverse('about'))]
+
+
+def _reply_contact(text):
+    settings = _settings()
+    lines = []
+    if settings.contact_email:
+        lines.append(f"Email: {settings.contact_email}")
+    if settings.contact_location:
+        lines.append(f"Location: {settings.contact_location}")
+    links = [('Contact page', reverse('contact'))]
+    for label, url in (('GitHub', settings.github_url), ('LinkedIn', settings.linkedin_url),
+                       ('Kaggle', settings.kaggle_url), ('LeetCode', settings.leetcode_url)):
+        if url:
+            links.append((label, url))
+    reply = "How to reach Bunny:\n\n" + "\n".join(lines) if lines else "Use the contact page to reach Bunny."
+    return reply, links
 
 
 def _skill_reply(label, terms):
@@ -223,28 +315,29 @@ def _skill_reply(label, terms):
             query |= Q(name__icontains=term)
         else:
             query |= Q(name__iregex=_word_pattern(term).pattern)
-    skills = list(Skill.objects.filter(query))
-    if not skills:
-        return f"I actively work with {label} in my projects. You can inspect my full toolkit on my /skills/ page!"
-    names = sorted({s.name for s in skills})
-    return f"My {label} toolkit includes: {', '.join(names)}. Check out my full tech stack on my /skills/ page!"
+    names = sorted({s.name for s in Skill.objects.filter(query)})
+    projects = [p for p in _published_projects()
+                if any(_keyword_hit(term, ' '.join(p.tech_tags_list).lower()) for term in terms)]
+    if not names and not projects:
+        return f"Bunny hasn't listed {label} skills here yet.", [('Skills page', reverse('skills'))]
+    lines = []
+    if names:
+        lines.append(f"Bunny's listed {label} skills: {', '.join(names)}.")
+    links = []
+    if projects:
+        lines.append('Projects tagged with it: ' + ', '.join(p.title for p in projects[:4]) + '.')
+        for project in projects[:2]:
+            links += _case_links(project)
+    links.append(('Skills page', reverse('skills')))
+    return '\n\n'.join(lines), links
 
 
 def _reply_skill_python(text):
-    return (
-        "Python is my primary programming language! I use it daily across:\n"
-        "• Agentic AI & MCP: Developing autonomous multi-agent pipelines\n"
-        "• Machine Learning: Neural network training in PyTorch & Scikit-learn\n"
-        "• Web & APIs: Building backends with Django and FastAPI\n"
-        "• GUIs & Automation: Crafting desktop interfaces with PyQt6"
-    )
+    return _skill_reply('Python', ['python'])
 
 
 def _reply_skill_django(text):
-    return (
-        "I build scalable backend web services and REST APIs with Django. "
-        "In fact, this entire portfolio website and its live database query engine are built using Django!"
-    )
+    return _skill_reply('Django', ['django', 'drf'])
 
 
 def _reply_skill_ml(text):
@@ -252,19 +345,11 @@ def _reply_skill_ml(text):
 
 
 def _reply_skill_agentic(text):
-    return (
-        "I specialize in Agentic AI and Model Context Protocol (MCP)!\n\n"
-        "I design autonomous multi-agent architectures featuring dynamic tool invocation, async step orchestration, and state management. "
-        "My SOC Copilot project showcases this by coordinating 4 specialized AI agents in real-time."
-    )
+    return _skill_reply('Agentic AI & MCP', ['mcp', 'agentic', 'agent'])
 
 
 def _reply_skill_security(text):
-    return (
-        "In cybersecurity, I build AI-powered threat intelligence and intrusion detection systems. "
-        "My flagship SOC Copilot project achieved a 99.88% intrusion detection accuracy on the CICIDS2017 dataset, "
-        "combining automated Shodan reconnaissance with reputation scoring pipelines."
-    )
+    return _skill_reply('security', ['security', 'soc', 'siem', 'threat', 'intrusion'])
 
 
 def _reply_skill_web(text):
@@ -274,80 +359,66 @@ def _reply_skill_web(text):
 def _reply_skills_general(text):
     skills = Skill.objects.all()
     if not skills.exists():
-        return "My core stack includes Python, Agentic AI (MCP), PyTorch, Scikit-learn, Django, FastAPI, PyQt6, PostgreSQL, and Docker."
+        return "Skills aren't listed here yet.", [('Skills page', reverse('skills'))]
     category_labels = dict(Skill.CATEGORY_CHOICES)
     grouped = OrderedDict()
     for skill in skills:
-        label = category_labels.get(skill.category, skill.category)
-        grouped.setdefault(label, []).append(skill.name)
+        grouped.setdefault(category_labels.get(skill.category, skill.category), []).append(skill.name)
     parts = [f"• {label}: {', '.join(names)}" for label, names in grouped.items()]
-    return "Here is a breakdown of my technical stack:\n\n" + "\n".join(parts) + "\n\nYou can explore all my skills on my /skills/ page!"
+    return "Bunny's listed skills:\n\n" + "\n".join(parts), [('Skills page', reverse('skills'))]
+
+
+def _named_project_reply(*phrases):
+    project = _find_project(*phrases)
+    if not project:
+        return "That project isn't published here yet.", [('All case files', reverse('projects'))]
+    return _project_reply(project)
 
 
 def _reply_soc_copilot(text):
-    project = _matching_project('soc copilot') or _matching_project('soc')
-    desc = project.short_description if project else "Autonomous 4-agent MCP security pipeline (Recon, Reputation, Shodan, Report)."
-    metrics = ""
-    if project and project.metric_1_value:
-        metrics = f"\nAccuracy Metric: {project.metric_1_value} {project.metric_1_label}"
-    return (
-        f"SOC Copilot is one of my key projects!\n\n"
-        f"{desc}{metrics}\n\n"
-        f"Key Highlights: 4-agent MCP architecture, PyQt6 GUI, automated Shodan threat intelligence, and 99.88% accuracy on CICIDS2017. "
-        f"You can read the full case study on my /projects/ page!"
-    )
+    return _named_project_reply('soc-copilot', 'soc copilot')
 
 
 def _reply_car_sales(text):
-    project = _matching_project('car sales') or _matching_project('car')
-    desc = project.short_description if project else "Neural network for predicting car prices with feature engineering."
-    return f"My Car Sales Price Prediction project uses deep neural networks and Scikit-learn to estimate vehicle market values based on feature engineering like mileage, brand, and condition.\n\nExplore it on my /projects/ page!"
+    return _named_project_reply('car sales', 'car price')
 
 
 def _reply_gate_pass(text):
-    project = _matching_project('gate pass') or _matching_project('gate')
-    desc = project.short_description if project else "QR authentication gate pass system reducing unauthorized entries."
-    return f"I developed the College Gate Pass System to modernize campus access control. It uses QR-code authentication for fast check-ins, replacing paper logs and reducing unauthorized campus entry.\n\nView details on my /projects/ page!"
-
-
-def _reply_projects_general(text):
-    projects = list(Project.objects.filter(is_published=True).order_by('order'))
-    if not projects:
-        return "Key Projects: SOC Copilot (MCP AI), Car Sales Price Predictor, College Gate Pass System. Visit my /projects/ page!"
-    lines = []
-    for p in projects[:4]:
-        tags = f" [{', '.join(p.tech_tags_list[:2])}]" if p.tech_tags_list else ""
-        lines.append(f"• {p.title}{tags}: {p.short_description}")
-    return "Here are a few of my engineering projects:\n\n" + "\n\n".join(lines) + "\n\nYou can dive into all project case studies on my /projects/ page!"
+    return _named_project_reply('gate pass')
 
 
 def _reply_specific_project(text):
     project = _matching_project(text)
     if not project:
         return _reply_projects_general(text)
-    tags = f" (Tech Stack: {', '.join(project.tech_tags_list)})" if project.tech_tags_list else ""
-    desc = project.short_description or project.long_description or "Advanced software project."
-    metrics = []
-    if project.metric_1_value:
-        metrics.append(f"{project.metric_1_label}: {project.metric_1_value}")
-    if project.metric_2_value:
-        metrics.append(f"{project.metric_2_label}: {project.metric_2_value}")
-    metric_str = f"\nKey Metrics: {' | '.join(metrics)}" if metrics else ""
+    return _project_reply(project)
+
+
+def _reply_projects_general(text):
+    projects = _published_projects()
+    if not projects:
+        return "No projects are published here yet.", [('All case files', reverse('projects'))]
+    lines = []
+    for p in projects[:5]:
+        summary = p.short_description or p.brief_text
+        if summary and len(summary) > 140:
+            summary = summary[:139].rstrip() + '…'
+        lines.append(f"• {p.title}" + (f": {summary}" if summary else ''))
     links = []
-    if project.github_url:
-        links.append(f"GitHub: {project.github_url}")
-    if project.live_demo_url:
-        links.append(f"Live Demo: {project.live_demo_url}")
-    link_str = f"\nLinks: {' | '.join(links)}" if links else ""
-    return f"🚀 {project.title}{tags}:\n\n{desc}{metric_str}{link_str}"
+    for p in projects[:3]:
+        links.append((f'{p.title} case file', reverse('project_detail', args=[p.slug])))
+    links.append(('All case files', reverse('projects')))
+    return "Bunny's published projects:\n\n" + "\n\n".join(lines), links
 
 
 def _reply_experience(text):
     roles = list(ExperienceEntry.newest_first()[:3])
     events = list(EventEntry.objects.all()[:2])
     if not roles and not events:
-        return "I haven't added my professional experience here yet. You can view my background on my /about/ page!"
+        return "Bunny hasn't added professional experience here yet.", [('About page', reverse('about'))]
     sections = []
+    if not roles:
+        sections.append("Bunny hasn't added professional experience here yet.")
     if roles:
         lines = []
         for index, e in enumerate(roles):
@@ -356,23 +427,66 @@ def _reply_experience(text):
             if index == 0 and e.summary:
                 line += f"\n  {e.summary}"
             lines.append(line)
-        sections.append("Here is a snapshot of my professional experience:\n\n" + "\n".join(lines))
+        sections.append("Bunny's professional experience:\n\n" + "\n".join(lines))
     if events:
         lines = [f"• {ev.title} ({ev.role}, {ev.year})" for ev in events]
         sections.append("Hackathons and leadership:\n\n" + "\n".join(lines))
-    return "\n\n".join(sections) + "\n\nYou can view my complete timeline on my /about/ page!"
+    return "\n\n".join(sections), [('About page', reverse('about'))]
 
 
 def _reply_certifications(text):
     certs = list(Certification.objects.all())
     if not certs:
-        return "I haven't listed my certifications here yet. You can view my background on my /about/ page!"
+        return "Bunny hasn't listed certifications here yet.", [('About page', reverse('about'))]
     shown = certs[:6]
     lines = [f"• {c.title}" + (f" ({c.issuer})" if c.issuer else "") for c in shown]
     if len(certs) > len(shown):
         lines.append(f"• …and {len(certs) - len(shown)} more")
-    return "My Certifications:\n\n" + "\n".join(lines) + "\n\nCheck out the full list on my /about/ page!"
+    return "Bunny's certifications:\n\n" + "\n".join(lines), [('About page', reverse('about'))]
 
+
+def _reply_pending_review(text):
+    return ("There's no approved answer for that yet. Here are topics this helper can answer:"), []
+
+
+def _reply_fallback(text):
+    if text:
+        matching_skills = Skill.objects.filter(name__icontains=text)
+        if matching_skills.exists():
+            names = ", ".join(s.name for s in matching_skills)
+            return f"Bunny lists these skills: {names}.", [('Skills page', reverse('skills'))]
+        matching_projects = Project.objects.filter(
+            Q(title__icontains=text) | Q(tech_tags__icontains=text) | Q(short_description__icontains=text),
+            is_published=True,
+        )
+        if matching_projects.exists():
+            return _project_reply(matching_projects.first())
+    return FALLBACK_TEXT, []
+
+
+# ---------------------------------------------------------------------------
+# Pending review: served as "no approved answer yet" until Bunny approves them.
+# Text below is unchanged from the original helper.
+# ---------------------------------------------------------------------------
+
+PENDING_REVIEW_INTENTS = (
+    'hardest_bug',
+    'why_agentic_over_llm',
+    'agent_failure_handling',
+    'explain_to_ceo',
+    'fun_curiosity_project',
+    'rearchitect_project',
+    'conflict_disagreement',
+    'stay_updated',
+    'tight_deadlines',
+    'startup_vs_senior',
+    'fav_library',
+    'bias_bad_data',
+    'story_behind_name',
+    'replace_developers',
+    'system_design',
+    'walle_fun',
+)
 
 def _reply_hardest_bug(text):
     return (
@@ -482,28 +596,6 @@ def _reply_system_design(text):
     )
 
 
-def _reply_is_ai(text):
-    settings = SiteSettings.load()
-    return (
-        f"I'm Karu Praneeth's AI portfolio assistant! I query my live Django database in real time to answer your questions accurately in first person.\n\n"
-        f"If you'd like to get in touch with me directly, drop me a note on my /contact/ page or email me at {settings.contact_email}!"
-    )
-
-
-def _reply_contact(text):
-    settings = SiteSettings.load()
-    return (
-        f"Here are my contact details and profile links:\n\n"
-        f"• Email: {settings.contact_email}\n"
-        f"• Location: {settings.contact_location}\n"
-        f"• GitHub: {settings.github_url}\n"
-        f"• LinkedIn: {settings.linkedin_url}\n"
-        f"• Kaggle: {settings.kaggle_url}\n"
-        f"• LeetCode: {settings.leetcode_url}\n\n"
-        f"You can also send me a message directly through my /contact/ page!"
-    )
-
-
 def _reply_walle_fun(text):
     return (
         "I love building high-tech interfaces and intelligent agent pipelines! In my free time, I enjoy exploring new AI research papers, "
@@ -511,51 +603,88 @@ def _reply_walle_fun(text):
     )
 
 
-def _reply_fallback(text):
-    if text:
-        matching_skills = Skill.objects.filter(name__icontains=text)
-        if matching_skills.exists():
-            names = ", ".join([s.name for s in matching_skills])
-            return f"I have hands-on experience with {names}. You can explore my full stack on my /skills/ page!"
 
-        matching_projects = Project.objects.filter(
-            Q(title__icontains=text) | Q(tech_tags__icontains=text) | Q(short_description__icontains=text),
-            is_published=True
-        )
-        if matching_projects.exists():
-            p = matching_projects.first()
-            return f"Here is a matching project for '{text}': {p.title} — {p.short_description}.\nCheck out all details on my /projects/ page!"
-
+# Original static replies replaced by data-driven ones above (kept for review, not served).
+def _review_reply_why_hire(text):
+    about = About.objects.first()
+    settings = SiteSettings.load()
+    acc = about.stat_accuracy if about else "99.88%"
+    agents = about.stat_agents if about else "4"
+    teams = about.stat_teams if about else "25+"
+    notice = settings.notice_period or "Immediate"
     return (
-        "I'd love to tell you more! Here are a few things you can ask me:\n"
-        "• 'Tell me about yourself'\n"
-        "• 'Why should we hire you?'\n"
-        "• 'Tell me about SOC Copilot'\n"
-        "• 'What is your experience with Agentic AI and MCP?'\n"
-        "• 'When can you start working?'\n"
-        "• 'What's the hardest bug you've fixed?'\n"
-        "• 'How can I contact you?'"
+        f"Here is why I'd be a strong addition to your engineering team:\n\n"
+        f"1. Cutting-Edge Agentic AI Expertise: I've built autonomous {agents}-agent MCP pipelines achieving {acc} intrusion detection accuracy on the CICIDS2017 dataset.\n"
+        f"2. End-to-End Execution: I don't just train ML models; I build complete products with Django backends, PyQt6 GUIs, and REST APIs.\n"
+        f"3. Leadership & Ownership: As Hackathon Lead for TechTrotter 2K25, I mentored and organized {teams} competing teams under tight deadlines.\n"
+        f"4. Rapid Onboarding: I have an {notice} notice period and am ready to make an impact on Day 1."
     )
 
 
+def _review_reply_skill_python(text):
+    return (
+        "Python is my primary programming language! I use it daily across:\n"
+        "• Agentic AI & MCP: Developing autonomous multi-agent pipelines\n"
+        "• Machine Learning: Neural network training in PyTorch & Scikit-learn\n"
+        "• Web & APIs: Building backends with Django and FastAPI\n"
+        "• GUIs & Automation: Crafting desktop interfaces with PyQt6"
+    )
+
+
+def _review_reply_skill_django(text):
+    return (
+        "I build scalable backend web services and REST APIs with Django. "
+        "In fact, this entire portfolio website and its live database query engine are built using Django!"
+    )
+
+
+def _review_reply_skill_agentic(text):
+    return (
+        "I specialize in Agentic AI and Model Context Protocol (MCP)!\n\n"
+        "I design autonomous multi-agent architectures featuring dynamic tool invocation, async step orchestration, and state management. "
+        "My SOC Copilot project showcases this by coordinating 4 specialized AI agents in real-time."
+    )
+
+
+def _review_reply_skill_security(text):
+    return (
+        "In cybersecurity, I build AI-powered threat intelligence and intrusion detection systems. "
+        "My flagship SOC Copilot project achieved a 99.88% intrusion detection accuracy on the CICIDS2017 dataset, "
+        "combining automated Shodan reconnaissance with reputation scoring pipelines."
+    )
+
+
+def _review_reply_soc_copilot(text):
+    project = _matching_project('soc copilot') or _matching_project('soc')
+    desc = project.short_description if project else "Autonomous 4-agent MCP security pipeline (Recon, Reputation, Shodan, Report)."
+    metrics = ""
+    if project and project.metric_1_value:
+        metrics = f"\nAccuracy Metric: {project.metric_1_value} {project.metric_1_label}"
+    return (
+        f"SOC Copilot is one of my key projects!\n\n"
+        f"{desc}{metrics}\n\n"
+        f"Key Highlights: 4-agent MCP architecture, PyQt6 GUI, automated Shodan threat intelligence, and 99.88% accuracy on CICIDS2017. "
+        f"You can read the full case study on my /projects/ page!"
+    )
+
+
+def _review_reply_car_sales(text):
+    project = _matching_project('car sales') or _matching_project('car')
+    desc = project.short_description if project else "Neural network for predicting car prices with feature engineering."
+    return f"My Car Sales Price Prediction project uses deep neural networks and Scikit-learn to estimate vehicle market values based on feature engineering like mileage, brand, and condition.\n\nExplore it on my /projects/ page!"
+
+
+def _review_reply_gate_pass(text):
+    project = _matching_project('gate pass') or _matching_project('gate')
+    desc = project.short_description if project else "QR authentication gate pass system reducing unauthorized entries."
+    return f"I developed the College Gate Pass System to modernize campus access control. It uses QR-code authentication for fast check-ins, replacing paper logs and reducing unauthorized campus entry.\n\nView details on my /projects/ page!"
+
+
+
 _INTENT_BUILDERS = {
-    'hardest_bug': _reply_hardest_bug,
-    'why_agentic_over_llm': _reply_why_agentic_over_llm,
-    'agent_failure_handling': _reply_agent_failure_handling,
-    'explain_to_ceo': _reply_explain_to_ceo,
-    'fun_curiosity_project': _reply_fun_curiosity_project,
-    'rearchitect_project': _reply_rearchitect_project,
-    'conflict_disagreement': _reply_conflict_disagreement,
-    'stay_updated': _reply_stay_updated,
-    'tight_deadlines': _reply_tight_deadlines,
-    'startup_vs_senior': _reply_startup_vs_senior,
-    'fav_library': _reply_fav_library,
-    'bias_bad_data': _reply_bias_bad_data,
-    'story_behind_name': _reply_story_behind_name,
-    'replace_developers': _reply_replace_developers,
-    'system_design': _reply_system_design,
     'why_hire': _reply_why_hire,
     'notice_period': _reply_notice_period,
+    'past_work': _reply_experience,
     'internship': _reply_internship,
     'remote': _reply_remote,
     'availability': _reply_availability,
@@ -565,7 +694,6 @@ _INTENT_BUILDERS = {
     'education': _reply_education,
     'certifications': _reply_certifications,
     'experience': _reply_experience,
-    'past_work': _reply_experience,
     'soc_copilot': _reply_soc_copilot,
     'car_sales': _reply_car_sales,
     'gate_pass': _reply_gate_pass,
@@ -580,18 +708,40 @@ _INTENT_BUILDERS = {
     'projects_general': _reply_projects_general,
     'is_ai': _reply_is_ai,
     'greeting': _reply_greeting,
-    'walle_fun': _reply_walle_fun,
     'fallback': _reply_fallback,
 }
 
+CHIP_INTENTS = {'greeting', 'fallback'}
+MAX_CHIPS = 6
+
+
+def suggested_chips():
+    return list(SuggestedQuestion.objects.filter(is_active=True).values_list('text', flat=True)[:MAX_CHIPS])
+
+
+def _response(intent, text, links, chips=False, fallback=False):
+    return {
+        'reply': text,
+        'links': [{'label': label, 'url': url} for label, url in links],
+        'chips': suggested_chips() if chips else [],
+        'intent': intent,
+        'fallback': fallback,
+    }
+
 
 def get_reply(message):
+    text = (message or '').strip().lower()
+    if not text:
+        return _response('greeting', *_reply_greeting(text), chips=True)
+    intent = _match_intent(text)
+    if intent in PENDING_REVIEW_INTENTS:
+        return _response(intent, *_reply_pending_review(text), chips=True, fallback=True)
+    builder = _INTENT_BUILDERS.get(intent, _reply_fallback)
     try:
-        text = (message or '').strip().lower()
-        if not text:
-            return _reply_fallback(text)
-        intent = _match_intent(text)
-        builder = _INTENT_BUILDERS.get(intent, _reply_fallback)
-        return builder(text)
-    except Exception as err:
-        return _reply_fallback(message or '')
+        reply, links = builder(text)
+    except Exception:
+        intent = 'fallback'
+        reply, links = _reply_fallback('')
+    is_fallback = intent == 'fallback' and reply == FALLBACK_TEXT
+    return _response(intent, reply, links, chips=intent in CHIP_INTENTS and (intent == 'greeting' or is_fallback),
+                     fallback=is_fallback)

@@ -296,6 +296,14 @@ Goal: get the latest internship live quickly and stop real experience being labe
 - Simple rate limit on `/api/chat/` using Django cache (e.g. 20 requests per minute per session). Return a friendly message when limited.
 - Keep CSRF protection on the endpoint.
 
+**Decisions confirmed by Bunny (2026-10-12) after the critique pass**
+- Split into 5a (robot, dialog, chips, links, `{reply, links, chips}`, honesty, logging, rate limit) and 5b (eval baseline from Bunny's 30 to 50 questions first, then `ChatAnswer` in admin, synonyms, fuzzy match).
+- Voice: third person ("Bunny built..."); the helper says it is scripted, not AI and not Bunny.
+- All 16 static story/opinion replies are pending review (not served); the old static skill/why-hire/project texts were replaced by data-driven replies and kept in code for review.
+- Robot parked bottom-right, 72px desktop / 56px phone; footer reserves a bottom strip. On 1360px+ screens it sits in the gutter beside content; on narrower screens it can still pass over content while scrolling.
+- Rate limit: 20/min per visitor, keyed by a salted hash of `X-Real-IP` (PythonAnywhere) or `REMOTE_ADDR`, stored only in the cache.
+- `ChatQuery`: emails/phones scrubbed, no IP, 90-day retention.
+
 **Done when**
 - Robot never covers text while idle
 - Chips work, links work, fallback offers chips

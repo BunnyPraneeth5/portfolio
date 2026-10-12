@@ -124,6 +124,19 @@ Use your superuser credentials.
 - **Nav**: the Replay link appears in the header once at least one replay is published.
 - **Backup path**: `python manage.py import_replay <project_slug> <path.json> [--publish] [--feature-on-home] [--title ...] [--order N]`.
 
+### 13. Suggested Questions (chat helper chips)
+- **Purpose**: Clickable chips shown when the chat helper opens and after an unrecognised question.
+- **Fields**: `Text`, `Order`, `Is active`. The first 6 active ones are shown.
+
+### 14. Chat Queries (read-only)
+- **Purpose**: Questions visitors asked the chat helper, to spot gaps. Filter by `Was fallback` to see what it could not answer.
+- **Privacy**: emails and phone numbers are replaced with [email] / [phone] before saving; no IP addresses are stored; rows older than 90 days are deleted automatically.
+
+**Chat helper notes**
+- The helper is rule-based (not AI) and answers in the third person from data on this site.
+- Story-style replies (hardest bug, conflict, deadlines, etc.) are switched off until you review them in Phase 5b; questions about them get "no approved answer yet" plus the chips.
+- Limit: 20 messages per minute per visitor.
+
 ## Common Administrative Tasks
 
 ### Feature a Project on Homepage
