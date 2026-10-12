@@ -79,5 +79,12 @@ Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting o
 - Note: `SiteAppearance` vars are injected into all 8 public templates + admin "Appearance" shortcut.
 - Note: fonts — Outfit/Cormorant/JetBrains via `styles.css`, Orbitron/Space Grotesk via templates; IBM Plex Sans not loaded.
 
+## Before Phase 5
+- [ ] Run a critique pass on the Phase 5 plan (robot + chatbot) first. Share findings and wait for Bunny's OK before writing any Phase 5 code.
+
+## Phase 5 (later) — tasks carried forward
+- [ ] Eval test: 30 to 50 recruiter questions, each with its expected intent. Bunny supplies the questions; do not write them.
+      **Acceptance:** one test runs every question through intent matching and reports each mismatch (question, expected, actual).
+
 ## Phase 7 (later) — notes carried forward
 - `ARCHITECTURE.md` still describes the old `ExperienceEntry` / `AdditionalCertification` fields. Rewrite with the Phase 7 docs update.
