@@ -208,10 +208,59 @@ class Project(models.Model):
     metric_2_label = models.CharField(max_length=50, blank=True)
     metric_3_value = models.CharField(max_length=20, blank=True)
     metric_3_label = models.CharField(max_length=50, blank=True)
+    case_number = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Shown as CASE FILE NO. 00X. Leave empty to hide the number.'
+    )
+    brief = models.TextField(
+        blank=True,
+        help_text='Case file "Brief". While empty, the long description is shown instead.'
+    )
+    architecture_notes = models.TextField(
+        blank=True,
+        help_text='Case file "Investigation": how it is built and why.'
+    )
+    open_leads = models.TextField(
+        blank=True,
+        help_text='Case file "Open leads": one per line.'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['order']
+
+    STATUS_STAMPS = {
+        'flagship': 'Flagship · Active',
+        'live': 'Case closed · Shipped',
+        'benchmarking': 'Active · Benchmarking',
+        'archived': 'Case closed · Archived',
+    }
+
+    @property
+    def case_label(self):
+        return f'{self.case_number:03d}' if self.case_number is not None else ''
+
+    @property
+    def status_stamp(self):
+        return self.STATUS_STAMPS.get(self.status, '')
+
+    @property
+    def brief_text(self):
+        return self.brief.strip() or self.long_description.strip()
+
+    @property
+    def open_leads_list(self):
+        return [line.strip() for line in self.open_leads.splitlines() if line.strip()]
+
+    @property
+    def metrics(self):
+        pairs = [
+            (self.metric_1_value, self.metric_1_label),
+            (self.metric_2_value, self.metric_2_label),
+            (self.metric_3_value, self.metric_3_label),
+        ]
+        return [{'value': value, 'label': label} for value, label in pairs if value]
 
     @property
     def tech_tags_list(self):
@@ -228,9 +277,39 @@ class Project(models.Model):
     @property
     def primary_live_url(self):
         return self.live_demo_url
-    
+
     def __str__(self):
         return self.title
+
+class CaseDecision(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='decisions')
+    code = models.CharField(max_length=20, help_text='e.g. D-01')
+    decision = models.TextField()
+    tradeoff = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Case decision'
+        verbose_name_plural = 'Case decisions'
+
+    def __str__(self):
+        return f'{self.project.title} {self.code}'
+
+class CaseIncident(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='incidents')
+    symptom = models.TextField()
+    root_cause = models.TextField()
+    fix = models.TextField()
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Case incident'
+        verbose_name_plural = 'Case incidents'
+
+    def __str__(self):
+        return f'{self.project.title}: {self.symptom[:40]}'
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)

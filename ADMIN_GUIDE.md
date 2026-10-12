@@ -72,6 +72,15 @@ Use your superuser credentials.
   - `Order`: Display priority (lower number appears first).
   - `Status`: Flagship, Live, Benchmarking or Archived. Shown as a badge in the roster; empty hides it. The Flagship project is the "Best work" link in the 30-second view (otherwise the first featured project).
   - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy). Metric 1 is the "Key metric" column in the roster.
+  - `Case file` (project page `/projects/<slug>/`; each section only shows when it has content):
+    - `Case number`: shown as CASE FILE NO. 00X and in the CASES / 00X breadcrumb. Empty hides the number.
+    - `Brief`: the Brief section. While empty, the `Long description` is shown instead.
+    - `Architecture notes`: the Investigation section.
+    - `Open leads`: one per line.
+  - `Status` also sets the stamp on the case file: Flagship = "Flagship · Active", Live = "Case closed · Shipped", Benchmarking = "Active · Benchmarking", Archived = "Case closed · Archived".
+  - **Case decisions** (inline, below the project form): `Code` (e.g. D-01), `Decision`, `Trade-off`, `Order`.
+  - **Case incidents** (inline): `Symptom`, `Root cause`, `Fix`, `Order`.
+  - No thumbnail: the page and the /projects/ card show a styled "Case file" placeholder.
 
 ### 5. Education Entries
 - **Purpose**: Education timeline on `/about/` page.

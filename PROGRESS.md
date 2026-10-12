@@ -4,6 +4,29 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 4: Phase 2 committed, Phase 3 implemented
+
+**Phase 2:** committed as `e9ecda3` on `redesign/phase-0`.
+
+**Phase 3:** done locally, waiting for review.
+
+**Decisions from Bunny:** Brief falls back to `long_description`; stamp wording per plan mapping; empty case number hides the number.
+
+**Done**
+- `Project` case file fields + `CaseDecision` / `CaseIncident` models, admin inlines (migration 0020). `ADMIN_GUIDE.md` updated.
+- `project_detail.html` rebuilt as a case file: top bar, title block with stamp, evidence strip, sticky section nav, sections that hide when empty, previous/next case.
+- Thumbnail fallback partial used on the case file and /projects/ cards.
+- Tests 34 → 43, all pass.
+- Browser: temporary fully-filled project checked at desktop and phone, then deleted.
+
+**Correction to Phase 1:** the dead-CSS pass removed `.project-thumbnail--soc/ml/gate/ai` because the template built those class names with `{% cycle %}`, which my scan did not detect. Visual impact was small (the base placeholder styling stayed; only the four tints were lost), and Phase 3 replaced that fallback entirely. Future CSS cleanups should also check for dynamically built class names.
+
+**Deploy note for Bunny:** back up MySQL, pull, `migrate` (0020), `collectstatic`, reload.
+
+**Next**
+- Bunny: review Phase 3; write case file content in admin (SOC Copilot first).
+- Then Phase 4 (replay feature).
+
 ## 2026-10-12 — Session 3: Phase 1 committed, Phase 2 implemented
 
 **Phase 1:** committed as `34039c1` on `redesign/phase-0`.

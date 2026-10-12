@@ -1,7 +1,7 @@
 # TASKS
 
-Current phase: **Phase 2 — Homepage rebuild (ops console)** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review.** Phase 0 and Phase 1 committed on `redesign/phase-0`.
+Current phase: **Phase 3 — Case file project pages** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phases 0 to 2 committed on `redesign/phase-0`.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -158,6 +158,31 @@ Decisions (Bunny, 2026-10-12): nav = Agents, Cases, Logs, About, Contact; replay
 - `Looking for` is empty: fill it in Site Settings to show the row.
 - Set `Status` on each project (SOC Copilot as Flagship?) so roster badges and Best work are deliberate.
 - The hero pitch (`Hero description`) is three lines with manual line breaks; the plan asks for one line.
+
+## Phase 3 — Case file project pages
+Decisions (Bunny, 2026-10-12): Brief falls back to `long_description`; stamp mapping as in the plan; empty case number hides the number.
+
+## 3.1 Models + admin
+- [x] `Project`: `case_number`, `brief`, `architecture_notes`, `open_leads` (all optional). Helpers: `case_label`, `status_stamp`, `brief_text`, `open_leads_list`, `metrics`.
+- [x] `CaseDecision` (code, decision, tradeoff, order) and `CaseIncident` (symptom, root cause, fix, order) as stacked inlines on the Project admin. "Case file" fieldset added. Migration `0020_project_case_file`.
+
+## 3.2 Case file template
+- [x] Top bar: back to roster (`/#agents`), breadcrumb CASES / 00X.
+- [x] Title block: CASE FILE NO. 00X, title, short description, status stamp.
+- [x] Evidence strip: metric tiles (metric 1 to 3), stack tags, View code / Live demo.
+- [x] Section nav (sticky on desktop, inline on phone): Brief, Investigation, Decisions, Incidents, Replay (Phase 4), Open leads. Each section and its nav link render only with content.
+- [x] Previous / next case by `order` among published projects.
+
+## 3.3 Thumbnail fallback
+- [x] `partials/case_thumb.html`: image, or a styled "Case file" placeholder. Used on the case file and the /projects/ cards (replaces the old `project-thumbnail--{soc,ml,gate,ai}` classes).
+
+## Phase 3 checks
+- [x] 43 tests pass (detail view with and without decisions/incidents, empty sections hidden, brief fallback, prev/next, 404 for unpublished, admin inlines).
+- [x] Browser: a temporary fully-filled project checked at 1440px and 390px (then deleted); SOC Copilot renders with only existing data.
+
+## Content for Bunny (Phase 3)
+- Per project: brief, architecture notes, 2 to 3 decisions, 1 to 2 incidents, open leads, and a case number if you want one. SOC Copilot first.
+- Local DB: SOC Copilot's long description is placeholder keyboard text; check production's.
 
 ## Phase 5 notes carried forward
 - The robot still sits over content (e.g. the roster's first row at 1440x900). Phase 5 parks it.

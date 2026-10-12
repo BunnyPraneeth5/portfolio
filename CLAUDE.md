@@ -8,7 +8,7 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - Chat widget: `templates/pet_widget.html` -> `POST /api/chat/` -> `portfolio/chatbot.py` (rule-based keywords, no LLM).
 
 ## Key models (`portfolio/models.py`)
-- `SiteSettings` (singleton, `load()`), `About`, `Project` (slug, `/projects/<slug>/`), `Skill`, `BlogPost`, `ContactMessage`
+- `SiteSettings` (singleton, `load()`), `About`, `Project` (slug, `/projects/<slug>/` case file; `CaseDecision`, `CaseIncident` inlines), `Skill`, `BlogPost`, `ContactMessage`
 - `ExperienceEntry` (real roles only), `Certification`, `EducationEntry`, `EventEntry`, `WhatIDo`
 
 ## Boundaries
@@ -30,4 +30,4 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - No heavy animations. Avoid the generic template look.
 
 ## Current focus
-Phase 2 implemented, waiting for Bunny's review. Next: Phase 3 (case file project pages).
+Phase 3 implemented, waiting for Bunny's review. Next: Phase 4 (replay feature).

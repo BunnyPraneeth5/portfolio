@@ -203,6 +203,11 @@ Goal: get the latest internship live quickly and stop real experience being labe
 6. Footer: previous/next case by `order`.
 7. Fix missing thumbnails: show a styled fallback if `thumbnail` is empty.
 
+**Decisions confirmed by Bunny (2026-10-12)**
+- Brief shows `brief`, falling back to the existing `long_description` while brief is empty. Investigation = `architecture_notes`.
+- Status stamps: Flagship → FLAGSHIP · ACTIVE; Live → CASE CLOSED · SHIPPED; Benchmarking → ACTIVE · BENCHMARKING; Archived → CASE CLOSED · ARCHIVED; no status → no stamp.
+- Empty `case_number` hides the number (no auto-numbering).
+
 **Done when**
 - SOC Copilot page renders fully once content is filled in admin
 - Empty sections hide cleanly

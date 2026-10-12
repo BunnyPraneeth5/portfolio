@@ -3,97 +3,190 @@
 
 {% block title %}{{ project.title }} | Karu Praneeth Kumar{% endblock %}
 
+{% block meta %}
+    {% if project.short_description %}
+    <meta name="description" content="{{ project.short_description|truncatechars:160 }}">
+    {% endif %}
+{% endblock %}
+
 {% block body_attrs %} data-chapter="projects"{% endblock %}
 
 {% block content %}
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl mx-auto">
-
-                <!-- Back button -->
-                <div class="mb-8" data-aos="fade-up">
-                    <a href="{% url 'projects' %}"
-                       class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Projects
-                    </a>
-                </div>
-
-                <!-- Project header -->
-                <div class="glass-card p-8 mb-8" data-aos="fade-up">
-
-                    {% if project.card_image %}
-                    <div class="w-full h-64 overflow-hidden rounded-xl mb-6">
-                        <img src="{{ project.card_image.url }}"
-                             alt="{{ project.title }}"
-                             class="w-full h-full object-cover">
-                    </div>
-                    {% endif %}
-
-                    <h1 class="text-3xl md:text-4xl font-display font-bold mb-4">
-                        <span>
-                            {{ project.title }}
-                        </span>
-                    </h1>
-
-                    {% if project.metric_1_value or project.metric_2_value or project.metric_3_value %}
-                    <div class="flex flex-wrap gap-6 text-sm text-gray-400 mb-6 pb-6 border-b border-gray-700/50">
-                        {% if project.metric_1_value %}
-                        <span>
-                            <span class="text-white font-semibold">{{ project.metric_1_value }}</span>
-                            {{ project.metric_1_label }}
-                        </span>
-                        {% endif %}
-                        {% if project.metric_2_value %}
-                        <span>
-                            <span class="text-white font-semibold">{{ project.metric_2_value }}</span>
-                            {{ project.metric_2_label }}
-                        </span>
-                        {% endif %}
-                        {% if project.metric_3_value %}
-                        <span>
-                            <span class="text-white font-semibold">{{ project.metric_3_value }}</span>
-                            {{ project.metric_3_label }}
-                        </span>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-
-                    <!-- Project content -->
-                    <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed mb-6">
-                        {{ project.long_description|linebreaks }}
-                    </div>
-
-                    <div class="project-tags mb-6">
-                        {% for tag in project.tech_tags_list %}
-                        <span class="project-tag">{{ tag }}</span>
-                        {% endfor %}
-                    </div>
-
-                    <div>
-                        {% if project.github_url %}
-                        <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
-                            View Code <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                        {% if project.primary_live_url %}
-                        <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
-                            Live Demo <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                    </div>
-
-                </div>
-
-                <!-- Back to list CTA -->
-                <div class="text-center" data-aos="fade-up">
-                    <a href="{% url 'projects' %}"
-                       class="btn-primary">
-                        <i class="fas fa-th-large mr-2"></i>All Projects
-                    </a>
-                </div>
-
+    <main class="case">
+        <div class="site-wrap">
+            <!-- Top bar: back + breadcrumb -->
+            <div class="case-topbar">
+                <a href="{% url 'index' %}#agents" class="label-mono case-topbar__back"><span aria-hidden="true">←</span> Back to roster</a>
+                <p class="label-mono case-topbar__crumb" aria-label="Breadcrumb">
+                    <a href="{% url 'projects' %}">Cases</a>{% if project.case_label %} / {{ project.case_label }}{% endif %}
+                </p>
             </div>
+
+            <!-- Title block -->
+            <header class="case-header">
+                <div class="case-header__text">
+                    <p class="label-mono case-header__kicker">Case file{% if project.case_label %} no. {{ project.case_label }}{% endif %}</p>
+                    <h1 class="case-title">{{ project.title }}</h1>
+                    {% if project.short_description %}
+                    <p class="case-summary">{{ project.short_description }}</p>
+                    {% endif %}
+                    {% if project.status_stamp %}
+                    <p class="case-stamp case-stamp--{{ project.status }}">{{ project.status_stamp }}</p>
+                    {% endif %}
+                </div>
+                <figure class="case-thumb">
+                    {% include 'partials/case_thumb.html' %}
+                </figure>
+            </header>
+
+            <!-- Evidence strip -->
+            {% if project.metrics or project.tech_tags_list or project.github_url or project.live_demo_url %}
+            <section class="case-evidence" aria-label="Evidence">
+                {% if project.metrics %}
+                <div class="case-evidence__metrics">
+                    {% for metric in project.metrics %}
+                    <div class="stat-tile">
+                        <span class="stat-tile__value">{{ metric.value }}</span>
+                        <span class="stat-tile__label">{{ metric.label }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if project.tech_tags_list %}
+                <div class="case-evidence__stack">
+                    <span class="label-mono">Stack</span>
+                    <ul class="case-tags">
+                        {% for tag in project.tech_tags_list %}
+                        <li class="tag">{{ tag }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% if project.github_url or project.live_demo_url %}
+                <div class="case-evidence__links">
+                    {% if project.github_url %}
+                    <a href="{{ project.github_url }}" target="_blank" rel="noopener" class="btn-ghost">View code</a>
+                    {% endif %}
+                    {% if project.live_demo_url %}
+                    <a href="{{ project.live_demo_url }}" target="_blank" rel="noopener" class="btn-ghost">Live demo</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            <!-- Sections: each renders only when it has content -->
+            {% if project.brief_text or project.architecture_notes or decisions or incidents or replay or project.open_leads_list %}
+            <div class="case-body">
+                <div class="case-nav" role="navigation" aria-label="Case file sections">
+                    <ul>
+                        {% if project.brief_text %}<li><a href="#brief">Brief</a></li>{% endif %}
+                        {% if project.architecture_notes %}<li><a href="#investigation">Investigation</a></li>{% endif %}
+                        {% if decisions %}<li><a href="#decisions">Decisions</a></li>{% endif %}
+                        {% if incidents %}<li><a href="#incidents">Incidents</a></li>{% endif %}
+                        {% if replay %}<li><a href="#replay">Replay</a></li>{% endif %}
+                        {% if project.open_leads_list %}<li><a href="#open-leads">Open leads</a></li>{% endif %}
+                    </ul>
+                </div>
+
+                <div class="case-sections">
+                    {% if project.brief_text %}
+                    <section id="brief" class="case-section" aria-labelledby="brief-heading">
+                        <h2 id="brief-heading" class="case-section__title">Brief</h2>
+                        <div class="case-prose">{{ project.brief_text|linebreaks }}</div>
+                    </section>
+                    {% endif %}
+
+                    {% if project.architecture_notes %}
+                    <section id="investigation" class="case-section" aria-labelledby="investigation-heading">
+                        <h2 id="investigation-heading" class="case-section__title">Investigation</h2>
+                        <div class="case-prose">{{ project.architecture_notes|linebreaks }}</div>
+                    </section>
+                    {% endif %}
+
+                    {% if decisions %}
+                    <section id="decisions" class="case-section" aria-labelledby="decisions-heading">
+                        <h2 id="decisions-heading" class="case-section__title">Decisions</h2>
+                        <ol class="decision-list">
+                            {% for item in decisions %}
+                            <li class="decision">
+                                <span class="decision__code">{{ item.code }}</span>
+                                <div class="decision__body">
+                                    <p class="decision__text">{{ item.decision|linebreaksbr }}</p>
+                                    {% if item.tradeoff %}
+                                    <p class="decision__tradeoff"><span class="label-mono">Trade-off</span> {{ item.tradeoff|linebreaksbr }}</p>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
+                    {% endif %}
+
+                    {% if incidents %}
+                    <section id="incidents" class="case-section" aria-labelledby="incidents-heading">
+                        <h2 id="incidents-heading" class="case-section__title">Incidents</h2>
+                        {% for item in incidents %}
+                        <div class="panel incident">
+                            <dl class="kv-list">
+                                <div class="kv-row">
+                                    <dt class="label-mono">Symptom</dt>
+                                    <dd>{{ item.symptom|linebreaksbr }}</dd>
+                                </div>
+                                <div class="kv-row">
+                                    <dt class="label-mono">Root cause</dt>
+                                    <dd>{{ item.root_cause|linebreaksbr }}</dd>
+                                </div>
+                                <div class="kv-row">
+                                    <dt class="label-mono">Fix</dt>
+                                    <dd>{{ item.fix|linebreaksbr }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        {% endfor %}
+                    </section>
+                    {% endif %}
+
+                    {% if replay %}
+                    <section id="replay" class="case-section" aria-labelledby="replay-heading">
+                        <h2 id="replay-heading" class="case-section__title">Replay</h2>
+                        <div class="panel panel--deep replay-shell">
+                            <div class="replay-shell__console" data-replay-console aria-live="polite"></div>
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    {% if project.open_leads_list %}
+                    <section id="open-leads" class="case-section" aria-labelledby="open-leads-heading">
+                        <h2 id="open-leads-heading" class="case-section__title">Open leads</h2>
+                        <ul class="lead-list">
+                            {% for lead in project.open_leads_list %}
+                            <li>{{ lead }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Previous / next case -->
+            {% if previous_case or next_case %}
+            <div class="case-pager" role="navigation" aria-label="More cases">
+                {% if previous_case %}
+                <a href="{% url 'project_detail' previous_case.slug %}" class="case-pager__link">
+                    <span class="label-mono"><span aria-hidden="true">←</span> Previous case</span>
+                    <span class="case-pager__title">{{ previous_case.title }}</span>
+                </a>
+                {% else %}<span></span>{% endif %}
+                {% if next_case %}
+                <a href="{% url 'project_detail' next_case.slug %}" class="case-pager__link case-pager__link--next">
+                    <span class="label-mono">Next case <span aria-hidden="true">→</span></span>
+                    <span class="case-pager__title">{{ next_case.title }}</span>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
     </main>
 {% endblock %}

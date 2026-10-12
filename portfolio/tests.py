@@ -10,6 +10,7 @@ from .admin import ExperienceEntryAdminForm
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     Certification, EventEntry, ExperienceEntry, SiteSettings,
+    CaseDecision, CaseIncident,
 )
 
 class PortfolioViewsTestCase(TestCase):
@@ -387,3 +388,94 @@ class CertificationDataMigrationTests(TransactionTestCase):
         css = CertificationAtStep.objects.get(title="CSS")
         self.assertEqual(css.certificate_file.name, "certificates/css.pdf")
         self.assertGreater(css.order, deloitte.order)
+
+
+class CaseFileTests(TestCase):
+    def setUp(self):
+        Project.objects.all().delete()  # drop rows seeded by migration 0008
+        self.first =Project.objects.create(title="First Case", slug="first-case", order=1)
+        self.case = Project.objects.create(
+            title="Middle Case", slug="middle-case", order=2, short_description="One line summary.",
+            status="live", case_number=3, metric_1_value="99.88%", metric_1_label="Accuracy",
+            metric_3_value="4", metric_3_label="Agents", tech_tags="Python, MCP",
+            github_url="https://github.com/example/repo")
+        self.last = Project.objects.create(title="Last Case", slug="last-case", order=3)
+        Project.objects.create(title="Hidden Case", slug="hidden-case", order=4, is_published=False)
+
+    def get(self, slug='middle-case'):
+        return self.client.get(reverse('project_detail', args=[slug]))
+
+    def test_model_helpers(self):
+        self.assertEqual(self.case.case_label, "003")
+        self.assertEqual(self.first.case_label, "")
+        self.assertEqual(self.case.status_stamp, "Case closed · Shipped")
+        self.assertEqual(self.first.status_stamp, "")
+        self.assertEqual([m['value'] for m in self.case.metrics], ["99.88%", "4"])
+        self.case.open_leads = "Lead one\n\n Lead two "
+        self.assertEqual(self.case.open_leads_list, ["Lead one", "Lead two"])
+
+    def test_title_block_and_evidence(self):
+        response = self.get()
+        self.assertContains(response, "Case file no. 003")
+        self.assertContains(response, "Cases</a> / 003")
+        self.assertContains(response, "Case closed · Shipped")
+        self.assertContains(response, "One line summary.")
+        self.assertContains(response, "99.88%")
+        self.assertContains(response, "View code")
+        self.assertContains(response, 'class="case-thumb-fallback"')
+
+    def test_empty_sections_are_hidden(self):
+        response = self.get()
+        for heading in ['Brief', 'Investigation', 'Decisions', 'Incidents', 'Replay', 'Open leads']:
+            self.assertNotContains(response, f'-heading" class="case-section__title">{heading}</h2>')
+        self.assertNotContains(response, 'class="case-nav"')
+
+    def test_sections_render_with_content(self):
+        self.case.brief = "The brief."
+        self.case.architecture_notes = "How it works."
+        self.case.open_leads = "Try a bigger model"
+        self.case.save()
+        CaseDecision.objects.create(project=self.case, code="D-02", decision="Second", order=2)
+        CaseDecision.objects.create(project=self.case, code="D-01", decision="Use MCP", tradeoff="More setup", order=1)
+        CaseIncident.objects.create(project=self.case, symptom="Hung GUI", root_cause="Race", fix="Queue")
+        response = self.get()
+        for anchor in ['#brief', '#investigation', '#decisions', '#incidents', '#open-leads']:
+            self.assertContains(response, f'href="{anchor}"')
+        self.assertNotContains(response, 'href="#replay"')
+        self.assertContains(response, "The brief.")
+        self.assertContains(response, "More setup")
+        self.assertContains(response, "Hung GUI")
+        self.assertContains(response, "Try a bigger model")
+        content = response.content.decode()
+        self.assertLess(content.index("D-01"), content.index("D-02"))
+
+    def test_brief_falls_back_to_long_description(self):
+        self.case.long_description = "Older long text."
+        self.case.save()
+        self.assertContains(self.get(), "Older long text.")
+        self.case.brief = "New brief."
+        self.case.save()
+        response = self.get()
+        self.assertContains(response, "New brief.")
+        self.assertNotContains(response, "Older long text.")
+
+    def test_previous_and_next_case(self):
+        response = self.get()
+        self.assertEqual(response.context['previous_case'].slug, "first-case")
+        self.assertEqual(response.context['next_case'].slug, "last-case")
+        self.assertIsNone(self.get('first-case').context['previous_case'])
+        # Unpublished projects are skipped.
+        self.assertIsNone(self.get('last-case').context['next_case'])
+
+    def test_unpublished_case_is_404(self):
+        self.assertEqual(self.get('hidden-case').status_code, 404)
+
+    def test_projects_list_uses_thumbnail_fallback(self):
+        response = self.client.get(reverse('projects'))
+        self.assertContains(response, 'class="case-thumb-fallback"')
+        self.assertNotContains(response, 'project-thumbnail--')
+
+    def test_admin_has_case_inlines(self):
+        from django.contrib import admin as django_admin
+        inline_models = [inline.model for inline in django_admin.site._registry[Project].inlines]
+        self.assertEqual(inline_models, [CaseDecision, CaseIncident])

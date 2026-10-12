@@ -26,13 +26,9 @@
                 <div class="secondary-project-grid gap-8">
                     {% for project in all_projects %}
                     <article class="glass-card project-card secondary-project-card" data-aos="fade-up" data-aos-delay="160">
-                        {% if project.card_image %}
                         <div class="project-thumbnail">
-                            <img src="{{ project.card_image.url }}" alt="{{ project.title }}">
+                            {% include 'partials/case_thumb.html' %}
                         </div>
-                        {% else %}
-                        <div class="project-thumbnail project-thumbnail--{% cycle 'soc' 'ml' 'gate' 'ai' %}"></div>
-                        {% endif %}
                         <div class="secondary-project-card-body">
                             {% if project.secondary_kicker %}
                             <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>

@@ -1,0 +1,8 @@
+{% if project.thumbnail %}
+<img src="{{ project.thumbnail.url }}" alt="{{ project.title }}">
+{% else %}
+<div class="case-thumb-fallback" role="img" aria-label="{{ project.title }}">
+    <span class="label-mono">{% if project.case_label %}Case {{ project.case_label }}{% else %}Case file{% endif %}</span>
+    <span class="case-thumb-fallback__title">{{ project.title }}</span>
+</div>
+{% endif %}

@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
-    Certification, SiteSettings,
+    Certification, SiteSettings, CaseDecision, CaseIncident,
 )
 
 admin.site.site_header = 'KP Portfolio Administration'
@@ -44,12 +44,25 @@ class SkillAdmin(admin.ModelAdmin):
     search_fields = ['name']
     ordering = ['category', 'order', 'name']
 
+class CaseDecisionInline(admin.StackedInline):
+    model = CaseDecision
+    extra = 0
+    fields = ('code', 'decision', 'tradeoff', 'order')
+
+
+class CaseIncidentInline(admin.StackedInline):
+    model = CaseIncident
+    extra = 0
+    fields = ('symptom', 'root_cause', 'fix', 'order')
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
+    inlines = [CaseDecisionInline, CaseIncidentInline]
     list_display = ['title', 'slug', 'status', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
     list_filter = ['status', 'is_featured', 'is_published']
     list_editable = ['status', 'is_featured', 'is_published', 'order']
-    search_fields = ['title', 'short_description', 'long_description', 'tech_tags']
+    search_fields = ['title', 'short_description', 'long_description', 'brief', 'tech_tags']
     ordering = ['order']
     prepopulated_fields = {'slug': ('title',)}
     fieldsets = (
@@ -66,6 +79,10 @@ class ProjectAdmin(admin.ModelAdmin):
                 'is_featured',
                 'is_published',
             )
+        }),
+        ('Case file', {
+            'description': 'Each section shows on the project page only when it has content. Decisions and incidents are below.',
+            'fields': ('case_number', 'brief', 'architecture_notes', 'open_leads')
         }),
         ('Links', {
             'fields': ('github_url', 'live_demo_url')

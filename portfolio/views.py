@@ -100,7 +100,17 @@ def blog_detail(request, slug):
 
 def project_detail(request, slug):
     project = get_object_or_404(Project, slug=slug, is_published=True)
-    return render(request, 'project_detail.html', {'project': project})
+    published = list(Project.objects.filter(is_published=True).order_by('order', 'id').only('pk', 'slug', 'title', 'case_number'))
+    index = next(i for i, p in enumerate(published) if p.pk == project.pk)
+    return render(request, 'project_detail.html', {
+        'project': project,
+        'decisions': list(project.decisions.all()),
+        'incidents': list(project.incidents.all()),
+        # Filled in Phase 4 (ProjectReplay); the Replay section stays hidden until then.
+        'replay': None,
+        'previous_case': published[index - 1] if index > 0 else None,
+        'next_case': published[index + 1] if index + 1 < len(published) else None,
+    })
 
 def contact_view(request):
     site_settings = SiteSettings.load()
