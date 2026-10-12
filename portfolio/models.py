@@ -287,39 +287,67 @@ class EducationEntry(models.Model):
         return f"{self.degree} - {self.institution}"
 
 class ExperienceEntry(models.Model):
-    SIDE_CHOICES = [('left', 'Left'), ('right', 'Right')]
-    
-    year_label = models.CharField(max_length=50)
+    EMPLOYMENT_TYPE_CHOICES = [
+        ('internship', 'Internship'),
+        ('part_time', 'Part-time'),
+        ('full_time', 'Full-time'),
+        ('contract', 'Contract'),
+        ('freelance', 'Freelance'),
+    ]
+
     organization = models.CharField(max_length=200)
     role = models.CharField(max_length=200)
+    employment_type = models.CharField(
+        max_length=20, choices=EMPLOYMENT_TYPE_CHOICES, default='internship')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(
+        null=True, blank=True, help_text='Leave empty if this is your current role.')
+    is_current = models.BooleanField(default=False)
+    location = models.CharField(max_length=200, blank=True)
+    is_remote = models.BooleanField(default=False)
+    summary = models.TextField(blank=True, help_text='One or two lines.')
+    highlights = models.TextField(blank=True, help_text='One bullet per line.')
+    related_project = models.ForeignKey(
+        'Project', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='experience_entries')
     tags = models.CharField(
         max_length=500, blank=True,
         help_text='Comma-separated tags e.g. Python,MCP,AI')
-    certificate_file = models.FileField(
-        upload_to='certificates/', blank=True, null=True)
-    certificate_file_2 = models.FileField(
-        upload_to='certificates/', blank=True, null=True,
-        help_text='Second certificate file if needed')
-    icon_class = models.CharField(
-        max_length=100, default='fas fa-certificate',
-        help_text='Font Awesome icon class e.g. fas fa-trophy')
-    icon_color = models.CharField(
-        max_length=50, default='text-blue-400',
-        help_text='Tailwind color class e.g. text-blue-400')
-    side = models.CharField(
-        max_length=10, choices=SIDE_CHOICES, default='left')
-    order = models.IntegerField(default=0)
-    
+    order = models.IntegerField(
+        default=0, help_text='Lower number appears first. Ties are sorted newest first.')
+
     class Meta:
-        ordering = ['order']
-        verbose_name = 'Experience / Certification Entry'
-        verbose_name_plural = 'Experience / Certification Entries'
-    
+        ordering = ['order', '-start_date']
+        verbose_name = 'Professional Experience'
+        verbose_name_plural = 'Professional Experience'
+
+    @classmethod
+    def newest_first(cls):
+        """Current roles first, then by start date, newest first. Undated rows last."""
+        return cls.objects.order_by(
+            '-is_current', models.F('start_date').desc(nulls_last=True), 'order')
+
     def get_tags_list(self):
         if self.tags:
-            return [t.strip() for t in self.tags.split(',')]
+            return [t.strip() for t in self.tags.split(',') if t.strip()]
         return []
-    
+
+    @property
+    def highlights_list(self):
+        return [line.strip() for line in self.highlights.splitlines() if line.strip()]
+
+    @property
+    def date_range_label(self):
+        if not self.start_date:
+            return ''
+        start = self.start_date.strftime('%b %Y')
+        if self.is_current:
+            return f'{start} – Present'
+        if self.end_date:
+            end = self.end_date.strftime('%b %Y')
+            return start if end == start else f'{start} – {end}'
+        return start
+
     def __str__(self):
         return f"{self.organization} - {self.role}"
 
@@ -345,25 +373,31 @@ class EventEntry(models.Model):
     def __str__(self):
         return self.title
 
-class AdditionalCertification(models.Model):
+class Certification(models.Model):
     title = models.CharField(max_length=200)
-    icon_class = models.CharField(
-        max_length=100, default='fas fa-certificate',
-        help_text='Font Awesome icon class')
-    icon_color = models.CharField(
-        max_length=50, default='text-blue-400',
-        help_text='Tailwind color class e.g. text-blue-400')
+    issuer = models.CharField(max_length=200, blank=True)
+    category = models.CharField(
+        max_length=100, blank=True,
+        help_text='Optional group label e.g. Virtual Internship')
+    issued_date = models.DateField(null=True, blank=True)
     certificate_file = models.FileField(
         upload_to='certificates/', blank=True, null=True)
-    see_experience_note = models.CharField(
-        max_length=100, blank=True,
-        help_text='If no file, show this note e.g. (See Experience)')
+    certificate_file_2 = models.FileField(
+        upload_to='certificates/', blank=True, null=True,
+        help_text='Second certificate file if needed')
+    credential_url = models.URLField(blank=True)
     order = models.IntegerField(default=0)
-    
+
     class Meta:
-        ordering = ['order']
-        verbose_name = 'Additional Certification'
-        verbose_name_plural = 'Additional Certifications'
-    
+        ordering = ['order', 'title']
+        verbose_name = 'Certification'
+        verbose_name_plural = 'Certifications'
+
+    @property
+    def has_file(self):
+        return bool(self.certificate_file or self.certificate_file_2)
+
     def __str__(self):
+        if self.issuer:
+            return f"{self.issuer} - {self.title}"
         return self.title

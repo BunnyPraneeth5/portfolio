@@ -104,6 +104,11 @@
                         {% endfor %}
                     </span>
                 </p>
+                {% if recent_experience %}
+                <p class="hero-recent mb-6" data-aos="fade-up" data-aos-delay="150">
+                    Recent: {{ recent_experience.role }} at {{ recent_experience.organization }}
+                </p>
+                {% endif %}
                 <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
                     {{ site_settings.hero_description|linebreaksbr }}
                 </p>

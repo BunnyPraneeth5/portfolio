@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage, SiteAppearance,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
-    AdditionalCertification, SiteSettings,
+    Certification, SiteSettings,
 )
 
 admin.site.site_header = 'KP Portfolio Administration'
@@ -133,22 +133,64 @@ class EducationEntryAdmin(admin.ModelAdmin):
         'degree', 'institution', 'year_range', 'order']
     list_editable = ['order']
 
+class ExperienceEntryAdminForm(forms.ModelForm):
+    class Meta:
+        model = ExperienceEntry
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['start_date'].required = True
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start_date')
+        end = cleaned.get('end_date')
+        if cleaned.get('is_current') and end:
+            self.add_error('end_date', 'Leave the end date empty for a current role.')
+        if start and end and end < start:
+            self.add_error('end_date', 'End date cannot be before the start date.')
+        return cleaned
+
 @admin.register(ExperienceEntry)
 class ExperienceEntryAdmin(admin.ModelAdmin):
+    form = ExperienceEntryAdminForm
     list_display = [
-        'organization', 'role', 'year_label', 'side', 'order']
-    list_editable = ['order', 'side']
-    list_filter = ['side']
+        'organization', 'role', 'employment_type',
+        'start_date', 'end_date', 'is_current', 'order']
+    list_editable = ['order']
+    list_filter = ['employment_type', 'is_current']
+    search_fields = ['organization', 'role', 'summary']
+    fieldsets = (
+        ('Role', {
+            'fields': ('organization', 'role', 'employment_type')
+        }),
+        ('Dates', {
+            'fields': ('start_date', 'end_date', 'is_current')
+        }),
+        ('Details', {
+            'fields': ('location', 'is_remote', 'summary', 'highlights', 'tags', 'order')
+        }),
+        ('Links', {
+            'fields': ('related_project',)
+        }),
+    )
 
 @admin.register(EventEntry)
 class EventEntryAdmin(admin.ModelAdmin):
     list_display = ['title', 'role', 'year', 'order']
     list_editable = ['order']
 
-@admin.register(AdditionalCertification)
-class AdditionalCertificationAdmin(admin.ModelAdmin):
-    list_display = ['title', 'order']
+@admin.register(Certification)
+class CertificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'issuer', 'category', 'issued_date', 'has_file', 'order']
     list_editable = ['order']
+    list_filter = ['category']
+    search_fields = ['title', 'issuer']
+
+    @admin.display(boolean=True, description='Has file')
+    def has_file(self, obj):
+        return obj.has_file
 
 @admin.register(SiteAppearance)
 class SiteAppearanceAdmin(admin.ModelAdmin):

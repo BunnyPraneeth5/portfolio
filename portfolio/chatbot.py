@@ -11,7 +11,7 @@ from collections import OrderedDict
 from django.db.models import Q
 
 from .models import (
-    About, AdditionalCertification, EducationEntry, EventEntry,
+    About, Certification, EducationEntry, EventEntry,
     ExperienceEntry, Project, Skill, SiteSettings,
 )
 
@@ -36,6 +36,10 @@ INTENT_KEYWORDS = OrderedDict([
     # Core hiring & availability logistics
     ('why_hire', ['why should we hire', 'why hire', 'why you', 'strengths', 'superpower', 'secret sauce', 'what sets you apart', 'competitive advantage', 'why choose', 'value proposition']),
     ('notice_period', ['notice period', 'when can you start', 'start date', 'join date', 'immediate', 'how soon']),
+    # Past work goes to the experience reply; must come before 'internship' (availability)
+    ('past_work', ['your experience', 'your internship', 'your internships', 'past internship', 'previous internship', 'internship experience',
+                   'where did you work', 'where have you worked', 'where do you work', 'worked at', 'work experience',
+                   'work history', 'internship history', 'professional experience', 'previous role', 'current role']),
     ('internship', ['internship', 'intern', 'stipend', 'trainee']),
     ('remote', ['remote', 'relocate', 'relocation', 'location work', 'hybrid', 'on-site', 'onsite', 'timezone']),
     ('availability', ['looking for job', 'hiring', 'available', 'open to work', 'opportunities', 'hiring status', 'full time', 'roles', 'openings']),
@@ -339,26 +343,35 @@ def _reply_specific_project(text):
 
 
 def _reply_experience(text):
-    experiences = list(ExperienceEntry.objects.all()[:3])
+    roles = list(ExperienceEntry.newest_first()[:3])
     events = list(EventEntry.objects.all()[:2])
-    if not experiences and not events:
-        return "Experience Highlights: TechTrotter 2K25 Hackathon Lead, AI/ML Engineering Projects, MCP Certification."
-    parts = []
-    for e in experiences:
-        parts.append(f"• {e.role} @ {e.organization} ({e.year_label})")
-    for ev in events:
-        parts.append(f"• {ev.title} ({ev.role}, {ev.year})")
-    return "Here is a snapshot of my experience and leadership:\n\n" + "\n".join(parts) + "\n\nYou can view my complete timeline on my /about/ page!"
+    if not roles and not events:
+        return "I haven't added my professional experience here yet. You can view my background on my /about/ page!"
+    sections = []
+    if roles:
+        lines = []
+        for index, e in enumerate(roles):
+            details = ", ".join(filter(None, [e.get_employment_type_display(), e.date_range_label]))
+            line = f"• {e.role} @ {e.organization}" + (f" ({details})" if details else "")
+            if index == 0 and e.summary:
+                line += f"\n  {e.summary}"
+            lines.append(line)
+        sections.append("Here is a snapshot of my professional experience:\n\n" + "\n".join(lines))
+    if events:
+        lines = [f"• {ev.title} ({ev.role}, {ev.year})" for ev in events]
+        sections.append("Hackathons and leadership:\n\n" + "\n".join(lines))
+    return "\n\n".join(sections) + "\n\nYou can view my complete timeline on my /about/ page!"
 
 
 def _reply_certifications(text):
-    certs = list(AdditionalCertification.objects.all())
-    if certs:
-        titles = [f"• {c.title}" for c in certs]
-        cert_str = "\n".join(titles)
-    else:
-        cert_str = "• MCP Certified (Model Context Protocol)\n• Neural Networks & ML Specialist"
-    return f"My Certifications & Credentials:\n\n{cert_str}\n\nCheck out the full list on my /about/ page!"
+    certs = list(Certification.objects.all())
+    if not certs:
+        return "I haven't listed my certifications here yet. You can view my background on my /about/ page!"
+    shown = certs[:6]
+    lines = [f"• {c.title}" + (f" ({c.issuer})" if c.issuer else "") for c in shown]
+    if len(certs) > len(shown):
+        lines.append(f"• …and {len(certs) - len(shown)} more")
+    return "My Certifications:\n\n" + "\n".join(lines) + "\n\nCheck out the full list on my /about/ page!"
 
 
 def _reply_hardest_bug(text):
@@ -552,6 +565,7 @@ _INTENT_BUILDERS = {
     'education': _reply_education,
     'certifications': _reply_certifications,
     'experience': _reply_experience,
+    'past_work': _reply_experience,
     'soc_copilot': _reply_soc_copilot,
     'car_sales': _reply_car_sales,
     'gate_pass': _reply_gate_pass,

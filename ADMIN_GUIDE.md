@@ -2,7 +2,7 @@
 
 ## ✅ Admin Dashboard Overview
 
-All models (**Site Settings**, **Site Appearance**, **About**, **Skills**, **Projects**, **Blog Posts**, **Contact Messages**, **Education**, **Experience**, **Events**, **What I Do**, **Additional Certifications**) are fully functional in the Django Admin panel.
+All models (**Site Settings**, **Site Appearance**, **About**, **Skills**, **Projects**, **Blog Posts**, **Contact Messages**, **Education**, **Professional Experience**, **Events**, **What I Do**, **Certifications**) are fully functional in the Django Admin panel.
 
 Admin Header: **KP Portfolio Administration**  
 Admin Title: **KP Admin**
@@ -82,17 +82,23 @@ Use your superuser credentials.
 - **Purpose**: Education timeline on `/about/` page.
 - **Fields**: `Degree`, `Field of study`, `Institution`, `Year range`, `Bullet 1`, `Bullet 2`, `Order`.
 
-### 7. Experience Entries
-- **Purpose**: Two-column professional experience timeline on `/about/` page.
-- **Fields**: `Organization`, `Role`, `Year label`, `Side` (left/right column), `Tags` (comma-separated), `Certificate file` uploads 1 & 2, `Order`.
+### 7. Professional Experience
+- **Purpose**: Real roles only (internships, jobs, contracts). Shown in the "Professional Experience" timeline on `/about/`. The newest role also appears on the homepage as "Recent: <role> at <organization>". The chat widget uses it for experience questions.
+- **Fields**:
+  - Role: `Organization`, `Role`, `Employment type` (Internship, Part-time, Full-time, Contract, Freelance)
+  - Dates: `Start date` (required), `End date`, `Is current` (shows "Present"; leave end date empty)
+  - Details: `Location`, `Is remote`, `Summary` (1 to 2 lines), `Highlights` (one bullet per line, shown in a collapsible "Highlights" list), `Tags` (comma-separated), `Order`
+  - Links: `Related project` (optional; adds a "See the project →" link)
+- **Order**: lower `Order` first; equal values are sorted newest first.
+- Certificates do not go here. Use **Certifications**.
 
 ### 8. Events & Leadership Entries
 - **Purpose**: Cards for hackathons, events, and leadership roles.
 - **Fields**: `Title`, `Role`, `Year`, `Location`, `Description`, `Stats 1-3` (value & label), `Order`.
 
-### 9. Additional Certifications
-- **Purpose**: Certification badge grid with direct PDF downloads.
-- **Fields**: `Title`, `Icon class` (FontAwesome, e.g., `fab fa-aws`), `Icon color` (Tailwind class), `Certificate file`, `Order`.
+### 9. Certifications
+- **Purpose**: All certificates (courses, virtual internships, badges). Shown in the "Certifications" list on `/about/` and in the chat widget.
+- **Fields**: `Title`, `Issuer`, `Category` (optional group label, e.g. Virtual Internship), `Issued date`, `Certificate file`, `Certificate file 2` (optional), `Credential URL` (optional), `Order`.
 
 ### 10. What I Do
 - **Purpose**: Checklist items under "What I Do" section on `/about/` page.

@@ -6,40 +6,38 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from . import chatbot
-from .models import About, Skill, Project, BlogPost, ContactMessage, SiteSettings
+from .models import (
+    About, Skill, Project, BlogPost, ContactMessage, SiteSettings,
+    ExperienceEntry,
+)
 
 def index(request):
     about = About.objects.first()
     skills = Skill.objects.filter(is_featured=True)
     projects = Project.objects.filter(is_featured=True, is_published=True)[:3]
-    return render(request, 'index.html', {'about': about, 'skills': skills, 'projects': projects})
+    recent_experience = ExperienceEntry.newest_first().first()
+    return render(request, 'index.html', {
+        'about': about,
+        'skills': skills,
+        'projects': projects,
+        'recent_experience': recent_experience,
+    })
 
 def about_view(request):
     from .models import (About, WhatIDo, EducationEntry,
                          ExperienceEntry, EventEntry,
-                         AdditionalCertification)
+                         Certification)
     about = About.objects.first()
     what_i_do = WhatIDo.objects.all()
     education = EducationEntry.objects.all()
-    
-    # Split experience by side for paired timeline rendering
-    experience_entries = ExperienceEntry.objects.all()
-    
-    # Group experience into pairs for the two-column timeline
-    # Each pair = (left_entry, right_entry) — either can be None
-    experience_left = experience_entries.filter(side='left')
-    experience_right = experience_entries.filter(side='right')
-    experience_all = ExperienceEntry.objects.all().order_by('order')
-    
+    experience_all = ExperienceEntry.objects.select_related('related_project')
     events = EventEntry.objects.all()
-    certifications = AdditionalCertification.objects.all()
+    certifications = Certification.objects.all()
     
     return render(request, 'about.html', {
         'about': about,
         'what_i_do': what_i_do,
         'education': education,
-        'experience_left': experience_left,
-        'experience_right': experience_right,
         'experience_all': experience_all,
         'events': events,
         'certifications': certifications,

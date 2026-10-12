@@ -108,6 +108,15 @@ Goal: get the latest internship live quickly and stop real experience being labe
 **Chatbot**
 - Update the `experience` and `certifications` replies to read from the new models (latest role first, then others; certifications as a short list). Keep wording style the same.
 
+**Decisions confirmed by Bunny (2026-10-12)**
+- All 5 existing `ExperienceEntry` rows are certificates. Data migration moves ALL `ExperienceEntry` and ALL `AdditionalCertification` rows into `Certification`. No ID matching.
+- `Certification` gets `certificate_file` + optional `certificate_file_2`, and an optional `category` (filled from old `year_label`). No splitting.
+- Drop `ExperienceEntry.side`, `icon_class`, `icon_color`, `year_label`, the certificate file fields, and `see_experience_note`. Remove unused `experience_left`/`experience_right` from `about_view`.
+- Dates nullable in DB; the `ExperienceEntry` admin form requires `start_date`.
+- Chatbot: "open to internships" stays on the `internship` intent; past-work questions ("your internship", "where did you work", "work experience") go to `experience`. Events listed after roles under "Hackathons and leadership". No hardcoded fallback content: if tables are empty, say so and point to /about/.
+- Migrations database-neutral (RunPython only, no raw SQL).
+- Also in Phase 0: delete `portfolio/_tmp_widget_smoke.py`, make `test_projects_view` create its own projects, fix the broken ✓ in `about.html` education bullets.
+
 **Content rule**
 - Only public, non-confidential details about internship work. No internal company info (funding, product plans, rollout status). Bunny writes the text.
 
@@ -123,7 +132,10 @@ Goal: get the latest internship live quickly and stop real experience being labe
 ### Phase 1: Cleanup and design system
 
 **Tasks**
-1. Delete `portfolio/_tmp_widget_smoke.py`.
+0. Convert all public templates to extend `base.html` (today every page is a standalone HTML document; `base.html` is unused and loads a different Tailwind CDN). Move shared head, nav, mobile menu, scripts and the pet widget include into `base.html`. Do this first: tasks 3 and 4 and the Phase 2 footer depend on it.
+   - Note: `SiteAppearance` CSS vars are injected into all 8 public templates (index, about, skills, projects, project_detail, blog, blog_detail, contact), not only about/blog. The admin header also links to it ("Appearance" shortcut).
+   - Note: fonts today: `styles.css` `@import`s Cormorant Garamond, Outfit and JetBrains Mono; templates also load Orbitron and Space Grotesk. IBM Plex Sans is not loaded anywhere. Body font is Outfit.
+1. ~~Delete `portfolio/_tmp_widget_smoke.py`.~~ Moved to Phase 0.
 2. Create design tokens at the top of `static/styles.css` as CSS variables:
    - `--bg #0b0c0d`, `--panel #121416`, `--panel-deep #070808`, `--line #24282c`, `--line-soft #1c1f22`
    - `--text #ece8df`, `--text-2 #c9c5bc`, `--muted #9a9790`

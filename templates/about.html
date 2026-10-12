@@ -184,10 +184,10 @@
                                 {% if entry.bullet_1 or entry.bullet_2 %}
                                 <ul class="roadmap-points">
                                     {% if entry.bullet_1 %}
-                                    <li><span class="about-check">âœ“</span>{{ entry.bullet_1 }}</li>
+                                    <li><span class="about-check">✓</span>{{ entry.bullet_1 }}</li>
                                     {% endif %}
                                     {% if entry.bullet_2 %}
-                                    <li><span class="about-check">âœ“</span>{{ entry.bullet_2 }}</li>
+                                    <li><span class="about-check">✓</span>{{ entry.bullet_2 }}</li>
                                     {% endif %}
                                 </ul>
                                 {% endif %}
@@ -247,25 +247,37 @@
                 </div>
 
                 <!-- Experience Timeline -->
+                {% if experience_all %}
                 <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
                     <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Professional Experience</h2>
                     <div class="roadmap">
                         <div class="roadmap-line"><div class="timeline-progress"></div></div>
                         {% for entry in experience_all %}
-                        <article class="roadmap-item">
+                        <article class="roadmap-item experience-item">
                             <span class="roadmap-dot"></span>
                             <div class="roadmap-side-note">
-                                <span class="roadmap-year">{{ entry.year_label }}</span>
+                                <span class="roadmap-year">{{ entry.date_range_label }}</span>
                                 <strong>{{ entry.role }}</strong>
                             </div>
                             <div class="glass-card roadmap-card">
-                                <h3>
-                                    {% if entry.icon_class %}
-                                    <i class="{{ entry.icon_class }} {% if entry.icon_color %}{{ entry.icon_color }}{% else %}text-blue-400{% endif %} mr-2"></i>
-                                    {% endif %}
-                                    {{ entry.organization }}
-                                </h3>
-                                <div class="roadmap-badge">Credential</div>
+                                <h3>{{ entry.organization }}</h3>
+                                <div class="roadmap-badge">{{ entry.get_employment_type_display }}</div>
+                                <p class="experience-meta">
+                                    {{ entry.role }}{% if entry.date_range_label %} · {{ entry.date_range_label }}{% endif %}{% if entry.location %} · {{ entry.location }}{% endif %}{% if entry.is_remote %} · Remote{% endif %}
+                                </p>
+                                {% if entry.summary %}
+                                <p class="experience-summary">{{ entry.summary|linebreaksbr }}</p>
+                                {% endif %}
+                                {% if entry.highlights_list %}
+                                <details class="experience-highlights">
+                                    <summary>Highlights</summary>
+                                    <ul class="roadmap-points">
+                                        {% for point in entry.highlights_list %}
+                                        <li><span class="about-check">✓</span>{{ point }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </details>
+                                {% endif %}
                                 {% if entry.tags %}
                                 <div>
                                     {% for tag in entry.get_tags_list %}
@@ -273,14 +285,9 @@
                                     {% endfor %}
                                 </div>
                                 {% endif %}
-                                {% if entry.certificate_file %}
-                                <a href="{{ entry.certificate_file.url }}" target="_blank" class="timeline-link">
-                                    View Certificate <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                                {% if entry.certificate_file_2 %}
-                                <a href="{{ entry.certificate_file_2.url }}" target="_blank" class="timeline-link">
-                                    View Certificate <span aria-hidden="true">→</span>
+                                {% if entry.related_project and entry.related_project.is_published %}
+                                <a href="{% url 'project_detail' entry.related_project.slug %}" class="timeline-link">
+                                    See the project <span aria-hidden="true">→</span>
                                 </a>
                                 {% endif %}
                             </div>
@@ -288,6 +295,7 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Events & Leadership -->
                 <div class="events-section mb-12" data-aos="fade-up" data-aos-delay="350">
@@ -342,30 +350,41 @@
                     {% endfor %}
                 </div>
 
-                <!-- Additional Certifications -->
+                <!-- Certifications -->
+                {% if certifications %}
                 <div class="mb-12" data-aos="fade-up" data-aos-delay="400">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Additional Certifications</h2>
+                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Certifications</h2>
                     <div class="glass-card p-6 max-w-5xl mx-auto">
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        <ul class="certification-list">
                             {% for cert in certifications %}
-                            <div class="text-center">
-                                <div class="mb-2">
-                                    <i class="{{ cert.icon_class }} text-3xl {{ cert.icon_color }} mb-2"></i>
-                                    <h4 class="font-['Orbitron'] text-lg">{{ cert.title }}</h4>
-                                </div>
-                                {% if cert.certificate_file %}
-                                <a href="{{ cert.certificate_file.url }}" target="_blank"
-                                   class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full hover:bg-blue-500/30 transition-colors inline-block">
-                                    View
-                                </a>
-                                {% elif cert.see_experience_note %}
-                                <p class="text-xs text-gray-500">{{ cert.see_experience_note }}</p>
+                            <li class="certification-item">
+                                <h4 class="font-['Orbitron'] text-lg">{{ cert.title }}</h4>
+                                {% if cert.issuer or cert.issued_date %}
+                                <p class="certification-meta">
+                                    {{ cert.issuer }}{% if cert.issuer and cert.issued_date %} · {% endif %}{% if cert.issued_date %}{{ cert.issued_date|date:"M Y" }}{% endif %}
+                                </p>
                                 {% endif %}
-                            </div>
+                                {% if cert.certificate_file %}
+                                <a href="{{ cert.certificate_file.url }}" target="_blank" rel="noopener" class="timeline-link">
+                                    View certificate <span aria-hidden="true">→</span>
+                                </a>
+                                {% endif %}
+                                {% if cert.certificate_file_2 %}
+                                <a href="{{ cert.certificate_file_2.url }}" target="_blank" rel="noopener" class="timeline-link">
+                                    View second certificate <span aria-hidden="true">→</span>
+                                </a>
+                                {% endif %}
+                                {% if cert.credential_url %}
+                                <a href="{{ cert.credential_url }}" target="_blank" rel="noopener" class="timeline-link">
+                                    Verify credential <span aria-hidden="true">→</span>
+                                </a>
+                                {% endif %}
+                            </li>
                             {% endfor %}
-                        </div>
+                        </ul>
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Call to Action -->
                 <div class="text-center" data-aos="fade-up" data-aos-delay="500">
