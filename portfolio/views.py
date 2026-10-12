@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from . import chatbot
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage, SiteSettings,
-    EducationEntry, ExperienceEntry,
+    EducationEntry, ExperienceEntry, ProjectReplay,
 )
 
 def index(request):
@@ -23,8 +23,12 @@ def index(request):
         'roster': roster,
         'flagship': flagship,
         'latest_posts': BlogPost.objects.filter(published=True)[:3],
-        # Filled in Phase 4 (ProjectReplay); the section stays hidden until then.
-        'replay_preview': None,
+        # Featured replay first; the switcher offers the rest.
+        'replays': list(
+            ProjectReplay.objects.filter(is_published=True, project__is_published=True)
+            .select_related('project')
+            .order_by('-is_featured_on_home', 'order', 'id')
+        ),
     })
 
 def about_view(request):
@@ -106,8 +110,7 @@ def project_detail(request, slug):
         'project': project,
         'decisions': list(project.decisions.all()),
         'incidents': list(project.incidents.all()),
-        # Filled in Phase 4 (ProjectReplay); the Replay section stays hidden until then.
-        'replay': None,
+        'replays': list(project.replays.filter(is_published=True).select_related('project')),
         'previous_case': published[index - 1] if index > 0 else None,
         'next_case': published[index + 1] if index + 1 < len(published) else None,
     })

@@ -251,6 +251,10 @@ Goal: get the latest internship live quickly and stop real experience being labe
 - No API keys, tokens, file paths, usernames, real IPs, emails or private data
 - Shorten long tool outputs to one-line summaries
 
+**Decisions confirmed by Bunny (2026-10-12)**
+- The shared validator also blocks obvious leaks as a safety net: emails, token-looking strings, public IPv4 (private and documentation ranges allowed). Manual checklist still applies.
+- Optional `tools/` log converter not built in this phase (raw logs never enter the repo).
+
 **Done when**
 - One SOC Copilot and one TARS replay play on the site
 - Import command rejects malformed files with a clear error

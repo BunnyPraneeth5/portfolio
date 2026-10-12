@@ -33,6 +33,7 @@
                 <div class="hidden md:flex space-x-8">
                     <a href="{% url 'index' %}#agents" class="nav-link{% if nav == 'index' %} active{% endif %}">Agents</a>
                     <a href="{% url 'projects' %}" class="nav-link{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Cases</a>
+                    {% if has_replays %}<a href="{% url 'index' %}#replay" class="nav-link">Replay</a>{% endif %}
                     <a href="{% url 'blog' %}" class="nav-link{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Logs</a>
                     <a href="{% url 'about' %}" class="nav-link{% if nav == 'about' %} active{% endif %}">About</a>
                     <a href="{% url 'contact' %}" class="nav-link{% if nav == 'contact' %} active{% endif %}">Contact</a>
@@ -49,6 +50,7 @@
         <div class="p-4">
             <a href="{% url 'index' %}#agents" class="block py-2 text-gray-300 hover:text-white{% if nav == 'index' %} active{% endif %}">Agents</a>
             <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Cases</a>
+            {% if has_replays %}<a href="{% url 'index' %}#replay" class="block py-2 text-gray-300 hover:text-white">Replay</a>{% endif %}
             <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Logs</a>
             <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'about' %} active{% endif %}">About</a>
             <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'contact' %} active{% endif %}">Contact</a>
@@ -63,6 +65,7 @@
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="{% static 'script.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
     {% include 'pet_widget.html' %}
 </body>
 </html>

@@ -141,8 +141,8 @@
         </section>
         {% endif %}
 
-        <!-- Replay preview: shell only until Phase 4 provides a replay -->
-        {% if replay_preview %}
+        <!-- Replay: recorded agent runs (featured first) -->
+        {% if replays %}
         {% include 'partials/replay_preview.html' %}
         {% endif %}
 
@@ -173,3 +173,5 @@
         {% endif %}
     </main>
 {% endblock %}
+
+{% block extra_scripts %}{% if replays %}<script src="{% static 'replay.js' %}" defer></script>{% endif %}{% endblock %}

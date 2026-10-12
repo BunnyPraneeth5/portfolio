@@ -1,7 +1,7 @@
 # TASKS
 
-Current phase: **Phase 3 — Case file project pages** (see `docs/REDESIGN_PLAN.md` §3).
-**Status: implemented, waiting for Bunny's review.** Phases 0 to 2 committed on `redesign/phase-0`.
+Current phase: **Phase 4 — Replay feature** (see `docs/REDESIGN_PLAN.md` §3).
+**Status: implemented, waiting for Bunny's review.** Phases 0 to 3 committed on `redesign/phase-0`.
 
 Status key: `[ ]` todo · `[~]` in progress · `[x]` done · `BLOCKED` waiting on Bunny
 
@@ -183,6 +183,38 @@ Decisions (Bunny, 2026-10-12): Brief falls back to `long_description`; stamp map
 ## Content for Bunny (Phase 3)
 - Per project: brief, architecture notes, 2 to 3 decisions, 1 to 2 incidents, open leads, and a case number if you want one. SOC Copilot first.
 - Local DB: SOC Copilot's long description is placeholder keyboard text; check production's.
+
+## Phase 4 — Replay feature
+Decision (Bunny, 2026-10-12): validator also blocks obvious leaks (emails, tokens, public IPs).
+
+## 4.1 Model
+- [x] `ProjectReplay` (project, title, duration_s, steps JSON, is_published default off, is_featured_on_home unique, order). Migration `0021_projectreplay`.
+
+## 4.2 Shared validator (`portfolio/replays.py`)
+- [x] Schema, kinds, time order, t within duration, 300-step cap, 500-char text cap, 512 KB file cap, readable per-step errors, leak checks.
+
+## 4.3 Admin upload
+- [x] JSON upload field on the ProjectReplay form runs the validator and fills steps (and title/duration if empty).
+
+## 4.4 Management command
+- [x] `import_replay <project_slug> <path.json>` with `--publish`, `--feature-on-home`, `--title`, `--order`; same validator; clear `CommandError` on bad files.
+
+## 4.5 Converter (optional)
+- [ ] Not built. Raw logs stay out of the repo. Revisit if Bunny wants a helper in `tools/` (git-ignored).
+
+## 4.6 Player (`static/replay.js`)
+- [x] Play/pause/resume, restart, speed 1x/2x, progress bar, steps typed in order and coloured by kind, auto-scroll, textContent only.
+- [x] `prefers-reduced-motion`: all steps shown at once, controls hidden. Server-rendered transcript works without JS.
+
+## 4.7 Placement
+- [x] Homepage Replay section (featured first, switcher when more than one), case file Replay section, Replay nav link once a replay is published. `replay.js` only loads on pages with replays.
+
+## Phase 4 checks
+- [x] 63 tests pass (validator, model, admin upload, import command, page context/escaping).
+- [x] Browser: example replay imported on two local projects (then deleted); playback, pause, speed, switcher, reduced motion and 390px layout checked.
+
+## Content for Bunny (Phase 4)
+- One sanitized SOC Copilot run and one TARS run as JSON (`docs/REPLAY_FORMAT.md`). Import, check, then publish.
 
 ## Phase 5 notes carried forward
 - The robot still sits over content (e.g. the roster's first row at 1440x900). Phase 5 parks it.

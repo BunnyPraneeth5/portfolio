@@ -311,6 +311,77 @@ class CaseIncident(models.Model):
     def __str__(self):
         return f'{self.project.title}: {self.symptom[:40]}'
 
+class ProjectReplay(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='replays')
+    title = models.CharField(max_length=200)
+    duration_s = models.PositiveIntegerField(help_text='Length of the recorded run in seconds.')
+    steps = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Filled from the uploaded JSON file. Each step: {"t", "actor", "kind", "text"}.'
+    )
+    is_published = models.BooleanField(
+        default=False,
+        help_text='Publish only after running the sanitization checklist.'
+    )
+    is_featured_on_home = models.BooleanField(
+        default=False,
+        help_text='Plays first on the homepage. Only one replay can have this on.'
+    )
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Project replay'
+        verbose_name_plural = 'Project replays'
+
+    def __str__(self):
+        return f'{self.project.title}: {self.title}'
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from .replays import ReplayValidationError, validate_replay
+
+        if self.duration_s is None:
+            return  # field-level "required" error already reported
+        try:
+            normalized = validate_replay({'title': self.title or '', 'duration_s': self.duration_s, 'steps': self.steps})
+        except ReplayValidationError as err:
+            by_field = {}
+            for message in err.messages:
+                field = 'title' if message.startswith('"title"') else 'duration_s' if message.startswith('"duration_s"') else 'steps'
+                by_field.setdefault(field, []).append(message)
+            raise ValidationError(by_field)
+        self.steps = normalized['steps']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_featured_on_home:
+            ProjectReplay.objects.exclude(pk=self.pk).filter(is_featured_on_home=True).update(is_featured_on_home=False)
+
+    @property
+    def step_count(self):
+        return len(self.steps or [])
+
+    @property
+    def duration_label(self):
+        minutes, seconds = divmod(self.duration_s or 0, 60)
+        return f'{minutes:02d}:{seconds:02d}'
+
+    @property
+    def script_id(self):
+        return f'replay-data-{self.pk}'
+
+    @property
+    def player_data(self):
+        return {
+            'title': self.title,
+            'project': self.project.title,
+            'duration_s': self.duration_s,
+            'steps': self.steps,
+        }
+
 class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)

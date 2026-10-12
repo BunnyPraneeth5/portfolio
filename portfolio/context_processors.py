@@ -1,6 +1,6 @@
 from django.templatetags.static import static
 
-from .models import SiteSettings
+from .models import ProjectReplay, SiteSettings
 
 
 def site_settings(request):
@@ -18,4 +18,6 @@ def site_settings(request):
         'site_settings': settings,
         'profile_image_url': profile_image_url,
         'resume_url': resume_url,
+        # Shows the Replay nav link once at least one replay is public.
+        'has_replays': ProjectReplay.objects.filter(is_published=True, project__is_published=True).exists(),
     }

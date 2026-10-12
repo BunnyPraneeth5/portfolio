@@ -4,6 +4,28 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-12 — Session 5: Phase 3 committed, Phase 4 implemented
+
+**Phase 3:** committed as `337bcf9` on `redesign/phase-0`.
+
+**Phase 4:** done locally, waiting for review.
+
+**Decision from Bunny:** the replay validator also blocks obvious leaks (emails, token-like strings, public IPs).
+
+**Done**
+- `ProjectReplay` model (migration 0021), shared validator `portfolio/replays.py`, admin JSON upload, `import_replay` command, player `static/replay.js`, `partials/replay_player.html`.
+- Homepage Replay section (featured first + switcher), case file Replay section, Replay nav link when a replay is published.
+- `docs/REPLAY_FORMAT.md` + illustrative `docs/examples/replay-example.json`. `ADMIN_GUIDE.md` section 12.
+- Tests 43 → 63, all pass.
+- Browser: imported the example on two local projects, checked playback/pause/2x/switcher/reduced motion/390px, then deleted them. The preview pane does not fire `requestAnimationFrame` while hidden, so timed playback was verified with a timer stand-in; a capped frame step now stops a backgrounded tab from dumping all remaining lines at once.
+- Not built: optional `tools/` log converter.
+
+**Deploy note for Bunny:** back up MySQL, pull, `migrate` (0021), `collectstatic`, reload. JSONField needs MySQL 5.7.8+ (PythonAnywhere's MySQL 8 is fine).
+
+**Next**
+- Bunny: review Phase 4; prepare sanitized SOC Copilot and TARS runs.
+- Then the "Before Phase 5" critique pass, and wait for Bunny's OK.
+
 ## 2026-10-12 — Session 4: Phase 2 committed, Phase 3 implemented
 
 **Phase 2:** committed as `e9ecda3` on `redesign/phase-0`.

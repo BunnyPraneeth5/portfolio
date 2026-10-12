@@ -1,0 +1,48 @@
+{% comment %}
+Recorded replay player. Needs `replays` (list of published ProjectReplay, first one shown).
+The first transcript is rendered server-side so it reads without JavaScript;
+static/replay.js turns it into a playable console. Steps are inserted with textContent only.
+{% endcomment %}
+{% with first=replays.0 %}
+<div class="replay-player" data-replay-player>
+    {% if replays|length > 1 %}
+    <div class="replay-switcher" role="tablist" aria-label="Choose a recorded run">
+        {% for replay in replays %}
+        <button type="button" role="tab" class="replay-switcher__tab" data-replay-index="{{ forloop.counter0 }}"
+                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">{{ replay.project.title }}</button>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="panel panel--deep replay-shell">
+        <div class="replay-shell__bar">
+            <div class="replay-shell__meta">
+                <span class="replay-badge">Recorded</span>
+                <span class="replay-shell__title" data-replay-title>{{ first.title }}</span>
+                <span class="label-mono" data-replay-meta>{{ first.project.title }} · {{ first.duration_label }}</span>
+            </div>
+            <div class="replay-controls" data-replay-controls hidden>
+                <button type="button" class="replay-btn" data-replay-play aria-label="Play">Play</button>
+                <button type="button" class="replay-btn" data-replay-restart>Restart</button>
+                <button type="button" class="replay-btn" data-replay-speed aria-label="Playback speed 1x">1x</button>
+            </div>
+        </div>
+        <div class="replay-progress" data-replay-progress-wrap hidden>
+            <div class="replay-progress__bar" data-replay-progress role="progressbar" aria-label="Replay progress"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        </div>
+        <ol class="replay-console" data-replay-console aria-label="Replay transcript">
+            {% for step in first.steps %}
+            <li class="replay-line replay-line--{{ step.kind }}">
+                <span class="replay-line__actor">{{ step.actor }}</span>
+                <span class="replay-line__text">{{ step.text }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    {% for replay in replays %}
+    {{ replay.player_data|json_script:replay.script_id }}
+    {% endfor %}
+</div>
+{% endwith %}

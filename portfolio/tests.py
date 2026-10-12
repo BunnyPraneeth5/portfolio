@@ -1,17 +1,24 @@
+import json
+import tempfile
 from datetime import date
+from io import StringIO
+from pathlib import Path
 
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase, TransactionTestCase, Client
 from django.urls import reverse
 
 from . import chatbot
-from .admin import ExperienceEntryAdminForm
+from .admin import ExperienceEntryAdminForm, ProjectReplayAdminForm
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     Certification, EventEntry, ExperienceEntry, SiteSettings,
-    CaseDecision, CaseIncident,
+    CaseDecision, CaseIncident, ProjectReplay,
 )
+from .replays import MAX_STEPS, ReplayValidationError, parse_replay_json, validate_replay
 
 class PortfolioViewsTestCase(TestCase):
     def setUp(self):
@@ -479,3 +486,223 @@ class CaseFileTests(TestCase):
         from django.contrib import admin as django_admin
         inline_models = [inline.model for inline in django_admin.site._registry[Project].inlines]
         self.assertEqual(inline_models, [CaseDecision, CaseIncident])
+
+
+def replay_doc(**overrides):
+    doc = {
+        'title': 'Example run',
+        'duration_s': 10,
+        'steps': [
+            {'t': 0, 'actor': 'orchestrator', 'kind': 'info', 'text': 'received alert'},
+            {'t': 3, 'actor': 'recon', 'kind': 'tool_call', 'text': 'lookup_ip 203.0.113.7'},
+            {'t': 7, 'actor': 'recon', 'kind': 'result', 'text': 'finding summary'},
+        ],
+    }
+    doc.update(overrides)
+    return doc
+
+
+class ReplayValidatorTests(TestCase):
+    def assertRejected(self, doc, fragment):
+        with self.assertRaises(ReplayValidationError) as ctx:
+            validate_replay(doc)
+        self.assertTrue(any(fragment in m for m in ctx.exception.messages), ctx.exception.messages)
+
+    def test_valid_document_is_normalized(self):
+        doc = replay_doc(duration_s=9.2)
+        doc['steps'][0]['extra'] = 'dropped'
+        result = validate_replay(doc)
+        self.assertEqual(result['duration_s'], 10)
+        self.assertEqual(len(result['steps']), 3)
+        self.assertNotIn('extra', result['steps'][0])
+
+    def test_rejects_unknown_kind(self):
+        doc = replay_doc()
+        doc['steps'][1]['kind'] = 'warning'
+        self.assertRejected(doc, "Step 2: unknown kind 'warning'")
+
+    def test_rejects_too_many_steps(self):
+        steps = [{'t': 0, 'actor': 'a', 'kind': 'info', 'text': 'x'}] * (MAX_STEPS + 1)
+        self.assertRejected(replay_doc(steps=steps), 'Too many steps')
+
+    def test_rejects_out_of_order_and_late_steps(self):
+        doc = replay_doc()
+        doc['steps'][2]['t'] = 1
+        self.assertRejected(doc, 'time order')
+        doc = replay_doc()
+        doc['steps'][2]['t'] = 99
+        self.assertRejected(doc, 'after "duration_s"')
+
+    def test_rejects_long_text_and_missing_fields(self):
+        doc = replay_doc()
+        doc['steps'][0]['text'] = 'x' * 501
+        self.assertRejected(doc, 'shorten it')
+        self.assertRejected(replay_doc(title=''), '"title"')
+        self.assertRejected(replay_doc(steps=[]), '"steps"')
+        self.assertRejected([], 'Top level')
+
+    def test_rejects_invalid_json(self):
+        with self.assertRaises(ReplayValidationError) as ctx:
+            parse_replay_json(b'{"title": ')
+        self.assertIn('Not valid JSON', ctx.exception.messages[0])
+
+    def test_blocks_obvious_leaks(self):
+        for text, fragment in [
+            ('mailed alice@example.com', 'email'),
+            ('key sk-abcdefghijklmnopqrstu', 'API key'),
+            ('api_key=12345', 'secret'),
+            ('lookup 8.8.8.8', 'public IP'),
+            ('hash ' + 'a' * 40, 'hex'),
+        ]:
+            doc = replay_doc()
+            doc['steps'][0]['text'] = text
+            self.assertRejected(doc, fragment)
+
+    def test_allows_private_and_documentation_ips(self):
+        doc = replay_doc()
+        doc['steps'][0]['text'] = 'from 10.0.0.4 to 192.168.1.20 via 198.51.100.23'
+        validate_replay(doc)
+
+
+class ProjectReplayModelTests(TestCase):
+    def setUp(self):
+        self.project = Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
+
+    def make(self, **kwargs):
+        data = replay_doc()
+        defaults = {'project': self.project, 'title': data['title'], 'duration_s': 10, 'steps': data['steps']}
+        defaults.update(kwargs)
+        return ProjectReplay.objects.create(**defaults)
+
+    def test_only_one_featured_on_home(self):
+        first = self.make(is_featured_on_home=True)
+        second = self.make(is_featured_on_home=True)
+        first.refresh_from_db()
+        self.assertFalse(first.is_featured_on_home)
+        self.assertTrue(second.is_featured_on_home)
+
+    def test_clean_rejects_bad_steps(self):
+        from django.core.exceptions import ValidationError
+        replay = ProjectReplay(project=self.project, title='x', duration_s=5,
+                               steps=[{'t': 0, 'actor': 'a', 'kind': 'nope', 'text': 'x'}])
+        with self.assertRaises(ValidationError) as ctx:
+            replay.full_clean()
+        self.assertIn('steps', ctx.exception.message_dict)
+
+    def test_admin_upload_fills_fields(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        upload = SimpleUploadedFile('run.json', json.dumps(replay_doc()).encode(), content_type='application/json')
+        form = ProjectReplayAdminForm(
+            data={'project': self.project.pk, 'title': '', 'duration_s': '', 'steps': '[]', 'order': 0},
+            files={'replay_file': upload})
+        self.assertTrue(form.is_valid(), form.errors)
+        replay = form.save()
+        self.assertEqual(replay.title, 'Example run')
+        self.assertEqual(replay.duration_s, 10)
+        self.assertEqual(replay.step_count, 3)
+        self.assertFalse(replay.is_published)
+
+    def test_admin_upload_rejects_bad_file(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        doc = replay_doc()
+        doc['steps'][0]['kind'] = 'bogus'
+        upload = SimpleUploadedFile('run.json', json.dumps(doc).encode(), content_type='application/json')
+        form = ProjectReplayAdminForm(
+            data={'project': self.project.pk, 'title': '', 'duration_s': '', 'steps': '[]', 'order': 0},
+            files={'replay_file': upload})
+        self.assertFalse(form.is_valid())
+        self.assertIn('unknown kind', str(form.errors['replay_file']))
+
+
+class ImportReplayCommandTests(TestCase):
+    def setUp(self):
+        self.project = Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def write(self, content):
+        path = Path(self.tmp.name) / 'run.json'
+        path.write_text(content if isinstance(content, str) else json.dumps(content), encoding='utf-8')
+        return str(path)
+
+    def test_imports_valid_file_unpublished(self):
+        out = StringIO()
+        call_command('import_replay', 'gargantua-probe', self.write(replay_doc()), stdout=out)
+        replay = ProjectReplay.objects.get()
+        self.assertEqual(replay.project, self.project)
+        self.assertFalse(replay.is_published)
+        self.assertIn('3 steps', out.getvalue())
+
+    def test_publish_and_feature_flags(self):
+        call_command('import_replay', 'gargantua-probe', self.write(replay_doc()),
+                     '--publish', '--feature-on-home', '--title', 'Custom', stdout=StringIO())
+        replay = ProjectReplay.objects.get()
+        self.assertTrue(replay.is_published)
+        self.assertTrue(replay.is_featured_on_home)
+        self.assertEqual(replay.title, 'Custom')
+
+    def test_rejects_malformed_files_with_clear_errors(self):
+        doc = replay_doc()
+        doc['steps'][1]['kind'] = 'warning'
+        with self.assertRaises(CommandError) as ctx:
+            call_command('import_replay', 'gargantua-probe', self.write(doc), stdout=StringIO())
+        self.assertIn("Step 2: unknown kind 'warning'", str(ctx.exception))
+        with self.assertRaises(CommandError) as ctx:
+            call_command('import_replay', 'gargantua-probe', self.write('{not json'), stdout=StringIO())
+        self.assertIn('Not valid JSON', str(ctx.exception))
+        self.assertEqual(ProjectReplay.objects.count(), 0)
+
+    def test_unknown_project_and_missing_file(self):
+        with self.assertRaises(CommandError):
+            call_command('import_replay', 'nope', self.write(replay_doc()), stdout=StringIO())
+        with self.assertRaises(CommandError):
+            call_command('import_replay', 'gargantua-probe', str(Path(self.tmp.name) / 'missing.json'), stdout=StringIO())
+
+
+class ReplayPageTests(TestCase):
+    def setUp(self):
+        self.project = Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
+        self.other = Project.objects.create(title="Endurance Docking", slug="endurance-docking")
+
+    def make(self, project, **kwargs):
+        data = replay_doc()
+        defaults = {'title': data['title'], 'duration_s': 10, 'steps': data['steps'], 'is_published': True}
+        defaults.update(kwargs)
+        return ProjectReplay.objects.create(project=project, **defaults)
+
+    def test_hidden_without_published_replays(self):
+        self.make(self.project, is_published=False)
+        response = self.client.get(reverse('index'))
+        self.assertNotContains(response, 'id="replay"')
+        self.assertNotContains(response, 'replay.js')
+        self.assertNotContains(response, '#replay" class="nav-link"')
+
+    def test_homepage_player_featured_first_with_switcher(self):
+        plain = self.make(self.project, title='Plain run', order=0)
+        featured = self.make(self.other, title='Featured run', order=5, is_featured_on_home=True)
+        response = self.client.get(reverse('index'))
+        self.assertEqual([r.pk for r in response.context['replays']], [featured.pk, plain.pk])
+        self.assertContains(response, 'id="replay"')
+        self.assertContains(response, 'data-replay-title>Featured run<')
+        self.assertContains(response, f'id="replay-data-{plain.pk}"')
+        self.assertContains(response, 'role="tablist"')
+        self.assertContains(response, 'replay.js')
+        self.assertContains(response, '#replay" class="nav-link"')
+
+    def test_project_page_replay_section(self):
+        self.make(self.project)
+        response = self.client.get(reverse('project_detail', args=['gargantua-probe']))
+        self.assertContains(response, 'href="#replay"')
+        self.assertContains(response, 'data-replay-player')
+        self.assertContains(response, 'finding summary')
+        other = self.client.get(reverse('project_detail', args=['endurance-docking']))
+        self.assertNotContains(other, 'data-replay-player')
+
+    def test_step_text_is_escaped(self):
+        replay = self.make(self.project)
+        replay.steps = [{'t': 0, 'actor': 'a', 'kind': 'info', 'text': '<img src=x onerror=alert(1)>'}]
+        replay.save()
+        response = self.client.get(reverse('project_detail', args=['gargantua-probe']))
+        self.assertNotContains(response, '<img src=x')
+        self.assertContains(response, '&lt;img src=x')
+        self.assertContains(response, '\\u003Cimg src=x')

@@ -4,8 +4,9 @@ from django.utils.html import format_html
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
-    Certification, SiteSettings, CaseDecision, CaseIncident,
+    Certification, SiteSettings, CaseDecision, CaseIncident, ProjectReplay,
 )
+from .replays import MAX_FILE_BYTES, ReplayValidationError, load_replay_file
 
 admin.site.site_header = 'KP Portfolio Administration'
 admin.site.site_title = 'KP Admin'
@@ -108,6 +109,82 @@ class ProjectAdmin(admin.ModelAdmin):
             )
         return "-"
     thumbnail_preview.short_description = 'Image'
+
+class ProjectReplayAdminForm(forms.ModelForm):
+    replay_file = forms.FileField(
+        required=False,
+        help_text=(
+            'Upload a sanitized .json replay ({"title", "duration_s", "steps"}). '
+            'It replaces the steps and fills title / duration if they are empty. '
+            'Checked for format, step limits and obvious leaks (emails, keys, public IPs).'
+        ),
+    )
+
+    class Meta:
+        model = ProjectReplay
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Title and duration can come from the uploaded file.
+        self.fields['title'].required = False
+        self.fields['duration_s'].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        upload = cleaned.get('replay_file')
+        if upload:
+            if upload.size > MAX_FILE_BYTES:
+                self.add_error('replay_file', f'File is larger than {MAX_FILE_BYTES // 1024} KB.')
+                return cleaned
+            try:
+                doc = load_replay_file(upload.read())
+            except ReplayValidationError as err:
+                self.add_error('replay_file', err.messages)
+                return cleaned
+            cleaned['steps'] = doc['steps']
+            if not cleaned.get('title'):
+                cleaned['title'] = doc['title']
+            if cleaned.get('duration_s') in (None, ''):
+                cleaned['duration_s'] = doc['duration_s']
+        if not cleaned.get('title'):
+            self.add_error('title', 'Enter a title or upload a replay file.')
+        if cleaned.get('duration_s') in (None, ''):
+            self.add_error('duration_s', 'Enter a duration or upload a replay file.')
+        if not upload and not cleaned.get('steps'):
+            self.add_error('replay_file', 'Upload a replay file.')
+        return cleaned
+
+
+@admin.register(ProjectReplay)
+class ProjectReplayAdmin(admin.ModelAdmin):
+    form = ProjectReplayAdminForm
+    list_display = ['title', 'project', 'step_count', 'duration_label', 'is_published', 'is_featured_on_home', 'order']
+    list_filter = ['project', 'is_published']
+    list_editable = ['is_published', 'is_featured_on_home', 'order']
+    search_fields = ['title', 'project__title']
+    fieldsets = (
+        ('Replay', {
+            'fields': ('project', 'replay_file', 'title', 'duration_s', 'order')
+        }),
+        ('Visibility', {
+            'description': 'Run the sanitization checklist before publishing: no API keys, tokens, file paths, usernames, real IPs, emails or private data; long tool outputs shortened to one line.',
+            'fields': ('is_published', 'is_featured_on_home')
+        }),
+        ('Steps (from the file)', {
+            'fields': ('steps',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    @admin.display(description='Steps')
+    def step_count(self, obj):
+        return obj.step_count
+
+    @admin.display(description='Duration')
+    def duration_label(self, obj):
+        return obj.duration_label
+
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
