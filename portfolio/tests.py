@@ -1157,3 +1157,56 @@ class Phase7Tests(TestCase):
         Skill.objects.create(name="Zeta Lang", category="languages", is_featured=True)
         response = self.client.get(reverse('skills'))
         self.assertContains(response, 'Zeta Lang <span class="tag tag--core">Core</span>')
+
+
+class Phase8FieldsTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+        self.admin = get_user_model().objects.create_superuser('boss8', 'boss8@example.com', 'unused-test-pass')
+        self.client.force_login(self.admin)
+        self.project = Project.objects.create(title="Probe", slug="probe")
+
+    def test_new_fields_start_empty(self):
+        self.assertEqual((self.project.role, self.project.year, self.project.project_type,
+                          self.project.one_liner, self.project.personal_note), ('', '', '', '', ''))
+        self.assertEqual(SiteSettings.load().currently, '')
+        about = About.objects.create(title="About", description="x")
+        self.assertEqual((about.off_duty, about.pull_quote), ('', ''))
+        self.assertFalse(Certification.objects.create(title="Cert").is_featured)
+        self.assertIsNone(BlogPost.objects.create(title="L", slug="l", content="c", excerpt="e").related_project)
+
+    def test_updated_at_is_set_on_save(self):
+        self.assertIsNotNone(self.project.updated_at)
+        settings = SiteSettings.load()
+        settings.save()
+        self.assertIsNotNone(settings.updated_at)
+
+    def test_log_keeps_existing_when_project_deleted(self):
+        post = BlogPost.objects.create(title="L", slug="l", content="c", excerpt="e", related_project=self.project)
+        self.assertEqual(list(self.project.logs.all()), [post])
+        self.project.delete()
+        post.refresh_from_db()
+        self.assertIsNone(post.related_project)
+
+    def test_admin_forms_show_new_fields(self):
+        about = About.objects.create(title="About", description="x")
+        cert = Certification.objects.create(title="Cert")
+        post = BlogPost.objects.create(title="L", slug="l", content="c", excerpt="e")
+        SiteSettings.load()
+        checks = [
+            (reverse('admin:portfolio_project_change', args=[self.project.pk]),
+             ['name="role"', 'name="year"', 'name="project_type"', 'name="one_liner"', 'name="personal_note"']),
+            (reverse('admin:portfolio_sitesettings_change', args=[1]), ['name="currently"']),
+            (reverse('admin:portfolio_about_change', args=[about.pk]), ['name="off_duty"', 'name="pull_quote"']),
+            (reverse('admin:portfolio_certification_change', args=[cert.pk]), ['name="is_featured"']),
+            (reverse('admin:portfolio_blogpost_change', args=[post.pk]), ['name="related_project"']),
+        ]
+        for url, names in checks:
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200, url)
+            for name in names:
+                self.assertContains(response, name, msg_prefix=url)
+
+    def test_public_pages_unchanged_by_new_empty_fields(self):
+        for url in [reverse('index'), reverse('about'), reverse('projects'), reverse('blog')]:
+            self.assertEqual(self.client.get(url).status_code, 200, url)

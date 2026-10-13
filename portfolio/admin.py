@@ -32,6 +32,10 @@ class AboutAdmin(admin.ModelAdmin):
                 'description'
             )
         }),
+        ('About page cards', {
+            'description': 'Each card is hidden while its field is empty.',
+            'fields': ('off_duty', 'pull_quote')
+        }),
         ('Stats', {
             'fields': (
                 ('stat_accuracy', 'stat_accuracy_label'),
@@ -85,6 +89,10 @@ class ProjectAdmin(admin.ModelAdmin):
                 'is_featured',
                 'is_published',
             )
+        }),
+        ('Case board', {
+            'description': 'Shown on the Projects page and the homepage roster. Each item is hidden while empty.',
+            'fields': ('role', 'year', 'project_type', 'one_liner', 'personal_note')
         }),
         ('Case file', {
             'description': 'Each section shows on the project page only when it has content. Decisions and incidents are below.',
@@ -294,6 +302,7 @@ class BlogPostAdmin(admin.ModelAdmin):
         'slug',
         'log_type',
         'event_date',
+        'related_project',
         'content',
         'excerpt',
         'image',
@@ -375,9 +384,9 @@ class EventEntryAdmin(admin.ModelAdmin):
 
 @admin.register(Certification)
 class CertificationAdmin(admin.ModelAdmin):
-    list_display = ['title', 'issuer', 'category', 'issued_date', 'has_file', 'order']
-    list_editable = ['order']
-    list_filter = ['category']
+    list_display = ['title', 'issuer', 'category', 'issued_date', 'has_file', 'is_featured', 'order']
+    list_editable = ['is_featured', 'order']
+    list_filter = ['category', 'is_featured']
     search_fields = ['title', 'issuer']
 
     @admin.display(boolean=True, description='Has file')
@@ -399,6 +408,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'hero_name_display',
                 'hero_roles',
                 'hero_description',
+                'currently',
                 'hero_cta_primary_label',
                 'hero_cta_primary_url',
                 'hero_cta_secondary_label',

@@ -21,6 +21,14 @@ class About(models.Model):
         default='Agentic AI Engineer · B.Tech CSE-AI · Kurnool, India'
     )
     
+    off_duty = models.CharField(
+        max_length=200, blank=True,
+        help_text='About page "Off duty" card: one line about you outside work. Hidden when empty.')
+    pull_quote = models.CharField(
+        max_length=200, blank=True,
+        help_text='About page quote card: a line from your own bio. Hidden when empty.')
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
     class Meta:
         verbose_name_plural = "About"
     
@@ -145,6 +153,10 @@ class SiteSettings(models.Model):
         blank=True,
         help_text='Shown in the homepage 30-second view, e.g. the kind of roles you want. Hidden when empty.'
     )
+    currently = models.CharField(
+        max_length=160, blank=True,
+        help_text='Homepage "Currently:" line under your title, e.g. what you are building. Hidden when empty.')
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         verbose_name = 'Site Settings'
@@ -272,7 +284,23 @@ class Project(models.Model):
         blank=True,
         help_text='Case file "Open leads": one per line.'
     )
+    role = models.CharField(
+        max_length=100, blank=True,
+        help_text='Your role on the project, e.g. Solo builder. Shown on the Case board. Hidden when empty.')
+    year = models.CharField(
+        max_length=20, blank=True,
+        help_text='e.g. 2025 or 2024-2025. Shown on the Case board and archive. Hidden when empty.')
+    project_type = models.CharField(
+        max_length=60, blank=True,
+        help_text='Short type label, e.g. Agent system. Shown on the Case board. Hidden when empty.')
+    one_liner = models.CharField(
+        max_length=120, blank=True,
+        help_text='One short line for the homepage roster. While empty, the first sentence of the short description is used.')
+    personal_note = models.CharField(
+        max_length=240, blank=True,
+        help_text='One line in your own words shown on the case file, e.g. what you would do differently. Hidden when empty.')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         ordering = ['order']
@@ -540,6 +568,9 @@ class BlogPost(models.Model):
     content = models.TextField()
     excerpt = models.TextField(max_length=300)
     image = models.ImageField(upload_to='blog/', blank=True, null=True)
+    related_project = models.ForeignKey(
+        'Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='logs',
+        help_text='Optional. Shows "Filed under CASE 00X" and lists this log on that case file.')
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -692,6 +723,9 @@ class Certification(models.Model):
         upload_to='certificates/', blank=True, null=True,
         help_text='Second certificate file if needed')
     credential_url = models.URLField(blank=True)
+    is_featured = models.BooleanField(
+        default=False,
+        help_text='Shown as a large card on the About page. The rest are listed as small chips.')
     order = models.IntegerField(default=0)
 
     class Meta:

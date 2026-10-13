@@ -351,6 +351,50 @@ Goal: get the latest internship live quickly and stop real experience being labe
 
 ---
 
+### Phase 8: Page redesigns (Case board, Home, Logs, About)
+
+Approved by Bunny on 2026-10-14 after mockups. Same stack and tokens, no new dependencies, one migration. Test projects stay published. Each step: tests, browser check at 390px and 1440px, report, commit only with Bunny's approval.
+
+**8.0 New admin fields** (migration `0027_phase8_page_fields`, all optional, blank by default so the live site is unchanged until filled)
+- `Project`: `role`, `year`, `project_type`, `one_liner` (120 chars), `personal_note`, `updated_at` (auto).
+- `SiteSettings`: `currently` (one line), `updated_at` (auto).
+- `About`: `off_duty`, `pull_quote`, `updated_at` (auto).
+- `BlogPost`: `related_project` (optional link to a project).
+- `Certification`: `is_featured`.
+- Admin fieldsets and help text; `ADMIN_GUIDE.md` updated.
+
+**8.1 Projects page as the Case board**
+- Featured cases as large numbered rows: case number, status stamp, title, role · year · type, summary, tags, evidence line (decisions, incidents, replay on file; counted from data, zeros hidden), links.
+- "Watch the run" only for projects with a real replay: streams the first steps.
+- Archive table for non-featured published projects: year, project, stack, links.
+- Fix duplicate title and joined links.
+
+**8.2 Home**
+- "Currently:" line in the hero (hidden when empty).
+- Roster shows featured projects only (fallback: first 4) with `one_liner`; link to the Case board with the total count.
+- "From the logs" as a dated list (latest 3).
+- Footer "Last updated" from the newest change across projects, logs, About and Site Settings.
+
+**8.3 Logs**
+- Index as a ledger grouped by year: type stamp, reading time (words / 200, rounded up), "Filed under CASE 00X" when linked.
+- Post page: side rail (type, date, reading time, case), reading width, older and newer links.
+- Case file: "Logs on this case" when any published log links to it.
+
+**8.4 About (mockup v2)**
+- Intro card grid: portrait, name, Now (current role), Off duty, Story (bio), quote. Empty cards hidden.
+- What I do as numbered cards in mixed sizes.
+- Work, Education and Events as three separate sections. No hardcoded labels.
+- Featured certificates as cards, the rest as chips; View only when a file or URL exists.
+- Stat tiles no longer shown (fields kept). Closing Resume and Contact cards. One column on phones.
+
+**8.5 Checks and docs**
+- Full tests, `makemigrations --check`, layout probe, contrast check, 390px and 1440px on all pages, Lighthouse on Home and Case board.
+- Update `TASKS.md`, `PROGRESS.md`, `ADMIN_GUIDE.md`, `ARCHITECTURE.md`, deploy note (migrate 0027, collectstatic, reload).
+
+**Bunny's content for Phase 8:** case numbers, statuses, featured ticks, role/year/type/one-liner per project; Currently, Off duty and quote lines; featured certificates; Cyrene AI highlights; real log posts; bio em dashes and "actively seeking" line; optional real SOC Copilot replay.
+
+---
+
 ## 4. Bunny's homework (content, can run in parallel)
 
 - [ ] Phase 0: tell Claude Code which current experience entries are real roles vs certificates

@@ -4,6 +4,18 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-14 — Session 10: Phase 7 pushed, research and mockups, Phase 8.0
+
+**Git:** Phase 7 committed and pushed (`8dd2fe2`).
+
+**Research:** Hacker News "share your site" threads and a roundup; visited chini.dev, knowshubhangi.com, brittanychiang.com, eugeneyan.com, emilkowal.ski, jesse-zhou.com, kuber.studio. Reddit was not reachable from the search tool. Takeaway: praised sites have one concept from the person's own work; ours is the ops room, so Phase 8 deepens it instead of copying.
+
+**Mockups approved by Bunny:** Case board (Projects), Home, Logs, About (card grid, v2 with separate Work / Education / Events). Plan saved as Phase 8 in `docs/REDESIGN_PLAN.md`.
+
+**Phase 8.0:** done locally, waiting for review. Migration `0027_phase8_page_fields` adds 13 optional fields (all blank, so pages are unchanged until filled). Admin fieldsets and ADMIN_GUIDE updated. Tests 114 → 119.
+
+---
+
 ## 2026-10-13 — Session 9: Phase 5b committed + pushed, Phase 7 implemented
 
 **Git:** Phase 5b committed (`fa92128`) and pushed.

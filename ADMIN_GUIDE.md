@@ -36,6 +36,7 @@ Use your superuser credentials.
   - `Hero name display`: Display name shown in the homepage hero.
   - `Hero roles`: One role per line, shown in the hero as one line joined with " · ".
   - `Hero description`: The one-line pitch under the name. Keep it short.
+  - `Currently`: One line under your title, e.g. what you are building now. Hidden when empty. (Shown from Phase 8.2.)
   - `Hero CTA primary/secondary`: Not used on the homepage since the Phase 2 rebuild (buttons are View agents, Resume, Contact).
   - `Job search mode` (one switch for the whole site):
     - **Open**: homepage shows the teal "Open to roles · <location>" line, notice period, "Open to remote" and "Looking for"; the chat helper answers availability, notice period, remote and internship questions from these fields.
@@ -53,6 +54,8 @@ Use your superuser credentials.
   - `Title`: Header text.
   - `Subtitle`: Professional tagline.
   - `Bio Paragraphs 1, 2, 3`: Separate bio text blocks.
+  - `Off duty`: One line about you outside work, shown as a card. Hidden when empty. (Shown from Phase 8.4.)
+  - `Pull quote`: A line from your own bio, shown as a quote card. Hidden when empty. (Shown from Phase 8.4.)
   - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels. Only filled values are shown on the About page; leave empty rather than guess a number.
 
 ### 3. Skills
@@ -77,6 +80,12 @@ Use your superuser credentials.
   - `Order`: Display priority (lower number appears first).
   - `Status`: Flagship, Live, Benchmarking or Archived. Shown as a badge in the roster; empty hides it. The Flagship project is the "Best work" link in the 30-second view (otherwise the first featured project).
   - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy). Metric 1 is the "Key metric" column in the roster.
+  - `Case board` (from Phase 8.1; each item hidden while empty):
+    - `Role`: your role, e.g. Solo builder.
+    - `Year`: e.g. 2025 or 2024-2025.
+    - `Project type`: short label, e.g. Agent system.
+    - `One-liner`: one short line for the homepage roster. While empty, the first sentence of the short description is used.
+    - `Personal note`: one line in your own words for the case file, e.g. what you would do differently.
   - `Case file` (project page `/projects/<slug>/`; each section only shows when it has content):
     - `Case number`: shown as CASE FILE NO. 00X and in the CASES / 00X breadcrumb. Empty hides the number.
     - `Brief`: the Brief section. While empty, the `Long description` is shown instead.
@@ -107,14 +116,14 @@ Use your superuser credentials.
 
 ### 8. Certifications
 - **Purpose**: All certificates (courses, virtual internships, badges). Shown in the "Certifications" list on `/about/` and in the chat widget.
-- **Fields**: `Title`, `Issuer`, `Category` (optional group label, e.g. Virtual Internship), `Issued date`, `Certificate file`, `Certificate file 2` (optional), `Credential URL` (optional), `Order`.
+- **Fields**: `Title`, `Issuer`, `Category` (optional group label, e.g. Virtual Internship), `Issued date`, `Certificate file`, `Certificate file 2` (optional), `Credential URL` (optional), `Is featured` (from Phase 8.4: shown as a large card on About; the rest as small chips), `Order`.
 
 ### 9. What I Do
 - **Purpose**: Checklist items under "What I Do" section on `/about/` page.
 
 ### 10. Blog Posts (shown as "Logs")
 - **Purpose**: The Logs page (`/blog/`, nav label "Logs") and the homepage "From the logs" section (latest 3).
-- **Fields**: `Title`, `Slug`, `Log type` (Decision, Incident, Build log, Note; default Note), `Event date` (logs are sorted by this, newest first), `Content` (HTML allowed), `Excerpt`, `Image`, `Published`.
+- **Fields**: `Title`, `Slug`, `Log type` (Decision, Incident, Build log, Note; default Note), `Event date` (logs are sorted by this, newest first), `Related project` (optional; from Phase 8.3 shows "Filed under CASE 00X" and lists the log on that case file), `Content` (HTML allowed), `Excerpt`, `Image`, `Published`.
 - **Filter**: the Logs page shows a filter for each type that has published posts (e.g. `/blog/?type=decision`).
 
 ### 11. Contact Messages

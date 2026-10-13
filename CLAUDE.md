@@ -31,4 +31,4 @@ Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks:
 - No heavy animations. Avoid the generic template look.
 
 ## Current focus
-Phase 7 implemented, waiting for Bunny's review. All plan phases done after that.
+Phase 8 (page redesigns) in progress, step by step. See TASKS.md.
