@@ -391,6 +391,11 @@ Approved by Bunny on 2026-10-14 after mockups. Same stack and tokens, no new dep
 - Full tests, `makemigrations --check`, layout probe, contrast check, 390px and 1440px on all pages, Lighthouse on Home and Case board.
 - Update `TASKS.md`, `PROGRESS.md`, `ADMIN_GUIDE.md`, `ARCHITECTURE.md`, deploy note (migrate 0027, collectstatic, reload).
 
+**8.6 Skills as a toolkit** (added 2026-10-14 after Bunny noticed Skills was left out)
+- Nav: Skills replaces Replay (the homepage Replay section stays).
+- Page title "Toolkit": core skills as cards, areas as cards sized by count (bigger areas first).
+- Each skill shows the published case files that use it, matched automatically against project tech tags (exact match on name parts split by `/` and `&`). No match: "No case file yet". No proficiency bars or percentages.
+
 **Bunny's content for Phase 8:** case numbers, statuses, featured ticks, role/year/type/one-liner per project; Currently, Off duty and quote lines; featured certificates; Cyrene AI highlights; real log posts; bio em dashes and "actively seeking" line; optional real SOC Copilot replay.
 
 ---

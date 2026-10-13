@@ -4,7 +4,7 @@
 {% block title %}Skills | {{ site_settings.hero_name_display }}{% endblock %}
 
 {% block meta %}
-    <meta name="description" content="Skills of {{ site_settings.hero_name_display }}, grouped by area.">
+    <meta name="description" content="Skills of {{ site_settings.hero_name_display }}, grouped by area, with the case files that use them.">
 {% endblock %}
 
 {% block body_attrs %} data-chapter="skills"{% endblock %}
@@ -13,31 +13,76 @@
     <main class="page">
         <div class="site-wrap">
             <div class="section-head">
-                <span class="label-mono">Skills{% if skills %} · {{ skills|length }} listed{% endif %}</span>
-                <h1 class="page-title">Skills</h1>
+                <span class="label-mono">Skills{% if skills %} · {{ skills|length }} listed{% if core_skills %} · {{ core_skills|length }} core{% endif %}{% endif %}</span>
+                <h1 class="page-title">Toolkit</h1>
             </div>
-            <p class="page-lead">Grouped by area. <span class="tag tag--core">Core</span> marks the core stack shown on the homepage.</p>
+            <p class="page-lead">What I work with, and where you can see it used.</p>
+
+            {% if core_skills %}
+            <section class="site-section" aria-labelledby="core-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="core-heading">Core stack</h2>
+                    <span class="label-mono">{{ core_skills|length }} core</span>
+                </div>
+                <ul class="bento skill-core">
+                    {% for skill in core_skills %}
+                    <li class="card card--gold">
+                        <span class="label-mono">{{ skill.get_category_display }}</span>
+                        <h3 class="card__title card__title--lg">{{ skill.name }}</h3>
+                        {% if skill.used_in %}
+                        <p class="label-mono skill-used__label">Used in</p>
+                        <p class="skill-used">
+                            {% for case in skill.used_in %}<a href="{% url 'project_detail' case.project.slug %}" class="text-accent">{{ case.project.title }}{% if case.count > 1 %} ×{{ case.count }}{% endif %}</a>{% if not forloop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}
+                        </p>
+                        {% else %}
+                        <p class="skill-none">No case file yet</p>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
 
             {% if grouped_skills %}
-            <div class="skill-groups">
-                {% for group in grouped_skills %}
-                <section class="panel skill-group" aria-labelledby="skills-{{ forloop.counter }}">
-                    <h2 id="skills-{{ forloop.counter }}" class="label-mono skill-group__title">{{ group.label }}</h2>
-                    <ul class="skill-group__list">
-                        {% for skill in group.items %}
-                        <li>{{ skill.name }}{% if skill.is_featured %} <span class="tag tag--core">Core</span>{% endif %}</li>
-                        {% endfor %}
-                    </ul>
-                </section>
-                {% endfor %}
-            </div>
+            <section class="site-section" aria-labelledby="areas-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="areas-heading">By area</h2>
+                    <span class="label-mono">{{ grouped_skills|length }} area{{ grouped_skills|length|pluralize }}</span>
+                </div>
+                <div class="bento skill-areas">
+                    {% for group in grouped_skills %}
+                    <section class="card skill-area" aria-labelledby="skills-{{ forloop.counter }}">
+                        <h3 id="skills-{{ forloop.counter }}" class="label-mono text-accent skill-area__title">{{ group.label }} · {{ group.items|length }}</h3>
+                        <ul class="skill-rows">
+                            {% for skill in group.items %}
+                            <li class="skill-row">
+                                <span>{{ skill.name }}{% if skill.is_featured %} <span class="tag tag--core">Core</span>{% endif %}</span>
+                                {% if skill.used_in_total == 1 %}
+                                <a href="{% url 'project_detail' skill.used_in.0.project.slug %}" class="label-mono text-accent">{{ skill.used_in.0.project.title }}</a>
+                                {% elif skill.used_in_total %}
+                                <span class="label-mono text-accent">{{ skill.used_in_total }} cases</span>
+                                {% else %}
+                                <span class="skill-none">no case yet</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                    {% endfor %}
+                </div>
+            </section>
             {% else %}
             <p class="page-lead">No skills are listed yet.</p>
             {% endif %}
 
-            <div class="page-actions">
-                <a href="{% url 'projects' %}" class="btn-primary">See them in case files</a>
-                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="btn-ghost">Resume</a>
+            <div class="bento about-close">
+                <a href="{% url 'projects' %}" class="card span-4 about-close__card">
+                    <span class="card__title">See the tools at work</span>
+                    <span class="label-mono text-accent">Case board <span aria-hidden="true">→</span></span>
+                </a>
+                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="card card--gold span-2 about-close__card about-close__card--center">
+                    <span class="label-mono text-accent">Resume <span aria-hidden="true">→</span></span>
+                </a>
             </div>
         </div>
     </main>

@@ -18,6 +18,10 @@ Newest entry at the top.
 
 **Phase 8.5:** Field note (`personal_note`) on the case file. Checks on 10 page types at 390px and 1440px: no horizontal scroll, no overflow, no text below 4.5:1 (checker validated with a planted 1.40:1 element). Lighthouse (local dev server): Home mobile 88 / desktop 98, Case board mobile 86 / desktop 96, accessibility, best practices and SEO 100. Tests 114 → 150.
 
+**Phase 8.5 gaps:** after Bunny asked for a page-by-page comparison with the mockups, fixed every code gap (committed `2a7f592`).
+
+**Phase 8.6 Skills:** Skills had been left out of Phase 8 and was unreachable (no link since the Phase 2 nav). Now in the nav in place of Replay, rebuilt as a Toolkit with automatic "Used in" matching. Tests 155 → 159.
+
 **Local data notes:** the illustrative sample replay is imported and published on SOC Copilot in the local DB only (title "Example run (illustrative only)"). Every other preview value used during checks was set with direct updates and cleared again.
 
 **Deploy note for Bunny (Phase 8)**

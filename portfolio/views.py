@@ -89,7 +89,25 @@ def skills_view(request):
         })
         grouped_skills[skill.category]['items'].append(skill)
 
-    return render(request, 'skills.html', {'skills': skills, 'grouped_skills': grouped_skills.values()})
+    # "Used in": published projects whose tech tags exactly match a part of the skill name
+    # ("Django / DRF" matches the tags Django or DRF). Same-title projects are folded together.
+    tagged = [(p, {tag.casefold() for tag in p.tech_tags_list})
+              for p in Project.objects.filter(is_published=True).order_by('order', 'id')]
+    for skill in skills:
+        parts = {part.strip().casefold() for part in re.split(r'[/&]', skill.name) if part.strip()}
+        cases = OrderedDict()
+        for project, tags in tagged:
+            if parts & tags:
+                cases.setdefault(project.title, {'project': project, 'count': 0})['count'] += 1
+        skill.used_in = list(cases.values())
+        skill.used_in_total = sum(case['count'] for case in skill.used_in)
+
+    return render(request, 'skills.html', {
+        'skills': skills,
+        'core_skills': [skill for skill in skills if skill.is_featured],
+        # Bigger areas first so the card grid fills evenly (stable for equal sizes).
+        'grouped_skills': sorted(grouped_skills.values(), key=lambda group: -len(group['items'])),
+    })
 
 def projects_view(request):
     published = Project.objects.filter(is_published=True).order_by('order', 'id')
@@ -124,7 +142,7 @@ def blog_view(request):
         for value, label in BlogPost.LOG_TYPE_CHOICES if counts.get(value)
     ]
     posts = published.filter(log_type=active_type) if active_type else published
-    posts = posts.select_related('related_project')
+    posts = posts.select_related('related_project').order_by('-event_date', '-created_at', '-pk')
     return render(request, 'blog.html', {
         'posts': posts,
         'filters': filters,
@@ -137,10 +155,14 @@ def blog_detail(request, slug):
     post = get_object_or_404(BlogPost.objects.select_related('related_project'), slug=slug, published=True)
     published = BlogPost.objects.filter(published=True).exclude(pk=post.pk)
     same_day = Q(event_date=post.event_date)
-    # Same order as the index: event date, then creation time.
-    older = published.filter(Q(event_date__lt=post.event_date) | (same_day & Q(created_at__lt=post.created_at))).first()
-    newer = (published.filter(Q(event_date__gt=post.event_date) | (same_day & Q(created_at__gt=post.created_at)))
-             .order_by('event_date', 'created_at').first())
+    same_time = same_day & Q(created_at=post.created_at)
+    # Same order as the index: event date, then creation time, then id (ties happen on Windows clocks).
+    older = (published.filter(Q(event_date__lt=post.event_date) | (same_day & Q(created_at__lt=post.created_at))
+                              | (same_time & Q(pk__lt=post.pk)))
+             .order_by('-event_date', '-created_at', '-pk').first())
+    newer = (published.filter(Q(event_date__gt=post.event_date) | (same_day & Q(created_at__gt=post.created_at))
+                              | (same_time & Q(pk__gt=post.pk)))
+             .order_by('event_date', 'created_at', 'pk').first())
     return render(request, 'blog_detail.html', {'post': post, 'older_post': older, 'newer_post': newer})
 
 def project_detail(request, slug):

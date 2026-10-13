@@ -59,11 +59,12 @@ Use your superuser credentials.
   - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels. Not shown on the site since Phase 8.4; kept in admin for reference.
 
 ### 3. Skills
-- **Purpose**: Categorized skill matrix displayed on `/skills/` page and featured on homepage.
+- **Purpose**: The Toolkit page (`/skills/`, nav label "Skills") and the homepage "Core stack" row.
+- **Used in (automatic)**: each skill lists the published projects whose `Tech tags` exactly match a part of the skill name (split on `/` and `&`, case-insensitive). "Django / DRF" matches projects tagged `Django` or `DRF`. A skill named "N8N Automation" only matches a project tagged `N8N Automation`, so keep skill names and tags consistent. No match shows "No case file yet".
 - **Fields**:
   - `Name`: Skill title (e.g., "Django", "PyTorch").
   - `Category`: `Agentic AI & MCP`, `ML & Data`, `Web & APIs`, `Languages`, `Security`, `Tools`, `Soft Skills`.
-  - `Is featured`: Shown as "Core stack" in the homepage 30-second view (first 8).
+  - `Is featured`: Core skill. Large card on the Toolkit page and "Core stack" in the homepage 30-second view (first 8).
   - `Order`: Sorting position.
 - **Inline Editing**: Category, Is Featured, and Order can be edited directly in the list view.
 

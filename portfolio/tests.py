@@ -706,7 +706,7 @@ class ReplayPageTests(TestCase):
         self.assertContains(response, f'id="replay-data-{plain.pk}"')
         self.assertContains(response, 'role="tablist"')
         self.assertContains(response, 'replay.js')
-        self.assertContains(response, '#replay" class="nav-link"')
+        self.assertNotContains(response, '#replay" class="nav-link"')
 
     def test_project_page_replay_section(self):
         self.make(self.project)
@@ -1368,12 +1368,14 @@ class HomePhase8Tests(TestCase):
         self.assertContains(response, "Last updated")
         self.assertContains(response, newest.strftime("%d %b %Y"))
 
-    def test_projects_page_keeps_replay_nav_link(self):
-        replay = ProjectReplay.objects.create(project=self.b, title="Run", duration_s=1, is_published=True,
-                                              steps=[{"t": 0, "actor": "a", "kind": "info", "text": "x"}])
+    def test_nav_has_skills_not_replay(self):
+        ProjectReplay.objects.create(project=self.b, title="Run", duration_s=1, is_published=True,
+                                     steps=[{"t": 0, "actor": "a", "kind": "info", "text": "x"}])
         response = self.client.get(reverse('projects'))
-        self.assertContains(response, 'href="/#replay"')
+        self.assertNotContains(response, 'href="/#replay"')
+        self.assertContains(response, 'href="/skills/" class="nav-link"')
         self.assertNotContains(response, "Watch the run")
+        self.assertContains(self.client.get(reverse('skills')), 'href="/skills/" class="nav-link active"')
 
 
 
@@ -1568,3 +1570,65 @@ class MockupGapTests(TestCase):
     def test_footer_last_updated_sits_with_links(self):
         html = self.client.get(reverse('contact')).content.decode()
         self.assertLess(html.index('site-footer__end'), html.index('Last updated'))
+
+
+
+class SkillsToolkitTests(TestCase):
+    def setUp(self):
+        Skill.objects.all().delete()
+        Project.objects.update(is_published=False)
+        self.soc = Project.objects.create(title="SOC Bot", slug="soc-bot", tech_tags="Python, MCP, Scikit-learn")
+        Project.objects.create(title="Gate", slug="gate", tech_tags="Django, Python")
+        Project.objects.create(title="Dup", slug="dup-1", tech_tags="Django")
+        Project.objects.create(title="Dup", slug="dup-2", tech_tags="Django")
+        Project.objects.create(title="Hidden", slug="hidden", tech_tags="Python", is_published=False)
+        Skill.objects.create(name="Python", category="languages", is_featured=True)
+        Skill.objects.create(name="MCP / Agentic AI", category="agentic", is_featured=True)
+        Skill.objects.create(name="Django / DRF", category="web", is_featured=True)
+        Skill.objects.create(name="HTML/CSS", category="web")
+        Skill.objects.create(name="Scikit-Learn", category="ml")
+        Skill.objects.create(name="ML", category="ml")
+
+    def skills(self):
+        return {s.name: s for s in self.client.get(reverse('skills')).context['skills']}
+
+    def test_exact_part_matching_only_published(self):
+        skills = self.skills()
+        self.assertEqual([c['project'].title for c in skills["Python"].used_in], ["SOC Bot", "Gate"])
+        self.assertEqual([c['project'].title for c in skills["MCP / Agentic AI"].used_in], ["SOC Bot"])
+        self.assertEqual(skills["Scikit-Learn"].used_in_total, 1)
+        self.assertEqual(skills["HTML/CSS"].used_in, [])
+        self.assertEqual(skills["ML"].used_in, [])
+
+    def test_same_title_projects_fold_together(self):
+        django = self.skills()["Django / DRF"]
+        self.assertEqual([(c['project'].title, c['count']) for c in django.used_in], [("Gate", 1), ("Dup", 2)])
+        self.assertEqual(django.used_in_total, 3)
+
+    def test_page_shows_core_cards_and_honest_empty_state(self):
+        response = self.client.get(reverse('skills'))
+        self.assertContains(response, "Toolkit</h1>")
+        self.assertContains(response, "6 listed · 3 core")
+        self.assertContains(response, 'href="/projects/soc-bot/"')
+        self.assertContains(response, "Dup ×2")
+        self.assertContains(response, "no case yet")
+        self.assertContains(response, "3 cases")
+
+    def test_bigger_areas_first(self):
+        labels = [g['label'] for g in self.client.get(reverse('skills')).context['grouped_skills']]
+        self.assertEqual(labels[:2], ["ML & Data", "Web & APIs"])
+
+
+
+class LogTieBreakTests(TestCase):
+    def test_identical_timestamps_still_chain(self):
+        BlogPost.objects.all().delete()
+        stamp = timezone.now()
+        posts = [BlogPost.objects.create(title="T%d" % i, slug="t-%d" % i, content="c", excerpt="e",
+                                         published=True, event_date=date(2026, 1, 1)) for i in range(3)]
+        BlogPost.objects.update(created_at=stamp)
+        middle = self.client.get(reverse('blog_detail', args=['t-1'])).context
+        self.assertEqual(middle['older_post'].slug, 't-0')
+        self.assertEqual(middle['newer_post'].slug, 't-2')
+        index = [p.slug for p in self.client.get(reverse('blog')).context['posts']]
+        self.assertEqual(index, ['t-2', 't-1', 't-0'])

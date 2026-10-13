@@ -34,7 +34,7 @@ On every request:
 | --- | --- | --- |
 | `/` | `index` | `index.html` |
 | `/about/` | `about_view` | `about.html` |
-| `/skills/` | `skills_view` | `skills.html` |
+| `/skills/` | `skills_view` | `skills.html` (Toolkit: core cards and areas, each skill with the published cases whose tags match it) |
 | `/projects/` | `projects_view` | `projects.html` (Case board: featured cases + archive table) |
 | `/projects/<slug>/` | `project_detail` | `project_detail.html` (case file) |
 | `/blog/` | `blog_view` | `blog.html` (logs, grouped by year) |

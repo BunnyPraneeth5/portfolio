@@ -2,7 +2,7 @@ from django.db.models import Max
 from django.templatetags.static import static
 from django.utils.html import strip_tags
 
-from .models import About, BlogPost, Project, ProjectReplay, SiteSettings
+from .models import About, BlogPost, Project, SiteSettings
 
 
 def get_resume_url(settings):
@@ -44,8 +44,6 @@ def site_settings(request):
         'resume_url': resume_url,
         # Callable: the template calls it once, in the footer.
         'site_last_updated': lambda: last_updated(settings),
-        # Shows the Replay nav link once at least one replay is public.
-        'has_replays': ProjectReplay.objects.filter(is_published=True, project__is_published=True).exists(),
     }
 
 
