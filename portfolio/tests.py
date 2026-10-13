@@ -1632,3 +1632,39 @@ class LogTieBreakTests(TestCase):
         self.assertEqual(middle['newer_post'].slug, 't-2')
         index = [p.slug for p in self.client.get(reverse('blog')).context['posts']]
         self.assertEqual(index, ['t-2', 't-1', 't-0'])
+
+
+class DatabaseSwitchTests(TestCase):
+    def build(self, env, debug=True):
+        from config.database import database_settings
+        return database_settings(env, Path('/base'), debug)['default']
+
+    def test_default_is_sqlite(self):
+        db = self.build({})
+        self.assertEqual(db['ENGINE'], 'django.db.backends.sqlite3')
+        self.assertEqual(db['NAME'], Path('/base') / 'db.sqlite3')
+
+    def test_db_name_alone_does_not_switch(self):
+        self.assertEqual(self.build({'DB_NAME': 'x'})['ENGINE'], 'django.db.backends.sqlite3')
+
+    def test_mysql_from_env(self):
+        db = self.build({'DB_ENGINE': 'MySQL', 'DB_NAME': 'u$db', 'DB_USER': 'u', 'DB_PASSWORD': 'p',
+                         'DB_HOST': 'h'}, debug=False)
+        self.assertEqual(db['ENGINE'], 'django.db.backends.mysql')
+        self.assertEqual((db['NAME'], db['USER'], db['HOST'], db['PORT']), ('u$db', 'u', 'h', '3306'))
+
+    def test_mysql_missing_values_fail_loudly(self):
+        from django.core.exceptions import ImproperlyConfigured
+        with self.assertRaisesMessage(ImproperlyConfigured, 'DB_PASSWORD, DB_HOST'):
+            self.build({'DB_ENGINE': 'mysql', 'DB_NAME': 'n', 'DB_USER': 'u'})
+
+    def test_production_refuses_silent_sqlite(self):
+        from django.core.exceptions import ImproperlyConfigured
+        with self.assertRaises(ImproperlyConfigured):
+            self.build({}, debug=False)
+        self.assertEqual(self.build({'ALLOW_SQLITE': 'True'}, debug=False)['ENGINE'], 'django.db.backends.sqlite3')
+
+    def test_unknown_engine_fails(self):
+        from django.core.exceptions import ImproperlyConfigured
+        with self.assertRaises(ImproperlyConfigured):
+            self.build({'DB_ENGINE': 'firebase'})

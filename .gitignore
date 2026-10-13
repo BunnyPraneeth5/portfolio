@@ -51,3 +51,6 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# Content exports from production (may contain personal data)
+exports/

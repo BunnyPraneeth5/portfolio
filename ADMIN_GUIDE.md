@@ -137,7 +137,7 @@ Use your superuser credentials.
 - **Add one**: pick the project, upload a sanitized `.json` file, save. Title and duration fill from the file if empty. Format and rules: `docs/REPLAY_FORMAT.md`.
 - **Checks on upload**: format, kinds (`info`, `tool_call`, `result`, `error`), max 300 steps, max 500 characters per step, and obvious leaks (emails, keys/tokens, public IPs). Errors name the step and the fix.
 - **Fields**: `Project`, `Replay file` (upload), `Title`, `Duration (s)`, `Order`, `Is published` (off by default; turn on after the sanitization checklist), `Is featured on home` (plays first on the homepage; only one at a time), `Steps` (filled from the file).
-- **Nav**: the Replay link appears in the header once at least one replay is published.
+- **Nav**: since Phase 8.6 the nav shows Skills instead of Replay; the homepage Replay section still appears once a replay is published.
 - **Backup path**: `python manage.py import_replay <project_slug> <path.json> [--publish] [--feature-on-home] [--title ...] [--order N]`.
 
 ### 13. Suggested Questions (chat helper chips)

@@ -2,7 +2,7 @@
 
 ## Before Deployment
 
-- [ ] Create `.env` file (or update `config/settings.py`) with your MySQL credentials
+- [ ] Create `.env` with `DB_ENGINE=mysql` and your MySQL credentials (see `PYTHONANYWHERE_DEPLOY.md` Step 2)
 - [ ] Set `SECRET_KEY` and `DEBUG=False` in environment / settings
 - [ ] Update `ALLOWED_HOSTS` with your PythonAnywhere domain (`your_username.pythonanywhere.com`)
 - [ ] Install mysqlclient dependency (`pip install mysqlclient`)

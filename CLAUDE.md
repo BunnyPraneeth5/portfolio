@@ -3,7 +3,7 @@
 Portfolio for Karu Praneeth Kumar (Bunny). Plan: `docs/REDESIGN_PLAN.md`. Tasks: `TASKS.md`. Log: `PROGRESS.md`. Decisions: `DECISIONS.md`.
 
 ## Stack
-- Django 5.2, project `config`, single app `portfolio`. Venv: `venv/Scripts/python.exe`. SQLite locally, MySQL on PythonAnywhere (DB switched by hand in `config/settings.py`).
+- Django 5.2, project `config`, single app `portfolio`. Venv: `venv/Scripts/python.exe`. SQLite locally, MySQL on PythonAnywhere, chosen by `DB_ENGINE` in `.env` (`config/database.py`).
 - Pages in `templates/` extend `base.html` (head, nav, scripts, pet widget). CSS in `static/styles.css` (design tokens at the top; use them, no new hardcoded colours), admin CSS in `static/admin.css`. No CSS/JS libraries (Google Fonts only). Vanilla JS, no build step. Full contact section only on home, case files and logs.
 - Chat helper: `templates/pet_widget.html` + `static/chat_widget.js` -> `POST /api/chat/` -> `portfolio/chatbot.py`. Topics/keywords/answers live in `ChatAnswer` (admin); eval set in `portfolio/chat_eval.py`. Respect `SiteSettings.job_search_mode`.
 - Replays: `ProjectReplay` + shared validator `portfolio/replays.py` (admin upload and `import_replay` command), player `static/replay.js`. Format: `docs/REPLAY_FORMAT.md`.

@@ -12,7 +12,8 @@ A personal portfolio built with Django. One app (`portfolio`) renders server-sid
 
 ### Databases
 * SQLite (`db.sqlite3`) for local development.
-* MySQL on PythonAnywhere. The database block is switched by hand in `config/settings.py`.
+* MySQL on PythonAnywhere.
+* `config/database.py` picks the database from `DB_ENGINE` (`sqlite` default, or `mysql` with `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`). With `DEBUG=False` an unset `DB_ENGINE` is an error, not a silent SQLite file. `config/settings.py` loads `.env` for both `manage.py` and the WSGI app.
 
 ### Hosting
 PythonAnywhere (`bunnypraneeth.pythonanywhere.com`) through the WSGI entry point `config/wsgi.py`. `DEBUG`, `SECRET_KEY` and `ALLOWED_HOSTS` come from the environment.
@@ -100,7 +101,7 @@ Every model above is registered in `portfolio/admin.py`. `SiteSettings` is a sin
 * With `DEBUG=True`, Django serves static and media files itself.
 
 ### Environment variables (names from `.env.example`)
-`DEBUG`, `SECRET_KEY`, `ALLOWED_HOSTS`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`.
+`DEBUG`, `SECRET_KEY`, `ALLOWED_HOSTS`, `DB_ENGINE`, `ALLOW_SQLITE` (optional), `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`.
 
 ---
 
@@ -110,7 +111,6 @@ Every model above is registered in `portfolio/admin.py`. `SiteSettings` is a sin
 
 * `SECURE_PROXY_SSL_HEADER` is not set. Behind the PythonAnywhere proxy, `request.build_absolute_uri()` may produce `http://` URLs, which affects `og:url` and `og:image`.
 * Text compression (gzip) is a server setting and is not handled by the app.
-* The database engine is switched by hand in `config/settings.py`.
 
 ---
 
