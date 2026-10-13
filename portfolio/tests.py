@@ -17,7 +17,7 @@ from . import chatbot
 from .admin import ExperienceEntryAdminForm, ProjectReplayAdminForm
 from .models import (
     About, Skill, Project, BlogPost, ContactMessage,
-    Certification, EventEntry, ExperienceEntry, SiteSettings,
+    Certification, EducationEntry, EventEntry, ExperienceEntry, SiteSettings,
     CaseDecision, CaseIncident, ProjectReplay, SuggestedQuestion, ChatQuery, ChatAnswer,
 )
 from .replays import MAX_STEPS, ReplayValidationError, parse_replay_json, validate_replay
@@ -293,16 +293,17 @@ class AboutAndHomeExperienceTests(TestCase):
 
     def test_about_shows_experience_and_certifications(self):
         response = self.client.get(reverse('about'))
-        self.assertContains(response, "Professional Experience")
+        self.assertContains(response, 'id="work-heading">Work</h2>')
         self.assertContains(response, "Lazarus Labs")
         self.assertContains(response, "Internship")
         self.assertContains(response, "Mar 2026 – Present")
         self.assertContains(response, "Remote")
         self.assertContains(response, "Built docking tools.")
-        self.assertContains(response, '<details class="experience-highlights">')
+        self.assertContains(response, "Highlights")
         self.assertContains(response, "Shipped thing two")
+        self.assertContains(response, "since Mar 2026")
         self.assertContains(response, reverse('project_detail', args=['gargantua-probe']))
-        self.assertContains(response, "Certifications</h2>")
+        self.assertContains(response, "Courses and certificates</h2>")
         self.assertContains(response, "HackerRank · May 2025")
         self.assertContains(response, "View certificate")
         self.assertNotContains(response, "Credential")
@@ -318,8 +319,8 @@ class AboutAndHomeExperienceTests(TestCase):
         Certification.objects.all().delete()
         response = self.client.get(reverse('about'))
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Professional Experience")
-        self.assertNotContains(response, "Certifications</h2>")
+        self.assertNotContains(response, 'id="work-heading"')
+        self.assertNotContains(response, "Courses and certificates</h2>")
 
     def test_home_shows_recent_role(self):
         ExperienceEntry.objects.create(
@@ -1439,3 +1440,82 @@ class LogsPhase8Tests(TestCase):
         self.assertEqual([p.title for p in response.context['case_logs']], ["Second log"])
         other = Project.objects.create(title="Other Case", slug="other-case")
         self.assertNotContains(self.client.get(reverse('project_detail', args=['other-case'])), 'Logs on this case')
+
+
+
+class AboutPhase8Tests(TestCase):
+    def setUp(self):
+        self.about = About.objects.create(title="About", description="Lead paragraph.",
+                                          bio_paragraph_1="Second paragraph.", stat_accuracy="99%")
+        EducationEntry.objects.create(year_range="2022-2026", degree="B.Tech", field_of_study="CS",
+                                      institution="Some College", bullet_1="Focus one")
+        EventEntry.objects.create(title="Hack Night", role="Lead", year="2025", location="Kurnool",
+                                  description="", stat_1_value="25+", stat_1_label="Teams")
+        self.cert_a = Certification.objects.create(title="Featured Cert", issuer="Acme", is_featured=True,
+                                                   credential_url="https://example.com/verify")
+        self.cert_b = Certification.objects.create(title="Plain Cert", issuer="Other")
+
+    def get(self):
+        return self.client.get(reverse('about'))
+
+    def test_story_splits_lead_and_rest(self):
+        response = self.get()
+        self.assertEqual(response.context['story_lead'], ["Lead paragraph."])
+        self.assertEqual(response.context['story_more'], ["Second paragraph."])
+        self.assertContains(response, "Read the full story")
+
+    def test_optional_cards_hidden_when_empty(self):
+        response = self.get()
+        self.assertNotContains(response, "Off duty")
+        self.assertNotContains(response, "about-card--quote")
+        self.assertContains(response, "about-card--story span-6")
+        About.objects.filter(pk=self.about.pk).update(off_duty="Plays chess", pull_quote="Ship small")
+        response = self.get()
+        self.assertContains(response, "Plays chess")
+        self.assertContains(response, '"Ship small"')
+        self.assertContains(response, "about-card--story span-4")
+
+    def test_now_card_from_current_role(self):
+        self.assertNotContains(self.get(), '>Now<')
+        ExperienceEntry.objects.create(organization="Lab", role="Intern", employment_type="internship",
+                                       start_date=date(2026, 8, 1), is_current=True)
+        response = self.get()
+        self.assertContains(response, '>Now<')
+        self.assertContains(response, "Lab · since Aug 2026")
+        self.assertContains(response, 'entry__badge--current">Current<')
+
+    def test_work_education_events_are_separate_sections(self):
+        ExperienceEntry.objects.create(organization="Lab", role="Intern", employment_type="internship")
+        response = self.get()
+        for heading in ['id="work-heading"', 'id="education-heading"', 'id="events-heading"']:
+            self.assertContains(response, heading)
+        self.assertContains(response, "Hack Night")
+        self.assertContains(response, '<span class="event-card__stat">25+</span>', html=True)
+
+    def test_featured_certs_as_cards_rest_as_chips(self):
+        response = self.get()
+        self.assertEqual(response.context['featured_certs'], [self.cert_a])
+        self.assertEqual(response.context['other_certs'], [self.cert_b])
+        self.assertContains(response, "Certifications · 2 on file")
+        self.assertContains(response, 'href="https://example.com/verify"')
+        self.assertContains(response, ">Also<")
+
+    def test_no_featured_certs_all_chips_without_also_label(self):
+        Certification.objects.update(is_featured=False)
+        response = self.get()
+        self.assertNotContains(response, "cert-card")
+        self.assertNotContains(response, ">Also<")
+        self.assertContains(response, "Featured Cert")
+
+    def test_stat_tiles_no_longer_shown(self):
+        response = self.get()
+        self.assertNotContains(response, "stat-tile")
+        self.assertNotContains(response, "99%")
+
+    def test_what_i_do_numbered(self):
+        from .models import WhatIDo
+        WhatIDo.objects.create(item="Build agents", order=0)
+        WhatIDo.objects.create(item="Ship apps", order=1)
+        response = self.get()
+        self.assertContains(response, '<span class="about-do__num">01</span>', html=True)
+        self.assertContains(response, "2 capabilities")

@@ -37,6 +37,7 @@ class AboutAdmin(admin.ModelAdmin):
             'fields': ('off_duty', 'pull_quote')
         }),
         ('Stats', {
+            'description': 'Not shown on the site since Phase 8.4 (proof lives on the case files). Kept for reference.',
             'fields': (
                 ('stat_accuracy', 'stat_accuracy_label'),
                 ('stat_agents', 'stat_agents_label'),

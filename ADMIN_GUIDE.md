@@ -56,7 +56,7 @@ Use your superuser credentials.
   - `Bio Paragraphs 1, 2, 3`: Separate bio text blocks.
   - `Off duty`: One line about you outside work, shown as a card. Hidden when empty. (Shown from Phase 8.4.)
   - `Pull quote`: A line from your own bio, shown as a quote card. Hidden when empty. (Shown from Phase 8.4.)
-  - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels. Only filled values are shown on the About page; leave empty rather than guess a number.
+  - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels. Not shown on the site since Phase 8.4; kept in admin for reference.
 
 ### 3. Skills
 - **Purpose**: Categorized skill matrix displayed on `/skills/` page and featured on homepage.

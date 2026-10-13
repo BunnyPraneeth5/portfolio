@@ -48,26 +48,26 @@ def about_view(request):
                          ExperienceEntry, EventEntry,
                          Certification)
     about = About.objects.first()
-    what_i_do = WhatIDo.objects.all()
-    education = EducationEntry.objects.all()
-    experience_all = ExperienceEntry.objects.select_related('related_project')
-    events = EventEntry.objects.all()
-    certifications = Certification.objects.all()
-    stats = []
+    experience = list(ExperienceEntry.newest_first().select_related('related_project'))
+    certifications = list(Certification.objects.all())
+    paragraphs = []
     if about:
-        for field in ('accuracy', 'agents', 'teams', 'projects'):
-            value = getattr(about, f'stat_{field}')
-            if value:
-                stats.append({'value': value, 'label': getattr(about, f'stat_{field}_label')})
+        paragraphs = [text for text in (about.description, about.bio_paragraph_1,
+                                        about.bio_paragraph_2, about.bio_paragraph_3) if text.strip()]
 
     return render(request, 'about.html', {
         'about': about,
-        'stats': stats,
-        'what_i_do': what_i_do,
-        'education': education,
-        'experience_all': experience_all,
-        'events': events,
-        'certifications': certifications,
+        # Story card: first paragraph shown, the rest behind "Read the full story".
+        'story_lead': paragraphs[:1],
+        'story_more': paragraphs[1:],
+        'recent_role': experience[0] if experience else None,
+        'what_i_do': list(WhatIDo.objects.all()),
+        'education': list(EducationEntry.objects.all()),
+        'experience_all': experience,
+        'events': list(EventEntry.objects.all()),
+        'featured_certs': [cert for cert in certifications if cert.is_featured],
+        'other_certs': [cert for cert in certifications if not cert.is_featured],
+        'cert_total': len(certifications),
     })
 
 def skills_view(request):
