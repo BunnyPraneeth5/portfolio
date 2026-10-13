@@ -36,25 +36,10 @@ Access admin panel at: `http://127.0.0.1:8000/admin/`
 ### 2. Setup MySQL Database
 - Go to PythonAnywhere Dashboard → Databases
 - Create MySQL database and note credentials
-- Update `config/settings.py` with your MySQL credentials:
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'your_username$dbname',
-        'USER': 'your_username',
-        'PASSWORD': 'your_password',
-        'HOST': 'your_username.mysql.pythonanywhere-services.com',
-        'PORT': '3306',
-    }
-}
-```
+- Put the credentials in `~/portfolio/.env` with `DB_ENGINE=mysql` (see `PYTHONANYWHERE_DEPLOY.md` Step 2). Do not edit `config/settings.py`.
 
 ### 3. Configure ALLOWED_HOSTS & Environment Variables
-In `config/settings.py` or `.env`:
-```python
-ALLOWED_HOSTS = ['your_username.pythonanywhere.com']
-```
+In `.env`: `DEBUG=False`, `SECRET_KEY=...`, `ALLOWED_HOSTS=your_username.pythonanywhere.com`.
 
 ### 4. Run Migrations on PythonAnywhere
 ```bash
@@ -103,9 +88,6 @@ Click "Reload" button in PythonAnywhere Web tab
 - CTA button labels & links
 - Social media profiles (GitHub, LinkedIn, Kaggle, LeetCode, HackerRank)
 - Contact email, location, tagline, and form availability toggle
-
-**Site Appearance:**
-- Customize primary, secondary, and accent colors via color pickers
 
 **About Section:**
 - Add/Edit title, subtitle, and bio paragraphs (1–3)

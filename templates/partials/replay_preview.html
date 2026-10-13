@@ -1,0 +1,12 @@
+{% comment %}
+Homepage replay section. Rendered only when at least one published replay exists.
+{% endcomment %}
+<section id="replay" class="site-section" aria-labelledby="replay-heading">
+    <div class="site-wrap">
+        <div class="section-head">
+            <span class="label-mono">Recorded runs · not live</span>
+            <h2 id="replay-heading">Replay</h2>
+        </div>
+        {% include 'partials/replay_player.html' %}
+    </div>
+</section>

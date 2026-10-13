@@ -1,11 +1,17 @@
 from django.contrib import admin
 from django import forms
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
 from django.utils.html import format_html
+from urllib.parse import urlencode
 from .models import (
-    About, Skill, Project, BlogPost, ContactMessage, SiteAppearance,
+    About, Skill, Project, BlogPost, ContactMessage,
     WhatIDo, EducationEntry, ExperienceEntry, EventEntry,
-    AdditionalCertification, SiteSettings,
+    Certification, SiteSettings, CaseDecision, CaseIncident, ProjectReplay,
+    SuggestedQuestion, ChatQuery, ChatAnswer,
 )
+from .replays import MAX_FILE_BYTES, ReplayValidationError, load_replay_file
 
 admin.site.site_header = 'KP Portfolio Administration'
 admin.site.site_title = 'KP Admin'
@@ -26,7 +32,12 @@ class AboutAdmin(admin.ModelAdmin):
                 'description'
             )
         }),
+        ('About page cards', {
+            'description': 'Each card is hidden while its field is empty.',
+            'fields': ('off_duty', 'pull_quote')
+        }),
         ('Stats', {
+            'description': 'Not shown on the site since Phase 8.4 (proof lives on the case files). Kept for reference.',
             'fields': (
                 ('stat_accuracy', 'stat_accuracy_label'),
                 ('stat_agents', 'stat_agents_label'),
@@ -44,12 +55,25 @@ class SkillAdmin(admin.ModelAdmin):
     search_fields = ['name']
     ordering = ['category', 'order', 'name']
 
+class CaseDecisionInline(admin.StackedInline):
+    model = CaseDecision
+    extra = 0
+    fields = ('code', 'decision', 'tradeoff', 'order')
+
+
+class CaseIncidentInline(admin.StackedInline):
+    model = CaseIncident
+    extra = 0
+    fields = ('symptom', 'root_cause', 'fix', 'order')
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'slug', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
-    list_filter = ['is_featured', 'is_published']
-    list_editable = ['is_featured', 'is_published', 'order']
-    search_fields = ['title', 'short_description', 'long_description', 'tech_tags']
+    inlines = [CaseDecisionInline, CaseIncidentInline]
+    list_display = ['title', 'slug', 'status', 'is_featured', 'is_published', 'order', 'thumbnail_preview']
+    list_filter = ['status', 'is_featured', 'is_published']
+    list_editable = ['status', 'is_featured', 'is_published', 'order']
+    search_fields = ['title', 'short_description', 'long_description', 'brief', 'tech_tags']
     ordering = ['order']
     prepopulated_fields = {'slug': ('title',)}
     fieldsets = (
@@ -62,9 +86,18 @@ class ProjectAdmin(admin.ModelAdmin):
                 'thumbnail',
                 'tech_tags',
                 'order',
+                'status',
                 'is_featured',
                 'is_published',
             )
+        }),
+        ('Case board', {
+            'description': 'Shown on the Projects page and the homepage roster. Each item is hidden while empty.',
+            'fields': ('role', 'year', 'project_type', 'one_liner', 'personal_note')
+        }),
+        ('Case file', {
+            'description': 'Each section shows on the project page only when it has content. Decisions and incidents are below.',
+            'fields': ('case_number', 'brief', 'architecture_notes', 'open_leads')
         }),
         ('Links', {
             'fields': ('github_url', 'live_demo_url')
@@ -91,17 +124,186 @@ class ProjectAdmin(admin.ModelAdmin):
         return "-"
     thumbnail_preview.short_description = 'Image'
 
+class ProjectReplayAdminForm(forms.ModelForm):
+    replay_file = forms.FileField(
+        required=False,
+        help_text=(
+            'Upload a sanitized .json replay ({"title", "duration_s", "steps"}). '
+            'It replaces the steps and fills title / duration if they are empty. '
+            'Checked for format, step limits and obvious leaks (emails, keys, public IPs).'
+        ),
+    )
+
+    class Meta:
+        model = ProjectReplay
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Title and duration can come from the uploaded file.
+        self.fields['title'].required = False
+        self.fields['duration_s'].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        upload = cleaned.get('replay_file')
+        if upload:
+            if upload.size > MAX_FILE_BYTES:
+                self.add_error('replay_file', f'File is larger than {MAX_FILE_BYTES // 1024} KB.')
+                return cleaned
+            try:
+                doc = load_replay_file(upload.read())
+            except ReplayValidationError as err:
+                self.add_error('replay_file', err.messages)
+                return cleaned
+            cleaned['steps'] = doc['steps']
+            if not cleaned.get('title'):
+                cleaned['title'] = doc['title']
+            if cleaned.get('duration_s') in (None, ''):
+                cleaned['duration_s'] = doc['duration_s']
+        if not cleaned.get('title'):
+            self.add_error('title', 'Enter a title or upload a replay file.')
+        if cleaned.get('duration_s') in (None, ''):
+            self.add_error('duration_s', 'Enter a duration or upload a replay file.')
+        if not upload and not cleaned.get('steps'):
+            self.add_error('replay_file', 'Upload a replay file.')
+        return cleaned
+
+
+@admin.register(ProjectReplay)
+class ProjectReplayAdmin(admin.ModelAdmin):
+    form = ProjectReplayAdminForm
+    list_display = ['title', 'project', 'step_count', 'duration_label', 'is_published', 'is_featured_on_home', 'order']
+    list_filter = ['project', 'is_published']
+    list_editable = ['is_published', 'is_featured_on_home', 'order']
+    search_fields = ['title', 'project__title']
+    fieldsets = (
+        ('Replay', {
+            'fields': ('project', 'replay_file', 'title', 'duration_s', 'order')
+        }),
+        ('Visibility', {
+            'description': 'Run the sanitization checklist before publishing: no API keys, tokens, file paths, usernames, real IPs, emails or private data; long tool outputs shortened to one line.',
+            'fields': ('is_published', 'is_featured_on_home')
+        }),
+        ('Steps (from the file)', {
+            'fields': ('steps',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    @admin.display(description='Steps')
+    def step_count(self, obj):
+        return obj.step_count
+
+    @admin.display(description='Duration')
+    def duration_label(self, obj):
+        return obj.duration_label
+
+
+@admin.register(SuggestedQuestion)
+class SuggestedQuestionAdmin(admin.ModelAdmin):
+    list_display = ['text', 'order', 'is_active']
+    list_editable = ['order', 'is_active']
+
+
+class TryQuestionForm(forms.Form):
+    question = forms.CharField(max_length=300, widget=forms.TextInput(attrs={'size': 60, 'autofocus': True}))
+
+
+@admin.register(ChatAnswer)
+class ChatAnswerAdmin(admin.ModelAdmin):
+    list_display = ['topic', 'intent', 'source', 'is_active', 'needs_review', 'follows_job_search_mode', 'priority', 'updated_at']
+    list_editable = ['is_active', 'needs_review']
+    list_filter = ['needs_review', 'is_active', 'follows_job_search_mode']
+    search_fields = ['topic', 'intent', 'keywords', 'synonyms', 'answer']
+    readonly_fields = ['updated_at', 'source']
+    fieldsets = (
+        ('Topic', {
+            'fields': ('topic', 'intent', 'source', 'is_active', 'needs_review'),
+        }),
+        ('When does it match?', {
+            'description': (
+                'Keywords: phrases that point to this topic, one per line. Synonyms: shorthand rewrites like '
+                '"np = notice period", applied to every question first. Use "Try a question" (top right) to check.'
+            ),
+            'fields': ('keywords', 'synonyms', 'priority'),
+        }),
+        ('Answer', {
+            'fields': ('answer', 'link_label', 'link_url', 'follows_job_search_mode', 'updated_at'),
+        }),
+    )
+
+    @admin.display(description='Answer comes from')
+    def source(self, obj):
+        from .chatbot import LIVE_BUILDERS
+        if obj.answer.strip():
+            return 'Your text'
+        if obj.intent in LIVE_BUILDERS:
+            return 'Live site data'
+        return 'Nothing yet (shows "no approved answer")'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [path('try/', self.admin_site.admin_view(self.try_view), name='portfolio_chatanswer_try')]
+        return custom + urls
+
+    def try_view(self, request):
+        from . import chatbot
+        form = TryQuestionForm(request.GET or None)
+        result = tokens = entry = None
+        if form.is_valid():
+            question = form.cleaned_data['question']
+            tokens = chatbot.prepare(question)
+            result = chatbot.get_reply(question)
+            entry = ChatAnswer.objects.filter(intent=result['intent']).first()
+        context = {
+            **self.admin_site.each_context(request),
+            'title': 'Try a question',
+            'opts': self.model._meta,
+            'form': form,
+            'result': result,
+            'tokens': ' '.join(tokens or []),
+            'entry': entry,
+        }
+        return TemplateResponse(request, 'admin/portfolio/chatanswer/try.html', context)
+
+
+@admin.register(ChatQuery)
+class ChatQueryAdmin(admin.ModelAdmin):
+    """Questions asked in the chat helper (emails/phones scrubbed, no IPs, kept 90 days)."""
+    list_display = ['question', 'matched_intent', 'was_fallback', 'created_at']
+    list_filter = ['was_fallback', 'matched_intent']
+    search_fields = ['question']
+    date_hierarchy = 'created_at'
+    readonly_fields = ['question', 'matched_intent', 'was_fallback', 'created_at']
+    actions = ['create_answer_from_questions']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    @admin.action(description='Create a chat answer from the selected questions')
+    def create_answer_from_questions(self, request, queryset):
+        keywords = '\n'.join(dict.fromkeys(q.question.strip().lower() for q in queryset if q.question.strip()))
+        url = reverse('admin:portfolio_chatanswer_add') + '?' + urlencode({'keywords': keywords, 'topic': 'New topic'})
+        return redirect(url)
+
+
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'event_date', 'published', 'created_at', 'thumbnail_preview']
-    list_filter = ['published', 'created_at']
+    list_display = ['title', 'log_type', 'event_date', 'published', 'created_at', 'thumbnail_preview']
+    list_filter = ['log_type', 'published', 'created_at']
     list_editable = ['published']
     search_fields = ['title', 'content', 'excerpt']
     prepopulated_fields = {'slug': ('title',)}
     fields = [
         'title',
         'slug',
+        'log_type',
         'event_date',
+        'related_project',
         'content',
         'excerpt',
         'image',
@@ -133,48 +335,68 @@ class EducationEntryAdmin(admin.ModelAdmin):
         'degree', 'institution', 'year_range', 'order']
     list_editable = ['order']
 
+class ExperienceEntryAdminForm(forms.ModelForm):
+    class Meta:
+        model = ExperienceEntry
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['start_date'].required = True
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start_date')
+        end = cleaned.get('end_date')
+        if cleaned.get('is_current') and end:
+            self.add_error('end_date', 'Leave the end date empty for a current role.')
+        if start and end and end < start:
+            self.add_error('end_date', 'End date cannot be before the start date.')
+        return cleaned
+
 @admin.register(ExperienceEntry)
 class ExperienceEntryAdmin(admin.ModelAdmin):
+    form = ExperienceEntryAdminForm
     list_display = [
-        'organization', 'role', 'year_label', 'side', 'order']
-    list_editable = ['order', 'side']
-    list_filter = ['side']
+        'organization', 'role', 'employment_type',
+        'start_date', 'end_date', 'is_current', 'order']
+    list_editable = ['order']
+    list_filter = ['employment_type', 'is_current']
+    search_fields = ['organization', 'role', 'summary']
+    fieldsets = (
+        ('Role', {
+            'fields': ('organization', 'role', 'employment_type')
+        }),
+        ('Dates', {
+            'fields': ('start_date', 'end_date', 'is_current')
+        }),
+        ('Details', {
+            'fields': ('location', 'is_remote', 'summary', 'highlights', 'tags', 'order')
+        }),
+        ('Links', {
+            'fields': ('related_project',)
+        }),
+    )
 
 @admin.register(EventEntry)
 class EventEntryAdmin(admin.ModelAdmin):
     list_display = ['title', 'role', 'year', 'order']
     list_editable = ['order']
 
-@admin.register(AdditionalCertification)
-class AdditionalCertificationAdmin(admin.ModelAdmin):
-    list_display = ['title', 'order']
-    list_editable = ['order']
+@admin.register(Certification)
+class CertificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'issuer', 'category', 'issued_date', 'has_file', 'is_featured', 'order']
+    list_editable = ['is_featured', 'order']
+    list_filter = ['category', 'is_featured']
+    search_fields = ['title', 'issuer']
 
-@admin.register(SiteAppearance)
-class SiteAppearanceAdmin(admin.ModelAdmin):
-    fieldsets = (
-        ('Colors', {
-            'fields': ('primary_color', 'secondary_color', 'accent_color')
-        }),
-    )
-    list_display = ['primary_color', 'secondary_color', 'accent_color', 'updated_at']
-    readonly_fields = ['updated_at']
-
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name in ['primary_color', 'secondary_color', 'accent_color']:
-            kwargs['widget'] = forms.TextInput(attrs={'type': 'color'})
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-    def has_add_permission(self, request):
-        if SiteAppearance.objects.exists():
-            return False
-        return super().has_add_permission(request)
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+    @admin.display(boolean=True, description='Has file')
+    def has_file(self, obj):
+        return obj.has_file
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
+    readonly_fields = ['availability_updated_at']
     fieldsets = (
         ('Profile & Resume', {
             'fields': (
@@ -187,18 +409,32 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'hero_name_display',
                 'hero_roles',
                 'hero_description',
+                'currently',
                 'hero_cta_primary_label',
                 'hero_cta_primary_url',
                 'hero_cta_secondary_label',
                 'hero_cta_secondary_url',
             )
         }),
-        ('Availability', {
+        ('Job search mode', {
+            'description': (
+                'Open: the homepage shows "Open to roles", notice period and remote, and the chat helper answers '
+                'availability questions. Quiet (recommended while employed) and Not looking hide those, and the '
+                'chat helper gives the matching reply below instead.'
+            ),
             'fields': (
-                'open_to_work',
+                'job_search_mode',
+                'availability_updated_at',
+                'quiet_reply',
+                'not_looking_reply',
+            )
+        }),
+        ('Availability details (shown only in Open mode)', {
+            'fields': (
                 'open_to_remote',
                 'open_to_internship',
                 'notice_period',
+                'looking_for',
             )
         }),
         ('Social Links', {

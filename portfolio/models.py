@@ -1,3 +1,5 @@
+import math
+import re
 from datetime import date
 
 from django.db import models
@@ -21,6 +23,14 @@ class About(models.Model):
         default='Agentic AI Engineer · B.Tech CSE-AI · Kurnool, India'
     )
     
+    off_duty = models.CharField(
+        max_length=200, blank=True,
+        help_text='About page "Off duty" card: one line about you outside work. Hidden when empty.')
+    pull_quote = models.CharField(
+        max_length=200, blank=True,
+        help_text='About page quote card: a line from your own bio. Hidden when empty.')
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
     class Meta:
         verbose_name_plural = "About"
     
@@ -48,19 +58,6 @@ class Skill(models.Model):
     
     def __str__(self):
         return self.name
-
-class SiteAppearance(models.Model):
-    primary_color = models.CharField(max_length=7, default='#3b82f6', help_text='Hex color, for example #3b82f6')
-    secondary_color = models.CharField(max_length=7, default='#8b5cf6', help_text='Hex color, for example #8b5cf6')
-    accent_color = models.CharField(max_length=7, default='#06b6d4', help_text='Hex color, for example #06b6d4')
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = 'Site Appearance'
-        verbose_name_plural = 'Site Appearance'
-
-    def __str__(self):
-        return 'Site Appearance'
 
 class SiteSettings(models.Model):
     profile_image = models.ImageField(
@@ -124,22 +121,78 @@ class SiteSettings(models.Model):
     meta_title = models.CharField(max_length=100, blank=True)
     meta_description = models.CharField(max_length=300, blank=True)
 
-    open_to_work = models.BooleanField(default=True, help_text='Show as actively looking on the pet chat')
+    JOB_SEARCH_CHOICES = [
+        ('open', 'Open: actively looking'),
+        ('quiet', 'Quiet: employed, open to the right offer'),
+        ('not_looking', 'Not looking'),
+    ]
+    job_search_mode = models.CharField(
+        max_length=20,
+        choices=JOB_SEARCH_CHOICES,
+        default='quiet',
+        help_text=(
+            'Open: homepage shows "Open to roles", notice period and remote; the chat helper answers availability. '
+            'Quiet / Not looking: those are hidden and the chat helper gives the reply below instead.'
+        ),
+    )
+    quiet_reply = models.TextField(
+        default='For opportunities, please contact Bunny directly at {contact_email}.',
+        help_text='Chat reply to availability questions in Quiet mode. Placeholders: {name}, {contact_email}, {location}.',
+    )
+    not_looking_reply = models.TextField(
+        default="Bunny isn't looking for new roles right now. You can still get in touch at {contact_email}.",
+        help_text='Chat reply to availability questions in Not looking mode. Same placeholders.',
+    )
+    availability_updated_at = models.DateTimeField(
+        null=True, blank=True, editable=False,
+        help_text='Set automatically when the mode, notice period or preferences change.',
+    )
     open_to_remote = models.BooleanField(default=True)
     open_to_internship = models.BooleanField(default=True)
     notice_period = models.CharField(max_length=100, blank=True, default='Immediate')
+    looking_for = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Shown in the homepage 30-second view, e.g. the kind of roles you want. Hidden when empty.'
+    )
+    currently = models.CharField(
+        max_length=160, blank=True,
+        help_text='Homepage "Currently:" line under your title, e.g. what you are building. Hidden when empty.')
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         verbose_name = 'Site Settings'
         verbose_name_plural = 'Site Settings'
 
+    AVAILABILITY_FIELDS = ('job_search_mode', 'notice_period', 'looking_for', 'open_to_remote', 'open_to_internship')
+
     def save(self, *args, **kwargs):
         self.pk = 1
+        previous = SiteSettings.objects.filter(pk=1).values(*self.AVAILABILITY_FIELDS).first()
+        current = {field: getattr(self, field) for field in self.AVAILABILITY_FIELDS}
+        if previous is None or previous != current:
+            from django.utils import timezone
+            self.availability_updated_at = timezone.now()
         super().save(*args, **kwargs)
+        from .middleware import get_request_memo
+        memo = get_request_memo()
+        if memo is not None:
+            memo['site_settings'] = self
+
+    @property
+    def is_job_hunting(self):
+        return self.job_search_mode == 'open'
 
     @classmethod
     def load(cls):
+        # Loaded once per request (see portfolio.middleware); fresh everywhere else.
+        from .middleware import get_request_memo
+        memo = get_request_memo()
+        if memo is not None and 'site_settings' in memo:
+            return memo['site_settings']
         obj, created = cls.objects.get_or_create(pk=1)
+        if memo is not None:
+            memo['site_settings'] = obj
         return obj
 
     @property
@@ -151,6 +204,13 @@ class SiteSettings(models.Model):
         return 'Site Settings'
 
 class Project(models.Model):
+    STATUS_CHOICES = [
+        ('flagship', 'Flagship'),
+        ('live', 'Live'),
+        ('benchmarking', 'Benchmarking'),
+        ('archived', 'Archived'),
+    ]
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     short_description = models.TextField(
@@ -175,6 +235,12 @@ class Project(models.Model):
     )
     is_featured = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        blank=True,
+        help_text='Shown in the homepage agent roster. Leave empty to hide.'
+    )
     order = models.PositiveIntegerField(
         default=0,
         help_text='Lower number appears first.'
@@ -203,14 +269,92 @@ class Project(models.Model):
     metric_2_label = models.CharField(max_length=50, blank=True)
     metric_3_value = models.CharField(max_length=20, blank=True)
     metric_3_label = models.CharField(max_length=50, blank=True)
+    case_number = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Shown as CASE FILE NO. 00X. Leave empty to hide the number.'
+    )
+    brief = models.TextField(
+        blank=True,
+        help_text='Case file "Brief". While empty, the long description is shown instead.'
+    )
+    architecture_notes = models.TextField(
+        blank=True,
+        help_text='Case file "Investigation": how it is built and why.'
+    )
+    open_leads = models.TextField(
+        blank=True,
+        help_text='Case file "Open leads": one per line.'
+    )
+    role = models.CharField(
+        max_length=100, blank=True,
+        help_text='Your role on the project, e.g. Solo builder. Shown on the Case board. Hidden when empty.')
+    year = models.CharField(
+        max_length=20, blank=True,
+        help_text='e.g. 2025 or 2024-2025. Shown on the Case board and archive. Hidden when empty.')
+    project_type = models.CharField(
+        max_length=60, blank=True,
+        help_text='Short type label, e.g. Agent system. Shown on the Case board. Hidden when empty.')
+    one_liner = models.CharField(
+        max_length=120, blank=True,
+        help_text='One short line for the homepage roster. While empty, the first sentence of the short description is used.')
+    personal_note = models.CharField(
+        max_length=240, blank=True,
+        help_text='One line in your own words shown on the case file, e.g. what you would do differently. Hidden when empty.')
     created_at = models.DateTimeField(auto_now_add=True)
-    
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
     class Meta:
         ordering = ['order']
+
+    STATUS_STAMPS = {
+        'flagship': 'Flagship · Active',
+        'live': 'Case closed · Shipped',
+        'benchmarking': 'Active · Benchmarking',
+        'archived': 'Case closed · Archived',
+    }
+
+    @property
+    def case_label(self):
+        return f'{self.case_number:03d}' if self.case_number is not None else ''
+
+    @property
+    def status_stamp(self):
+        return self.STATUS_STAMPS.get(self.status, '')
+
+    @property
+    def brief_text(self):
+        return self.brief.strip() or self.long_description.strip()
+
+    @property
+    def open_leads_list(self):
+        return [line.strip() for line in self.open_leads.splitlines() if line.strip()]
+
+    @property
+    def metrics(self):
+        pairs = [
+            (self.metric_1_value, self.metric_1_label),
+            (self.metric_2_value, self.metric_2_label),
+            (self.metric_3_value, self.metric_3_label),
+        ]
+        return [{'value': value, 'label': label} for value, label in pairs if value]
 
     @property
     def tech_tags_list(self):
         return [tag.strip() for tag in self.tech_tags.split(',') if tag.strip()]
+
+    @property
+    def roster_line(self):
+        """One line for the homepage roster: the one-liner, else the first sentence of the summary."""
+        if self.one_liner:
+            return self.one_liner
+        text = ' '.join(self.short_description.split())
+        return re.split(r'(?<=[.!?])\s', text, maxsplit=1)[0]
+
+    @property
+    def board_meta(self):
+        """Role, year and type for the case board; empty ones are left out."""
+        return [value for value in (self.role, self.year, self.project_type) if value]
 
     @property
     def card_description(self):
@@ -223,23 +367,243 @@ class Project(models.Model):
     @property
     def primary_live_url(self):
         return self.live_demo_url
-    
+
     def __str__(self):
         return self.title
 
+class CaseDecision(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='decisions')
+    code = models.CharField(max_length=20, help_text='e.g. D-01')
+    decision = models.TextField()
+    tradeoff = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Case decision'
+        verbose_name_plural = 'Case decisions'
+
+    def __str__(self):
+        return f'{self.project.title} {self.code}'
+
+class CaseIncident(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='incidents')
+    symptom = models.TextField()
+    root_cause = models.TextField()
+    fix = models.TextField()
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Case incident'
+        verbose_name_plural = 'Case incidents'
+
+    def __str__(self):
+        return f'{self.project.title}: {self.symptom[:40]}'
+
+class ProjectReplay(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='replays')
+    title = models.CharField(max_length=200)
+    duration_s = models.PositiveIntegerField(help_text='Length of the recorded run in seconds.')
+    steps = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Filled from the uploaded JSON file. Each step: {"t", "actor", "kind", "text"}.'
+    )
+    is_published = models.BooleanField(
+        default=False,
+        help_text='Publish only after running the sanitization checklist.'
+    )
+    is_featured_on_home = models.BooleanField(
+        default=False,
+        help_text='Plays first on the homepage. Only one replay can have this on.'
+    )
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Project replay'
+        verbose_name_plural = 'Project replays'
+
+    def __str__(self):
+        return f'{self.project.title}: {self.title}'
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from .replays import ReplayValidationError, validate_replay
+
+        if self.duration_s is None:
+            return  # field-level "required" error already reported
+        try:
+            normalized = validate_replay({'title': self.title or '', 'duration_s': self.duration_s, 'steps': self.steps})
+        except ReplayValidationError as err:
+            by_field = {}
+            for message in err.messages:
+                field = 'title' if message.startswith('"title"') else 'duration_s' if message.startswith('"duration_s"') else 'steps'
+                by_field.setdefault(field, []).append(message)
+            raise ValidationError(by_field)
+        self.steps = normalized['steps']
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_featured_on_home:
+            ProjectReplay.objects.exclude(pk=self.pk).filter(is_featured_on_home=True).update(is_featured_on_home=False)
+
+    @property
+    def step_count(self):
+        return len(self.steps or [])
+
+    @property
+    def duration_label(self):
+        minutes, seconds = divmod(self.duration_s or 0, 60)
+        return f'{minutes:02d}:{seconds:02d}'
+
+    @property
+    def script_id(self):
+        return f'replay-data-{self.pk}'
+
+    @property
+    def player_data(self):
+        return {
+            'title': self.title,
+            'project': self.project.title,
+            'duration_s': self.duration_s,
+            'steps': self.steps,
+        }
+
+class SuggestedQuestion(models.Model):
+    text = models.CharField(max_length=120, help_text='Shown as a clickable chip in the chat helper.')
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Suggested question'
+        verbose_name_plural = 'Suggested questions'
+
+    def __str__(self):
+        return self.text
+
+class ChatQuery(models.Model):
+    """A question asked in the chat helper. Emails and phone numbers are scrubbed; no IP is stored."""
+    RETENTION_DAYS = 90
+
+    question = models.CharField(max_length=300)
+    matched_intent = models.CharField(max_length=60, blank=True)
+    was_fallback = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Chat query'
+        verbose_name_plural = 'Chat queries'
+
+    def __str__(self):
+        return self.question[:60]
+
+class ChatAnswer(models.Model):
+    """One topic the chat helper can answer. Fully editable in admin."""
+
+    intent = models.SlugField(max_length=60, unique=True, help_text='Internal name, e.g. notice_period. Do not rename seeded ones.')
+    topic = models.CharField(max_length=100, help_text='Readable name shown in admin.')
+    keywords = models.TextField(
+        blank=True,
+        help_text=(
+            'One phrase per line. A question matches when it contains a phrase as whole words '
+            '(case and punctuation ignored, small typos tolerated). Longer, more specific phrases win.'
+        ),
+    )
+    synonyms = models.TextField(
+        blank=True,
+        help_text=(
+            'Shorthand, one per line as "short = meaning", e.g. "np = notice period" or "wfh = work from home". '
+            'Applied to every question before matching, so they help all topics.'
+        ),
+    )
+    answer = models.TextField(
+        blank=True,
+        help_text=(
+            'Leave empty to build the answer from site data (topics marked "live data"). '
+            'Text here replaces that. Placeholders: {name}, {contact_email}, {location}, {notice_period}, '
+            '{looking_for}, {resume_url}.'
+        ),
+    )
+    link_label = models.CharField(max_length=60, blank=True)
+    link_url = models.CharField(max_length=300, blank=True, help_text='A site path like /contact/ or a full https:// link.')
+    priority = models.IntegerField(default=0, help_text='Breaks ties between topics that match equally well. Higher wins.')
+    is_active = models.BooleanField(default=True, help_text='Off: this topic is ignored completely.')
+    needs_review = models.BooleanField(
+        default=False,
+        help_text='On: matched, but the answer is not shown ("no approved answer yet"). Turn off once the answer is true and approved.',
+    )
+    follows_job_search_mode = models.BooleanField(
+        default=False,
+        help_text='On: when the job search mode is not Open, reply with the Quiet / Not looking message instead.',
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['topic']
+        verbose_name = 'Chat answer'
+        verbose_name_plural = 'Chat answers'
+
+    def __str__(self):
+        return self.topic
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        url = (self.link_url or '').strip()
+        if url and not (url.startswith('/') and not url.startswith('//')) and not url.startswith(('https://', 'http://', 'mailto:')):
+            raise ValidationError({'link_url': 'Use a site path like /contact/ or a full https:// link.'})
+        if bool(self.link_label.strip()) != bool(url):
+            raise ValidationError({'link_label': 'Fill in both the link label and the link URL, or neither.'})
+        for line in self.synonyms.splitlines():
+            if line.strip() and '=' not in line:
+                raise ValidationError({'synonyms': f'"{line.strip()}" needs the form "short = meaning".'})
+
+    @property
+    def keyword_list(self):
+        return [line.strip() for line in self.keywords.splitlines() if line.strip()]
+
 class BlogPost(models.Model):
+    LOG_TYPE_CHOICES = [
+        ('decision', 'Decision'),
+        ('incident', 'Incident'),
+        ('build_log', 'Build log'),
+        ('note', 'Note'),
+    ]
+
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+    log_type = models.CharField(
+        max_length=20, choices=LOG_TYPE_CHOICES, default='note',
+        help_text='Shown as the label on the Logs page and used by its filter.')
     event_date = models.DateField(default=date.today)
     content = models.TextField()
     excerpt = models.TextField(max_length=300)
     image = models.ImageField(upload_to='blog/', blank=True, null=True)
+    related_project = models.ForeignKey(
+        'Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='logs',
+        help_text='Optional. Shows "Filed under CASE 00X" and lists this log on that case file.')
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-event_date', '-created_at']
+
+    @property
+    def reading_minutes(self):
+        """Whole minutes at 200 words a minute, at least 1."""
+        from django.utils.html import strip_tags
+        return max(1, math.ceil(len(strip_tags(self.content).split()) / 200))
+
+    @property
+    def visible_project(self):
+        """The linked case, only while that case is published."""
+        project = self.related_project
+        return project if project and project.is_published else None
     
     def __str__(self):
         return self.title
@@ -287,39 +651,67 @@ class EducationEntry(models.Model):
         return f"{self.degree} - {self.institution}"
 
 class ExperienceEntry(models.Model):
-    SIDE_CHOICES = [('left', 'Left'), ('right', 'Right')]
-    
-    year_label = models.CharField(max_length=50)
+    EMPLOYMENT_TYPE_CHOICES = [
+        ('internship', 'Internship'),
+        ('part_time', 'Part-time'),
+        ('full_time', 'Full-time'),
+        ('contract', 'Contract'),
+        ('freelance', 'Freelance'),
+    ]
+
     organization = models.CharField(max_length=200)
     role = models.CharField(max_length=200)
+    employment_type = models.CharField(
+        max_length=20, choices=EMPLOYMENT_TYPE_CHOICES, default='internship')
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(
+        null=True, blank=True, help_text='Leave empty if this is your current role.')
+    is_current = models.BooleanField(default=False)
+    location = models.CharField(max_length=200, blank=True)
+    is_remote = models.BooleanField(default=False)
+    summary = models.TextField(blank=True, help_text='One or two lines.')
+    highlights = models.TextField(blank=True, help_text='One bullet per line.')
+    related_project = models.ForeignKey(
+        'Project', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='experience_entries')
     tags = models.CharField(
         max_length=500, blank=True,
         help_text='Comma-separated tags e.g. Python,MCP,AI')
-    certificate_file = models.FileField(
-        upload_to='certificates/', blank=True, null=True)
-    certificate_file_2 = models.FileField(
-        upload_to='certificates/', blank=True, null=True,
-        help_text='Second certificate file if needed')
-    icon_class = models.CharField(
-        max_length=100, default='fas fa-certificate',
-        help_text='Font Awesome icon class e.g. fas fa-trophy')
-    icon_color = models.CharField(
-        max_length=50, default='text-blue-400',
-        help_text='Tailwind color class e.g. text-blue-400')
-    side = models.CharField(
-        max_length=10, choices=SIDE_CHOICES, default='left')
-    order = models.IntegerField(default=0)
-    
+    order = models.IntegerField(
+        default=0, help_text='Lower number appears first. Ties are sorted newest first.')
+
     class Meta:
-        ordering = ['order']
-        verbose_name = 'Experience / Certification Entry'
-        verbose_name_plural = 'Experience / Certification Entries'
-    
+        ordering = ['order', '-start_date']
+        verbose_name = 'Professional Experience'
+        verbose_name_plural = 'Professional Experience'
+
+    @classmethod
+    def newest_first(cls):
+        """Current roles first, then by start date, newest first. Undated rows last."""
+        return cls.objects.order_by(
+            '-is_current', models.F('start_date').desc(nulls_last=True), 'order')
+
     def get_tags_list(self):
         if self.tags:
-            return [t.strip() for t in self.tags.split(',')]
+            return [t.strip() for t in self.tags.split(',') if t.strip()]
         return []
-    
+
+    @property
+    def highlights_list(self):
+        return [line.strip() for line in self.highlights.splitlines() if line.strip()]
+
+    @property
+    def date_range_label(self):
+        if not self.start_date:
+            return ''
+        start = self.start_date.strftime('%b %Y')
+        if self.is_current:
+            return f'{start} – Present'
+        if self.end_date:
+            end = self.end_date.strftime('%b %Y')
+            return start if end == start else f'{start} – {end}'
+        return start
+
     def __str__(self):
         return f"{self.organization} - {self.role}"
 
@@ -345,25 +737,34 @@ class EventEntry(models.Model):
     def __str__(self):
         return self.title
 
-class AdditionalCertification(models.Model):
+class Certification(models.Model):
     title = models.CharField(max_length=200)
-    icon_class = models.CharField(
-        max_length=100, default='fas fa-certificate',
-        help_text='Font Awesome icon class')
-    icon_color = models.CharField(
-        max_length=50, default='text-blue-400',
-        help_text='Tailwind color class e.g. text-blue-400')
+    issuer = models.CharField(max_length=200, blank=True)
+    category = models.CharField(
+        max_length=100, blank=True,
+        help_text='Optional group label e.g. Virtual Internship')
+    issued_date = models.DateField(null=True, blank=True)
     certificate_file = models.FileField(
         upload_to='certificates/', blank=True, null=True)
-    see_experience_note = models.CharField(
-        max_length=100, blank=True,
-        help_text='If no file, show this note e.g. (See Experience)')
+    certificate_file_2 = models.FileField(
+        upload_to='certificates/', blank=True, null=True,
+        help_text='Second certificate file if needed')
+    credential_url = models.URLField(blank=True)
+    is_featured = models.BooleanField(
+        default=False,
+        help_text='Shown as a large card on the About page. The rest are listed as small chips.')
     order = models.IntegerField(default=0)
-    
+
     class Meta:
-        ordering = ['order']
-        verbose_name = 'Additional Certification'
-        verbose_name_plural = 'Additional Certifications'
-    
+        ordering = ['order', 'title']
+        verbose_name = 'Certification'
+        verbose_name_plural = 'Certifications'
+
+    @property
+    def has_file(self):
+        return bool(self.certificate_file or self.certificate_file_2)
+
     def __str__(self):
+        if self.issuer:
+            return f"{self.issuer} - {self.title}"
         return self.title

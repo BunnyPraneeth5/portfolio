@@ -1,106 +1,89 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skills | Karu Praneeth Kumar</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="skills">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link active">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+
+{% block title %}Skills | {{ site_settings.hero_name_display }}{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="Skills of {{ site_settings.hero_name_display }}, grouped by area, with the case files that use them.">
+{% endblock %}
+
+{% block body_attrs %} data-chapter="skills"{% endblock %}
+
+{% block content %}
+    <main class="page">
+        <div class="site-wrap">
+            <div class="section-head">
+                <span class="label-mono">Skills{% if skills %} · {{ skills|length }} listed{% if core_skills %} · {{ core_skills|length }} core{% endif %}{% endif %}</span>
+                <h1 class="page-title">Toolkit</h1>
             </div>
-        </div>
-    </nav>
+            <p class="page-lead">What I work with, and where you can see it used.</p>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white active">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
-
-    <!-- Skills Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Capabilities
-                    </span>
-                </h1>
-                <p class="text-xl text-gray-300">Knowledge organized into useful systems.</p>
-            </div>
-
-            <hr class="section-rule" data-aos="fade-up">
-
-            <!-- Skills Grid -->
-            <div class="skills-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                {% for group in grouped_skills %}
-                <div class="glass-card skill-card p-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter }}00">
-                    <div class="skill-card-header flex items-center mb-4">
-                        <h2 class="text-xl font-['Orbitron']">{{ group.label }}</h2>
-                    </div>
-                    <ul class="space-y-2">
-                        {% for skill in group.items %}
-                        <li>{{ skill.name }}</li>
-                        {% endfor %}
-                    </ul>
+            {% if core_skills %}
+            <section class="site-section" aria-labelledby="core-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="core-heading">Core stack</h2>
+                    <span class="label-mono">{{ core_skills|length }} core</span>
                 </div>
-                {% empty %}
-                <div class="glass-card p-6 text-center md:col-span-2 lg:col-span-3" data-aos="fade-up">
-                    <p class="text-gray-300">No skills have been added yet. Add them from the admin panel.</p>
-                </div>
-                {% endfor %}
-            </div>
+                <ul class="bento skill-core">
+                    {% for skill in core_skills %}
+                    <li class="card card--gold">
+                        <span class="label-mono">{{ skill.get_category_display }}</span>
+                        <h3 class="card__title card__title--lg">{{ skill.name }}</h3>
+                        {% if skill.used_in %}
+                        <p class="label-mono skill-used__label">Used in</p>
+                        <p class="skill-used">
+                            {% for case in skill.used_in %}<a href="{% url 'project_detail' case.project.slug %}" class="text-accent">{{ case.project.title }}{% if case.count > 1 %} ×{{ case.count }}{% endif %}</a>{% if not forloop.last %}<span aria-hidden="true"> · </span>{% endif %}{% endfor %}
+                        </p>
+                        {% else %}
+                        <p class="skill-none">No case file yet</p>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
 
+            {% if grouped_skills %}
+            <section class="site-section" aria-labelledby="areas-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="areas-heading">By area</h2>
+                    <span class="label-mono">{{ grouped_skills|length }} area{{ grouped_skills|length|pluralize }}</span>
+                </div>
+                <div class="bento skill-areas">
+                    {% for group in grouped_skills %}
+                    <section class="card skill-area" aria-labelledby="skills-{{ forloop.counter }}">
+                        <h3 id="skills-{{ forloop.counter }}" class="label-mono text-accent skill-area__title">{{ group.label }} · {{ group.items|length }}</h3>
+                        <ul class="skill-rows">
+                            {% for skill in group.items %}
+                            <li class="skill-row">
+                                <span>{{ skill.name }}{% if skill.is_featured %} <span class="tag tag--core">Core</span>{% endif %}</span>
+                                {% if skill.used_in_total == 1 %}
+                                <a href="{% url 'project_detail' skill.used_in.0.project.slug %}" class="label-mono text-accent">{{ skill.used_in.0.project.title }}</a>
+                                {% elif skill.used_in_total %}
+                                <span class="label-mono text-accent">{{ skill.used_in_total }} cases</span>
+                                {% else %}
+                                <span class="skill-none">no case yet</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                    {% endfor %}
+                </div>
+            </section>
+            {% else %}
+            <p class="page-lead">No skills are listed yet.</p>
+            {% endif %}
+
+            <div class="bento about-close">
+                <a href="{% url 'projects' %}" class="card span-4 about-close__card">
+                    <span class="card__title">See the tools at work</span>
+                    <span class="label-mono text-accent">Case board <span aria-hidden="true">→</span></span>
+                </a>
+                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="card card--gold span-2 about-close__card about-close__card--center">
+                    <span class="label-mono text-accent">Resume <span aria-hidden="true">→</span></span>
+                </a>
+            </div>
         </div>
     </main>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% endblock %}

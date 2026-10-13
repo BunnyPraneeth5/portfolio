@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a> &rsaquo;
+    <a href="{% url 'admin:portfolio_chatanswer_changelist' %}">Chat answers</a> &rsaquo; Try a question
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module" style="padding: 16px;">
+    <p>Type a question the way a recruiter might. You'll see which topic it matches and the exact reply visitors get. Nothing is saved or logged.</p>
+    <form method="get">
+        {{ form.question }}
+        <input type="submit" value="Try it">
+    </form>
+</div>
+
+{% if result %}
+<div class="module" style="padding: 16px; margin-top: 16px;">
+    <h2>Result</h2>
+    <p><strong>Read as:</strong> <code>{{ tokens|default:"(nothing)" }}</code></p>
+    <p><strong>Matched topic:</strong>
+        {% if entry %}<a href="{% url 'admin:portfolio_chatanswer_change' entry.pk %}">{{ entry.topic }}</a> (<code>{{ result.intent }}</code>)
+        {% else %}<code>{{ result.intent }}</code>{% endif %}
+        {% if result.fallback %} &mdash; shown as a fallback / no approved answer{% endif %}
+    </p>
+    <p><strong>Reply:</strong></p>
+    <pre style="white-space: pre-wrap;">{{ result.reply }}</pre>
+    {% if result.links %}
+    <p><strong>Links:</strong>
+        {% for link in result.links %}<a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.label }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+    {% if result.chips %}
+    <p><strong>Chips:</strong> {{ result.chips|join:" · " }}</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

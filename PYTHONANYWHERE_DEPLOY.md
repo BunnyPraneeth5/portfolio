@@ -11,17 +11,18 @@
    - Password: (your MySQL password)
    - Host: `your_username.mysql.pythonanywhere-services.com`
 
-## Step 2: Configure Environment Variables / settings.py
+## Step 2: Configure Environment Variables
 
-### Option A: Create a `.env` File (Recommended)
+The database is chosen by `DB_ENGINE`; `config/settings.py` is never edited by hand.
 
-In `~/portfolio/.env`:
+In `~/portfolio/.env` (never commit it):
 
 ```env
 DEBUG=False
 SECRET_KEY=generate-a-secure-production-secret-key-here
 ALLOWED_HOSTS=your_username.pythonanywhere.com
 
+DB_ENGINE=mysql
 DB_NAME=your_username$portfolio
 DB_USER=your_username
 DB_PASSWORD=your_mysql_password
@@ -29,27 +30,7 @@ DB_HOST=your_username.mysql.pythonanywhere-services.com
 DB_PORT=3306
 ```
 
-### Option B: Update `config/settings.py` Directly
-
-In `config/settings.py`:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'your_username$portfolio',  # Replace your_username
-        'USER': 'your_username',             # Replace your_username
-        'PASSWORD': 'your_mysql_password',   # Replace with actual password
-        'HOST': 'your_username.mysql.pythonanywhere-services.com',  # Replace your_username
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
-    }
-}
-
-ALLOWED_HOSTS = ['your_username.pythonanywhere.com', 'localhost', '127.0.0.1']  # Replace your_username
-```
+`config/settings.py` loads this file for the web app and for console commands. With `DEBUG=False` and no `DB_ENGINE`, Django stops with an error instead of quietly using SQLite.
 
 ## Step 3: Upload Files to PythonAnywhere
 

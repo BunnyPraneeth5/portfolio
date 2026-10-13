@@ -1,201 +1,90 @@
-{% load static %} 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if site_settings.meta_title %}Contact | {{ site_settings.meta_title }}{% else %}Contact | {{ site_settings.hero_name_display }}{% endif %}</title>
-    {% if site_settings.meta_description %}
-    <meta name="description" content="{{ site_settings.meta_description }}">
-    {% endif %}
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="contact">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link active">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% extends 'base.html' %}
+{% load static %}
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white active">Contact</a>
-        </div>
-    </div>
+{% block title %}Contact | {{ site_settings.hero_name_display }}{% endblock %}
 
-    <!-- Contact Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Contact
-                    </span>
-                </h1>
-                <p class="text-xl text-gray-300">{{ site_settings.contact_tagline }}</p>
+{% block meta %}
+    <meta name="description" content="Contact {{ site_settings.hero_name_display }}{% if site_settings.contact_location %}, {{ site_settings.contact_location }}{% endif %}.">
+{% endblock %}
+
+{% block body_attrs %} data-chapter="contact"{% endblock %}
+
+{% block content %}
+    <main class="page">
+        <div class="site-wrap">
+            <div class="section-head">
+                <span class="label-mono">Contact</span>
+                <h1 class="page-title">{{ site_settings.contact_tagline|default:"Contact" }}</h1>
             </div>
 
-            <div class="max-w-4xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Contact Form -->
-                    <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="100">
-                        {% if site_settings.contact_form_active %}
-                        {% if messages %}
-                        <div class="contact-success" role="status">
-                            <h2>Thank you.</h2>
-                            <p>I'll get back to you soon.</p>
-                        </div>
-                        {% else %}
-                        <form id="contactForm" method="POST" class="contact-form-refined space-y-6">
-                            {% csrf_token %}
-                            <div>
-                                <label for="name" class="block text-sm font-medium mb-2">Name</label>
-                                <input type="text" id="name" name="name" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <label for="email" class="block text-sm font-medium mb-2">Email</label>
-                                <input type="email" id="email" name="email" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <label for="subject" class="block text-sm font-medium mb-2">Subject</label>
-                                <input type="text" id="subject" name="subject" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <label for="message" class="block text-sm font-medium mb-2">Message</label>
-                                <textarea id="message" name="message" rows="3" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-                            </div>
-                            <button type="submit" id="submitBtn"
-                                class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity">
-                                <i class="fas fa-paper-plane mr-2"></i><span id="btnText">Send Message</span>
-                            </button>
-                        </form>
-                        {% endif %}
-                        {% else %}
-                        <div class="contact-success" role="status">
-                            <h2>Email directly.</h2>
-                            <p>The contact form is currently offline.</p>
-                            <a href="mailto:{{ site_settings.contact_email }}"
-                               class="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity">
-                                Send a direct email
-                            </a>
-                        </div>
-                        {% endif %}
+            <div class="contact-page">
+                <div class="panel contact-page__form">
+                    {% if site_settings.contact_form_active %}
+                    {% if messages %}
+                    <div class="contact-success" role="status">
+                        <h2 class="entry__title">Thank you.</h2>
+                        <p class="entry__text">I'll get back to you soon.</p>
                     </div>
-
-                    <!-- Contact Information -->
-                    <div class="space-y-8">
-                        <!-- Contact Details -->
-                        <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="200">
-                            <h2 class="text-2xl font-['Orbitron'] mb-4">Coordinates</h2>
-                            <div class="space-y-4">
-                                <div class="flex items-center">
-                                    <i class="fas fa-envelope text-blue-400 w-8"></i>
-                                    <a href="mailto:{{ site_settings.contact_email }}" class="text-gray-300 hover:text-white">
-                                        {{ site_settings.contact_email }}
-                                    </a>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-map-marker-alt text-purple-400 w-8"></i>
-                                    <span class="text-gray-300">{{ site_settings.contact_location }}</span>
-                                </div>
-                            </div>
+                    {% else %}
+                    <form id="contactForm" method="POST" class="contact-form">
+                        {% csrf_token %}
+                        <div class="form-field">
+                            <label for="name" class="label-mono">Name</label>
+                            <input type="text" id="name" name="name" required autocomplete="name" class="form-input">
                         </div>
-
-                        <!-- Social Links -->
-                        <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
-                            <h2 class="text-2xl font-['Orbitron'] mb-4">Elsewhere</h2>
-                            <div class="grid grid-cols-2 gap-4">
-                                {% if site_settings.github_url %}
-                                <a href="{{ site_settings.github_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-github text-xl mr-2"></i>
-                                    <span>GitHub</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.linkedin_url %}
-                                <a href="{{ site_settings.linkedin_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-linkedin text-xl mr-2"></i>
-                                    <span>LinkedIn</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.kaggle_url %}
-                                <a href="{{ site_settings.kaggle_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-kaggle text-xl mr-2"></i>
-                                    <span>Kaggle</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.hackerrank_url %}
-                                <a href="{{ site_settings.hackerrank_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-hackerrank text-xl mr-2"></i>
-                                    <span>HackerRank</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.leetcode_url %}
-                                <a href="{{ site_settings.leetcode_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fas fa-code text-xl mr-2"></i>
-                                    <span>LeetCode</span>
-                                </a>
-                                {% endif %}
-                            </div>
+                        <div class="form-field">
+                            <label for="email" class="label-mono">Email</label>
+                            <input type="email" id="email" name="email" required autocomplete="email" class="form-input">
                         </div>
+                        <div class="form-field">
+                            <label for="subject" class="label-mono">Subject</label>
+                            <input type="text" id="subject" name="subject" required class="form-input">
+                        </div>
+                        <div class="form-field">
+                            <label for="message" class="label-mono">Message</label>
+                            <textarea id="message" name="message" rows="5" required class="form-input"></textarea>
+                        </div>
+                        <button type="submit" id="submitBtn" class="btn-primary">Send message</button>
+                    </form>
+                    {% endif %}
+                    {% else %}
+                    <div class="contact-success" role="status">
+                        <h2 class="entry__title">Email directly.</h2>
+                        <p class="entry__text">The contact form is currently offline.</p>
+                        <a href="mailto:{{ site_settings.contact_email }}" class="btn-primary">Send an email</a>
                     </div>
+                    {% endif %}
+                </div>
+
+                <div class="panel contact-page__details">
+                    <dl class="kv-list">
+                        <div class="kv-row">
+                            <dt class="label-mono">Email</dt>
+                            <dd><a href="mailto:{{ site_settings.contact_email }}" class="text-accent">{{ site_settings.contact_email }}</a></dd>
+                        </div>
+                        {% if site_settings.contact_location %}
+                        <div class="kv-row">
+                            <dt class="label-mono">Location</dt>
+                            <dd>{{ site_settings.contact_location }}</dd>
+                        </div>
+                        {% endif %}
+                        <div class="kv-row">
+                            <dt class="label-mono">Links</dt>
+                            <dd class="link-row">
+                                {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                                {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+                                {% if site_settings.kaggle_url %}<a href="{{ site_settings.kaggle_url }}" target="_blank" rel="noopener">Kaggle</a>{% endif %}
+                                {% if site_settings.hackerrank_url %}<a href="{{ site_settings.hackerrank_url }}" target="_blank" rel="noopener">HackerRank</a>{% endif %}
+                                {% if site_settings.leetcode_url %}<a href="{{ site_settings.leetcode_url }}" target="_blank" rel="noopener">LeetCode</a>{% endif %}
+                            </dd>
+                        </div>
+                        <div class="kv-row">
+                            <dt class="label-mono">Resume</dt>
+                            <dd><a href="{{ resume_url }}" target="_blank" rel="noopener">Download PDF</a></dd>
+                        </div>
+                    </dl>
                 </div>
             </div>
         </div>
     </main>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% endblock %}

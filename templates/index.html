@@ -1,267 +1,167 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if site_settings.meta_title %}{{ site_settings.meta_title }}{% else %}{{ site_settings.hero_name_display }} | Portfolio{% endif %}</title>
-    {% if site_settings.meta_description %}
-    <meta name="description" content="{{ site_settings.meta_description }}">
-    {% endif %}
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="home">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-logo">
-                <span class="text-4xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</span>
-            </div>
-            <div class="loading-spinner">
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-            </div>
-            <p class="loading-text">Opening Sequence</p>
-        </div>
-    </div>
-    
-    <!-- Scroll Progress Bar -->
-    <div id="scrollProgress" class="scroll-progress"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
+{% block title %}{% if site_settings.meta_title %}{{ site_settings.meta_title }}{% else %}{{ site_settings.hero_name_display }} | Portfolio{% endif %}{% endblock %}
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
+{% block body_attrs %} data-chapter="home"{% endblock %}
 
-    <!-- Hero Section -->
-    <main class="min-h-screen flex items-center">
-        <div class="container mx-auto px-4 py-24">
-            <div class="max-w-4xl mx-auto text-center">
-                <!-- Profile Image -->
-                <div class="portrait-container" data-aos="fade-down">
-                    <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}" class="portrait-img">
-                </div>
-                
-                <!-- Hero Text -->
-                <h1 class="text-4xl md:text-6xl font-['Orbitron'] font-bold mb-6" data-aos="fade-up">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        {{ site_settings.hero_name_display }}
-                    </span>
-                </h1>
-                <p class="hero-role text-xl md:text-2xl text-gray-300 mb-8" data-aos="fade-up" data-aos-delay="100">
-                    <span id="typewriter" class="role-crossfade" aria-live="polite">
-                        {% for phrase in site_settings.hero_roles_list %}
-                        <span class="role-crossfade__item{% if forloop.first %} active{% endif %}">{{ phrase }}</span>
-                        {% endfor %}
-                    </span>
+{% block content %}
+    <main class="home">
+        <!-- Hero + 30-second view -->
+        <section class="home-hero site-wrap" aria-labelledby="hero-name">
+            <div class="home-hero__intro">
+                {% if site_settings.is_job_hunting %}
+                <p class="status-line">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span class="label-mono">Open to roles{% if site_settings.contact_location %} · {{ site_settings.contact_location }}{% endif %}</span>
                 </p>
-                <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-                    {{ site_settings.hero_description|linebreaksbr }}
-                </p>
-
-                <!-- CTA Buttons -->
-                <div class="flex flex-col md:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="300">
-                    <a href="{{ site_settings.hero_cta_primary_url }}" 
-                       class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        {{ site_settings.hero_cta_primary_label }}
-                    </a>
-                    <a href="{{ site_settings.hero_cta_secondary_url }}" 
-                       class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
-                        {{ site_settings.hero_cta_secondary_label }}
-                    </a>
-                    <a href="{{ resume_url }}" target="_blank"
-                       class="px-8 py-3 border border-blue-500/30 rounded-full hover:bg-blue-500/10 transition-colors">
-                        Resume
-                    </a>
-                </div>
-
-                <!-- Social Links -->
-                <div class="mt-12 flex justify-center space-x-6" data-aos="fade-up" data-aos-delay="400">
-                    {% if site_settings.github_url %}
-                    <a href="{{ site_settings.github_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-github text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.linkedin_url %}
-                    <a href="{{ site_settings.linkedin_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-linkedin text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.kaggle_url %}
-                    <a href="{{ site_settings.kaggle_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-kaggle text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.hackerrank_url %}
-                    <a href="{{ site_settings.hackerrank_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fab fa-hackerrank text-2xl"></i>
-                    </a>
-                    {% endif %}
-                    {% if site_settings.leetcode_url %}
-                    <a href="{{ site_settings.leetcode_url }}" target="_blank" 
-                       class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-code text-2xl"></i>
-                    </a>
-                    {% endif %}
+                {% endif %}
+                <h1 id="hero-name" class="home-hero__name">{{ site_settings.hero_name_display }}</h1>
+                <p class="home-hero__roles">{{ site_settings.hero_roles_list|join:" · " }}</p>
+                {% if recent_experience %}
+                <p class="home-hero__recent label-mono">Recent: {{ recent_experience.role }} at {{ recent_experience.organization }}</p>
+                {% endif %}
+                {% if site_settings.currently %}
+                <p class="home-hero__currently label-mono"><span class="status-dot" aria-hidden="true"></span>Currently: {{ site_settings.currently }}</p>
+                {% endif %}
+                {% if site_settings.hero_description %}
+                <p class="home-hero__pitch">{{ site_settings.hero_description|linebreaksbr }}</p>
+                {% endif %}
+                <div class="home-hero__actions">
+                    <a href="#agents" class="btn-primary">View agents</a>
+                    <a href="{{ resume_url }}" target="_blank" rel="noopener" class="btn-ghost">Resume</a>
+                    <a href="#contact" class="btn-ghost">Contact</a>
                 </div>
             </div>
-        </div>
-    </main>
 
-    <!-- Featured Projects -->
-    <section class="pb-20" data-nav-target="projects" data-aos="fade-up">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <p class="featured-label text-center">SELECTED WORK</p>
-                <h2 class="text-3xl md:text-4xl font-['Orbitron'] font-bold text-center mb-8">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Selected Work
-                    </span>
-                </h2>
-                <div class="space-y-6">
-                    {% for project in projects %}
-                    <div class="glass-card p-6 relative" data-aos="fade-up" data-aos-delay="100">
-                        <span class="featured-badge">Featured</span>
-                        <div class="pr-20">
-                            <h3 class="text-2xl font-['Orbitron'] mb-3">{{ project.title }}</h3>
-                            {% if project.tech_tags_list %}
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                {% for tag in project.tech_tags_list %}
-                                <span class="px-2 py-1 bg-blue-500/20 rounded-full text-sm">{{ tag }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            <p class="text-gray-300 mb-5">
-                                {{ project.card_description|linebreaksbr }}
-                            </p>
-                            <div class="flex flex-wrap gap-4">
-                                {% if project.github_url %}
-                                <a href="{{ project.github_url }}" target="_blank"
-                                   class="text-blue-400 hover:text-blue-300 transition-colors">
-                                    <i class="fab fa-github mr-1"></i> View Code
-                                </a>
-                                {% endif %}
-                                {% if project.primary_live_url %}
-                                <a href="{{ project.primary_live_url }}" target="_blank"
-                                   class="text-blue-400 hover:text-blue-300 transition-colors">
-                                    <i class="fas fa-external-link-alt mr-1"></i> Live Demo
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
+            <aside class="panel quick-view" aria-labelledby="quick-view-heading">
+                <h2 id="quick-view-heading" class="label-mono quick-view__title">30-second view</h2>
+                <dl class="kv-list">
+                    {% if site_settings.is_job_hunting and site_settings.looking_for %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Looking for</dt>
+                        <dd>{{ site_settings.looking_for }}</dd>
                     </div>
-                    {% empty %}
-                    <div class="glass-card p-6 text-center">
-                        <p class="text-gray-400">No featured projects available.</p>
+                    {% endif %}
+                    {% if flagship %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Best work</dt>
+                        <dd><a href="{% url 'project_detail' flagship.slug %}" class="text-accent">{{ flagship.title }}</a></dd>
                     </div>
-                    {% endfor %}
-                </div>
-                <div class="text-center mt-8">
-                    <a href="{% url 'projects' %}" class="text-blue-400 hover:text-blue-300 transition-colors">
-                        Continue to Projects
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+                    {% endif %}
+                    {% if education %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Degree</dt>
+                        <dd>
+                            {{ education.degree }}{% if education.field_of_study %}, {{ education.field_of_study }}{% endif %}
+                            <span class="kv-sub">{{ education.institution }}{% if education.year_range %} · {{ education.year_range }}{% endif %}</span>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if core_stack %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Core stack</dt>
+                        <dd>{% for skill in core_stack %}{{ skill.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</dd>
+                    </div>
+                    {% endif %}
+                    {% if site_settings.contact_location %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Location</dt>
+                        <dd>{{ site_settings.contact_location }}{% if site_settings.is_job_hunting and site_settings.open_to_remote %} · Open to remote{% endif %}</dd>
+                    </div>
+                    {% endif %}
+                    {% if site_settings.is_job_hunting and site_settings.notice_period %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Notice period</dt>
+                        <dd>{{ site_settings.notice_period }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Links</dt>
+                        <dd class="link-row">
+                            {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                            {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+                            {% if site_settings.kaggle_url %}<a href="{{ site_settings.kaggle_url }}" target="_blank" rel="noopener">Kaggle</a>{% endif %}
+                            {% if site_settings.leetcode_url %}<a href="{{ site_settings.leetcode_url }}" target="_blank" rel="noopener">LeetCode</a>{% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </aside>
+        </section>
 
-    <!-- Skills Section -->
-    <section class="pb-20" data-nav-target="skills" data-aos="fade-up">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <p class="featured-label text-center">CAPABILITIES</p>
-                <h2 class="text-3xl md:text-4xl font-['Orbitron'] font-bold text-center mb-8">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Skills & Technologies
-                    </span>
-                </h2>
-                <div class="glass-card p-6" data-aos="fade-up">
-                    {% regroup skills by get_category_display as skill_groups %}
-                    {% for group in skill_groups %}
-                    <div class="mb-4 last:mb-0">
-                        <h3 class="text-sm font-['Orbitron'] text-blue-400 uppercase tracking-wider mb-2">{{ group.grouper }}</h3>
-                        <div class="flex flex-wrap gap-2">
-                            {% for skill in group.list %}
-                            <span class="px-3 py-1 bg-gray-800 border border-gray-700/60 rounded-full text-sm text-gray-300">
-                                {{ skill.name }}
-                            </span>
+        <!-- Agent roster -->
+        {% if roster %}
+        <section id="agents" class="site-section" aria-labelledby="agents-heading">
+            <div class="site-wrap">
+                <div class="section-head">
+                    <span class="label-mono">Roster · {% if roster_is_featured %}{{ roster|length }} featured{% else %}{{ roster|length }} of {{ case_total }}{% endif %}</span>
+                    <h2 id="agents-heading">Agents</h2>
+                </div>
+                <div class="roster-scroll" tabindex="0" role="region" aria-label="Agent roster">
+                    <table class="roster">
+                        <thead>
+                            <tr>
+                                <th scope="col">Agent</th>
+                                <th scope="col">Stack</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in roster %}
+                            <tr>
+                                <td class="roster__agent">
+                                    <a href="{% url 'project_detail' project.slug %}" class="roster__link">{{ project.title }}</a>
+                                    {% if project.roster_line %}
+                                    <span class="roster__desc">{{ project.roster_line|truncatechars:120 }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="roster__stack">{{ project.tech_tags_list|slice:":4"|join:" · " }}</td>
+                                <td>
+                                    {% if project.status %}
+                                    <span class="roster-status roster-status--{{ project.status }}">{{ project.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
                             {% endfor %}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="flex flex-wrap justify-center gap-2">
-                        {% for skill in skills %}
-                        <span class="px-3 py-1 bg-gray-800 border border-gray-700/60 rounded-full text-sm text-gray-300">
-                            {{ skill.name }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="text-center mt-8">
-                    <a href="{% url 'skills' %}" class="text-blue-400 hover:text-blue-300 transition-colors">
-                        View All Skills
-                    </a>
-                </div>
+                <p class="section-more"><a href="{% url 'projects' %}" class="text-accent">Case board and archive ({{ case_total }} on file) <span aria-hidden="true">→</span></a></p>
             </div>
-        </div>
-    </section>
+        </section>
+        {% endif %}
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html> 
+        <!-- Replay: recorded agent runs (featured first) -->
+        {% if replays %}
+        {% include 'partials/replay_preview.html' %}
+        {% endif %}
+
+        <!-- From the logs -->
+        {% if latest_posts %}
+        <section id="logs" class="site-section" aria-labelledby="logs-heading">
+            <div class="site-wrap">
+                <div class="section-head">
+                    <span class="label-mono">Logs</span>
+                    <h2 id="logs-heading">From the logs</h2>
+                </div>
+                <ol class="log-ledger">
+                    {% for post in latest_posts %}
+                    <li>
+                        <a href="{% url 'blog_detail' post.slug %}" class="log-ledger__row">
+                            <time class="label-mono" datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M Y" }}</time>
+                            <span class="label-mono log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span>
+                            <span class="log-ledger__title">{{ post.title }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ol>
+                <p class="section-more"><a href="{% url 'blog' %}" class="text-accent">All logs <span aria-hidden="true">→</span></a></p>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+{% endblock %}
+
+{% block extra_scripts %}{% if replays %}<script src="{% static 'replay.js' %}" defer></script>{% endif %}{% endblock %}
+
+{% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}

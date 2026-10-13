@@ -1,0 +1,11 @@
+{
+  "title": "Example run (illustrative only)",
+  "duration_s": 12,
+  "steps": [
+    {"t": 0, "actor": "orchestrator", "kind": "info", "text": "received alert"},
+    {"t": 2, "actor": "orchestrator", "kind": "info", "text": "dispatching 2 agents"},
+    {"t": 4, "actor": "recon", "kind": "tool_call", "text": "lookup_ip 203.0.113.7"},
+    {"t": 8, "actor": "recon", "kind": "result", "text": "finding summary"},
+    {"t": 11, "actor": "reporter", "kind": "info", "text": "report written"}
+  ]
+}

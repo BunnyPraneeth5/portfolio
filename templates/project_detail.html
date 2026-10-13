@@ -1,159 +1,215 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }} | Karu Praneeth Kumar</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="projects">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link active">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+
+{% block title %}{{ project.title }} | Karu Praneeth Kumar{% endblock %}
+
+{% block meta %}<meta name="description" content="{% if project.short_description %}{{ project.short_description|truncatechars:160 }}{% else %}{{ default_meta_description }}{% endif %}">{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{% if project.case_label %}Case file {{ project.case_label }}: {% endif %}{{ project.title }}{% endblock %}
+{% block og_description %}{% if project.short_description %}{{ project.short_description|truncatechars:200 }}{% else %}{{ default_meta_description }}{% endif %}{% endblock %}
+{% block og_image %}{% if project.thumbnail %}{{ request.scheme }}://{{ request.get_host }}{{ project.thumbnail.url }}{% else %}{{ absolute_profile_image_url }}{% endif %}{% endblock %}
+
+{% block body_attrs %} data-chapter="projects"{% endblock %}
+
+{% block content %}
+    <main class="case">
+        <div class="site-wrap">
+            <!-- Top bar: back + breadcrumb -->
+            <div class="case-topbar">
+                <a href="{% url 'index' %}#agents" class="label-mono case-topbar__back"><span aria-hidden="true">←</span> Back to roster</a>
+                <p class="label-mono case-topbar__crumb" aria-label="Breadcrumb">
+                    <a href="{% url 'projects' %}">Cases</a>{% if project.case_label %} / {{ project.case_label }}{% endif %}
+                </p>
             </div>
-        </div>
-    </nav>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white active">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
-
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl mx-auto">
-
-                <!-- Back button -->
-                <div class="mb-8" data-aos="fade-up">
-                    <a href="{% url 'projects' %}"
-                       class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Projects
-                    </a>
+            <!-- Title block -->
+            <header class="case-header">
+                <div class="case-header__text">
+                    <p class="label-mono case-header__kicker">Case file{% if project.case_label %} no. {{ project.case_label }}{% endif %}</p>
+                    <h1 class="case-title">{{ project.title }}</h1>
+                    {% if project.short_description %}
+                    <p class="case-summary">{{ project.short_description }}</p>
+                    {% endif %}
+                    {% if project.personal_note %}
+                    <p class="case-note"><span class="label-mono">Field note</span> {{ project.personal_note }}</p>
+                    {% endif %}
+                    {% if project.status_stamp %}
+                    <p class="case-stamp case-stamp--{{ project.status }}">{{ project.status_stamp }}</p>
+                    {% endif %}
                 </div>
+                <figure class="case-thumb">
+                    {% include 'partials/case_thumb.html' %}
+                </figure>
+            </header>
 
-                <!-- Project header -->
-                <div class="glass-card p-8 mb-8" data-aos="fade-up">
-
-                    {% if project.card_image %}
-                    <div class="w-full h-64 overflow-hidden rounded-xl mb-6">
-                        <img src="{{ project.card_image.url }}"
-                             alt="{{ project.title }}"
-                             class="w-full h-full object-cover">
+            <!-- Evidence strip -->
+            {% if project.metrics or project.tech_tags_list or project.github_url or project.live_demo_url %}
+            <section class="case-evidence" aria-label="Evidence">
+                {% if project.metrics %}
+                <div class="case-evidence__metrics">
+                    {% for metric in project.metrics %}
+                    <div class="stat-tile">
+                        <span class="stat-tile__value">{{ metric.value }}</span>
+                        <span class="stat-tile__label">{{ metric.label }}</span>
                     </div>
-                    {% endif %}
-
-                    <h1 class="text-3xl md:text-4xl font-['Orbitron'] font-bold mb-4">
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                            {{ project.title }}
-                        </span>
-                    </h1>
-
-                    {% if project.metric_1_value or project.metric_2_value or project.metric_3_value %}
-                    <div class="flex flex-wrap gap-6 text-sm text-gray-400 mb-6 pb-6 border-b border-gray-700/50">
-                        {% if project.metric_1_value %}
-                        <span>
-                            <span class="text-white font-semibold">{{ project.metric_1_value }}</span>
-                            {{ project.metric_1_label }}
-                        </span>
-                        {% endif %}
-                        {% if project.metric_2_value %}
-                        <span>
-                            <span class="text-white font-semibold">{{ project.metric_2_value }}</span>
-                            {{ project.metric_2_label }}
-                        </span>
-                        {% endif %}
-                        {% if project.metric_3_value %}
-                        <span>
-                            <span class="text-white font-semibold">{{ project.metric_3_value }}</span>
-                            {{ project.metric_3_label }}
-                        </span>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-
-                    <!-- Project content -->
-                    <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed mb-6">
-                        {{ project.long_description|linebreaks }}
-                    </div>
-
-                    <div class="project-tags mb-6">
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if project.tech_tags_list %}
+                <div class="case-evidence__stack">
+                    <span class="label-mono">Stack</span>
+                    <ul class="case-tags">
                         {% for tag in project.tech_tags_list %}
-                        <span class="project-tag">{{ tag }}</span>
+                        <li class="tag">{{ tag }}</li>
                         {% endfor %}
-                    </div>
+                    </ul>
+                </div>
+                {% endif %}
+                {% if project.github_url or project.live_demo_url %}
+                <div class="case-evidence__links">
+                    {% if project.github_url %}
+                    <a href="{{ project.github_url }}" target="_blank" rel="noopener" class="btn-ghost">View code</a>
+                    {% endif %}
+                    {% if project.live_demo_url %}
+                    <a href="{{ project.live_demo_url }}" target="_blank" rel="noopener" class="btn-ghost">Live demo</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
 
-                    <div>
-                        {% if project.github_url %}
-                        <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
-                            View Code <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                        {% if project.primary_live_url %}
-                        <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
-                            Live Demo <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        {% endif %}
-                    </div>
-
+            <!-- Sections: each renders only when it has content -->
+            {% if project.brief_text or project.architecture_notes or decisions or incidents or replays or project.open_leads_list or case_logs %}
+            <div class="case-body">
+                <div class="case-nav" role="navigation" aria-label="Case file sections">
+                    <ul>
+                        {% if project.brief_text %}<li><a href="#brief">Brief</a></li>{% endif %}
+                        {% if project.architecture_notes %}<li><a href="#investigation">Investigation</a></li>{% endif %}
+                        {% if decisions %}<li><a href="#decisions">Decisions</a></li>{% endif %}
+                        {% if incidents %}<li><a href="#incidents">Incidents</a></li>{% endif %}
+                        {% if replays %}<li><a href="#replay">Replay</a></li>{% endif %}
+                        {% if project.open_leads_list %}<li><a href="#open-leads">Open leads</a></li>{% endif %}
+                        {% if case_logs %}<li><a href="#case-logs">Logs</a></li>{% endif %}
+                    </ul>
                 </div>
 
-                <!-- Back to list CTA -->
-                <div class="text-center" data-aos="fade-up">
-                    <a href="{% url 'projects' %}"
-                       class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        <i class="fas fa-th-large mr-2"></i>All Projects
-                    </a>
-                </div>
+                <div class="case-sections">
+                    {% if project.brief_text %}
+                    <section id="brief" class="case-section" aria-labelledby="brief-heading">
+                        <h2 id="brief-heading" class="case-section__title">Brief</h2>
+                        <div class="case-prose">{{ project.brief_text|linebreaks }}</div>
+                    </section>
+                    {% endif %}
 
+                    {% if project.architecture_notes %}
+                    <section id="investigation" class="case-section" aria-labelledby="investigation-heading">
+                        <h2 id="investigation-heading" class="case-section__title">Investigation</h2>
+                        <div class="case-prose">{{ project.architecture_notes|linebreaks }}</div>
+                    </section>
+                    {% endif %}
+
+                    {% if decisions %}
+                    <section id="decisions" class="case-section" aria-labelledby="decisions-heading">
+                        <h2 id="decisions-heading" class="case-section__title">Decisions</h2>
+                        <ol class="decision-list">
+                            {% for item in decisions %}
+                            <li class="decision">
+                                <span class="decision__code">{{ item.code }}</span>
+                                <div class="decision__body">
+                                    <p class="decision__text">{{ item.decision|linebreaksbr }}</p>
+                                    {% if item.tradeoff %}
+                                    <p class="decision__tradeoff"><span class="label-mono">Trade-off</span> {{ item.tradeoff|linebreaksbr }}</p>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
+                    {% endif %}
+
+                    {% if incidents %}
+                    <section id="incidents" class="case-section" aria-labelledby="incidents-heading">
+                        <h2 id="incidents-heading" class="case-section__title">Incidents</h2>
+                        {% for item in incidents %}
+                        <div class="panel incident">
+                            <dl class="kv-list">
+                                <div class="kv-row">
+                                    <dt class="label-mono">Symptom</dt>
+                                    <dd>{{ item.symptom|linebreaksbr }}</dd>
+                                </div>
+                                <div class="kv-row">
+                                    <dt class="label-mono">Root cause</dt>
+                                    <dd>{{ item.root_cause|linebreaksbr }}</dd>
+                                </div>
+                                <div class="kv-row">
+                                    <dt class="label-mono">Fix</dt>
+                                    <dd>{{ item.fix|linebreaksbr }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        {% endfor %}
+                    </section>
+                    {% endif %}
+
+                    {% if replays %}
+                    <section id="replay" class="case-section" aria-labelledby="replay-heading">
+                        <h2 id="replay-heading" class="case-section__title">Replay</h2>
+                        {% include 'partials/replay_player.html' %}
+                    </section>
+                    {% endif %}
+
+                    {% if project.open_leads_list %}
+                    <section id="open-leads" class="case-section" aria-labelledby="open-leads-heading">
+                        <h2 id="open-leads-heading" class="case-section__title">Open leads</h2>
+                        <ul class="lead-list">
+                            {% for lead in project.open_leads_list %}
+                            <li>{{ lead }}</li>
+                            {% endfor %}
+                        </ul>
+                    </section>
+                    {% endif %}
+
+                    {% if case_logs %}
+                    <section id="case-logs" class="case-section" aria-labelledby="case-logs-heading">
+                        <h2 id="case-logs-heading" class="case-section__title">Logs on this case</h2>
+                        <ol class="log-ledger">
+                            {% for post in case_logs %}
+                            <li>
+                                <a href="{% url 'blog_detail' post.slug %}" class="log-ledger__row">
+                                    <time class="label-mono" datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M Y" }}</time>
+                                    <span class="label-mono log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span>
+                                    <span class="log-ledger__title">{{ post.title }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
+                    {% endif %}
+                </div>
             </div>
+            {% endif %}
+
+            <!-- Previous / next case -->
+            {% if previous_case or next_case %}
+            <div class="case-pager" role="navigation" aria-label="More cases">
+                {% if previous_case %}
+                <a href="{% url 'project_detail' previous_case.slug %}" class="case-pager__link">
+                    <span class="label-mono"><span aria-hidden="true">←</span> Previous case</span>
+                    <span class="case-pager__title">{{ previous_case.title }}</span>
+                </a>
+                {% else %}<span></span>{% endif %}
+                {% if next_case %}
+                <a href="{% url 'project_detail' next_case.slug %}" class="case-pager__link case-pager__link--next">
+                    <span class="label-mono">Next case <span aria-hidden="true">→</span></span>
+                    <span class="case-pager__title">{{ next_case.title }}</span>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
     </main>
+{% endblock %}
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% block extra_scripts %}{% if replays %}<script src="{% static 'replay.js' %}" defer></script>{% endif %}{% endblock %}
+
+{% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}

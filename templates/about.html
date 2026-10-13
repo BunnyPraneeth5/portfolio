@@ -1,393 +1,245 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About | Karu Praneeth Kumar</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="about">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link active">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white active">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
+{% block title %}About | {{ site_settings.hero_name_display }}{% endblock %}
 
-    <!-- About Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <!-- Header -->
-                <div class="text-center mb-12" data-aos="fade-up">
-                    <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                            Behind the Work
-                        </span>
-                    </h1>
-                    <div class="flex justify-center gap-2 mb-4">
-                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping" style="animation-delay:0ms"></span>
-                        <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping" style="animation-delay:200ms"></span>
-                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping" style="animation-delay:400ms"></span>
+{% block meta %}<meta name="description" content="{% if about.subtitle %}About {{ site_settings.hero_name_display }}: {{ about.subtitle }}{% else %}{{ default_meta_description }}{% endif %}">{% endblock %}
+
+{% block body_attrs %} data-chapter="about"{% endblock %}
+
+{% block content %}
+    <main class="page about-page">
+        <div class="site-wrap">
+            <p class="label-mono text-accent about-kicker">About · personnel file</p>
+            <!-- Intro cards: each card is hidden while its content is empty -->
+            <section class="bento about-cards" aria-labelledby="about-heading">
+                <figure class="card card--deep about-card--portrait">
+                    <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}" width="600" height="600">
+                    <figcaption class="about-card__id">
+                        <span class="label-mono">ID</span>
+                        <span class="about-card__id-value">KP · ops://bunny</span>
+                    </figcaption>
+                </figure>
+
+                <div class="card about-card--name">
+                    <h1 id="about-heading" class="page-title">{{ site_settings.hero_name_display }}</h1>
+                    <p class="about-card__subtitle">{% if about.subtitle %}{{ about.subtitle }}{% else %}{{ site_settings.hero_roles_list|join:" · " }}{% endif %}</p>
+                </div>
+
+                {% if recent_role %}
+                <div class="card card--gold {% if about.off_duty %}span-2{% else %}span-4{% endif %}">
+                    <span class="label-mono text-accent">{% if recent_role.is_current %}Now{% else %}Recent{% endif %}</span>
+                    <p class="card__title">{{ recent_role.role }}</p>
+                    <p class="card__text">{{ recent_role.organization }}{% if recent_role.date_range_label %} · {% if recent_role.is_current %}since {{ recent_role.start_date|date:"M Y" }}{% else %}{{ recent_role.date_range_label }}{% endif %}{% endif %}</p>
+                </div>
+                {% endif %}
+
+                {% if about.off_duty %}
+                <div class="card {% if recent_role %}span-2{% else %}span-4{% endif %}">
+                    <span class="label-mono">Off duty</span>
+                    <p class="card__text">{{ about.off_duty }}</p>
+                </div>
+                {% endif %}
+
+                {% if story_lead %}
+                <div class="card about-card--story {% if about.pull_quote %}span-4{% else %}span-6{% endif %}">
+                    <span class="label-mono">Story</span>
+                    <div class="prose-block">
+                        {% for paragraph in story_lead %}<p>{{ paragraph|linebreaksbr }}</p>{% endfor %}
                     </div>
-                    <p class="text-xl text-gray-400">
-                        {% if about.subtitle %}{{ about.subtitle }}{% else %}Agentic AI Engineer / B.Tech CSE-AI / Kurnool, India{% endif %}
-                    </p>
+                    {% if story_more %}
+                    <details class="about-story-more">
+                        <summary class="label-mono">Read the full story</summary>
+                        <div class="prose-block">
+                            {% for paragraph in story_more %}<p>{{ paragraph|linebreaksbr }}</p>{% endfor %}
+                        </div>
+                    </details>
+                    {% endif %}
                 </div>
+                {% endif %}
 
-                <!-- Main Content -->
-                <div class="glass-card p-8 mb-12" data-aos="fade-up" data-aos-delay="200">
-                    <div class="flex flex-col md:flex-row gap-8">
-                        <div class="md:w-3/5">
-                            {% if about.description %}
-                            <p class="mb-4 text-gray-300 leading-relaxed font-medium">
-                                {{ about.description|linebreaksbr }}
-                            </p>
-                            {% endif %}
-                            <p class="mb-4 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_1|linebreaksbr }}
-                            </p>
-                            <p class="mb-4 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_2|linebreaksbr }}
-                            </p>
-                            <p class="mb-6 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_3|linebreaksbr }}
-                            </p>
+                {% if about.pull_quote %}
+                <blockquote class="card card--deep about-card--quote {% if story_lead %}span-2{% else %}span-6{% endif %}">
+                    <p>"{{ about.pull_quote }}"</p>
+                </blockquote>
+                {% endif %}
+            </section>
 
-                            {% if what_i_do %}
-                            <h2 class="text-xl font-['Orbitron'] mb-3 mt-2">What I Do</h2>
-                            <ul class="about-checklist space-y-2">
-                                {% for item in what_i_do %}
-                                <li>
-                                    <span class="about-check">✓</span>{{ item.item }}
-                                </li>
-                                {% endfor %}
+            <!-- What I do -->
+            {% if what_i_do %}
+            <section class="site-section" aria-labelledby="what-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="what-heading">What I do</h2>
+                    <span class="label-mono">{{ what_i_do|length }} capabilit{{ what_i_do|length|pluralize:"y,ies" }}</span>
+                </div>
+                <ol class="bento about-do">
+                    {% for item in what_i_do %}
+                    <li class="card">
+                        <span class="about-do__num">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <p class="card__text">{{ item.item }}</p>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+
+            <!-- Work -->
+            {% if experience_all %}
+            <section class="site-section" aria-labelledby="work-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="work-heading">Work</h2>
+                    <span class="label-mono">{{ experience_all|length }} role{{ experience_all|length|pluralize }}</span>
+                </div>
+                <ol class="about-stack">
+                    {% for entry in experience_all %}
+                    <li class="card card--gold work-card{% if entry.summary or entry.highlights_list or entry.related_project.is_published %} work-card--split{% endif %}">
+                        <div class="work-card__main">
+                            <p class="work-card__badges">
+                                <span class="label-mono entry__badge">{{ entry.get_employment_type_display }}</span>
+                                {% if entry.is_current %}<span class="label-mono entry__badge entry__badge--current">Current</span>{% endif %}
+                            </p>
+                            <h3 class="card__title card__title--lg">{{ entry.role }}</h3>
+                            <p class="work-card__org">{{ entry.organization }}</p>
+                            <p class="label-mono experience-meta">
+                                {% if entry.date_range_label %}{{ entry.date_range_label }}{% endif %}{% if entry.location %}{% if entry.date_range_label %} · {% endif %}{{ entry.location }}{% endif %}{% if entry.is_remote %} · Remote{% endif %}
+                            </p>
+                            {% if entry.get_tags_list %}
+                            <ul class="tag-row">
+                                {% for tag in entry.get_tags_list %}<li class="tag">{{ tag }}</li>{% endfor %}
                             </ul>
                             {% endif %}
                         </div>
-
-                        <div class="md:w-2/5">
-                            <figure class="story-portrait" aria-label="{{ site_settings.hero_name_display }} profile image">
-                                <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}">
-                            </figure>
-                            {% if about %}
-                            <div class="about-stats-grid">
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">◎</span>
-                                        <strong data-count-to="{{ about.stat_accuracy|default:'0' }}" data-count-decimals="2" data-count-suffix="%">
-                                            {{ about.stat_accuracy }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_accuracy_label }}
-                                        </span>
-                                    </div>
-
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">◇</span>
-                                        <strong data-count-to="{{ about.stat_agents|default:'0' }}">
-                                            {{ about.stat_agents }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_agents_label }}
-                                        </span>
-                                    </div>
-
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">◈</span>
-                                        <strong data-count-to="{{ about.stat_teams|default:'0' }}">
-                                            {{ about.stat_teams }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_teams_label }}
-                                        </span>
-                                    </div>
-
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">⌥</span>
-                                        <strong data-count-to="{{ about.stat_projects|default:'0' }}">
-                                            {{ about.stat_projects }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_projects_label }}
-                                        </span>
-                                    </div>
-                            </div>
+                        {% if entry.summary or entry.highlights_list or entry.related_project.is_published %}
+                        <div class="work-card__detail">
+                            {% if entry.summary %}<p class="card__text">{{ entry.summary|linebreaksbr }}</p>{% endif %}
+                            {% if entry.highlights_list %}
+                            <p class="label-mono">Highlights</p>
+                            <ul class="check-list">
+                                {% for point in entry.highlights_list %}<li>{{ point }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                            {% if entry.related_project and entry.related_project.is_published %}
+                            <a href="{% url 'project_detail' entry.related_project.slug %}" class="text-accent entry__link">See the project <span aria-hidden="true">→</span></a>
                             {% endif %}
                         </div>
-                    </div>
-                </div>
-
-                <!-- Timeline -->
-                <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Education Journey</h2>
-                    <div class="roadmap education-roadmap">
-                        <div class="roadmap-line"><div class="timeline-progress"></div></div>
-
-                        {% for entry in education %}
-                        <article class="roadmap-item">
-                            <span class="roadmap-dot"></span>
-                            <div class="roadmap-side-note">
-                                <span class="roadmap-year">{{ entry.year_range }}</span>
-                                <strong>{{ entry.field_of_study }}</strong>
-                            </div>
-                            <div class="glass-card roadmap-card">
-                                <h3>{{ entry.degree }}</h3>
-                                <div class="roadmap-badge">Education</div>
-                                <p>{{ entry.institution }}</p>
-                                {% if entry.bullet_1 or entry.bullet_2 %}
-                                <ul class="roadmap-points">
-                                    {% if entry.bullet_1 %}
-                                    <li><span class="about-check">âœ“</span>{{ entry.bullet_1 }}</li>
-                                    {% endif %}
-                                    {% if entry.bullet_2 %}
-                                    <li><span class="about-check">âœ“</span>{{ entry.bullet_2 }}</li>
-                                    {% endif %}
-                                </ul>
-                                {% endif %}
-                            </div>
-                        </article>
-                        {% comment %}
-                        <div class="relative mb-12">
-                            <div class="flex items-center mb-4">
-                                <div class="w-1/2 pr-8 text-right">
-                                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium border border-blue-500/30">
-                                        {{ entry.year_range }}
-                                    </span>
-                                </div>
-                                <div class="timeline-node absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full ring-2 ring-white/20 ring-offset-2 ring-offset-gray-900">
-                                </div>
-                                <div class="w-1/2 pl-8"></div>
-                            </div>
-                            <div class="flex">
-                                <div class="w-1/2 pr-8">
-                                    <div class="glass-card p-6 ml-auto border-l-2 border-blue-400" data-aos="fade-right">
-                                        <div class="space-y-2 text-right">
-                                            <div class="flex items-center justify-end">
-                                                <h3 class="text-xl font-['Orbitron']">
-                                                    {{ entry.degree }}
-                                                </h3>
-                                            </div>
-                                            <p class="text-gray-300">{{ entry.field_of_study }}</p>
-                                            <p class="text-sm text-gray-400">{{ entry.institution }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="w-1/2 pl-8">
-                                    {% if entry.bullet_1 or entry.bullet_2 %}
-                                    <div class="glass-card p-6 border-r-2 border-purple-400" data-aos="fade-left">
-                                        <ul class="space-y-2 text-gray-300">
-                                            {% if entry.bullet_1 %}
-                                            <li class="flex items-start">
-                                                <span class="about-check">✓</span>
-                                                <span>{{ entry.bullet_1 }}</span>
-                                            </li>
-                                            {% endif %}
-                                            {% if entry.bullet_2 %}
-                                            <li class="flex items-start">
-                                                <span class="about-check">✓</span>
-                                                <span>{{ entry.bullet_2 }}</span>
-                                            </li>
-                                            {% endif %}
-                                        </ul>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endcomment %}
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Experience Timeline -->
-                <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Professional Experience</h2>
-                    <div class="roadmap">
-                        <div class="roadmap-line"><div class="timeline-progress"></div></div>
-                        {% for entry in experience_all %}
-                        <article class="roadmap-item">
-                            <span class="roadmap-dot"></span>
-                            <div class="roadmap-side-note">
-                                <span class="roadmap-year">{{ entry.year_label }}</span>
-                                <strong>{{ entry.role }}</strong>
-                            </div>
-                            <div class="glass-card roadmap-card">
-                                <h3>
-                                    {% if entry.icon_class %}
-                                    <i class="{{ entry.icon_class }} {% if entry.icon_color %}{{ entry.icon_color }}{% else %}text-blue-400{% endif %} mr-2"></i>
-                                    {% endif %}
-                                    {{ entry.organization }}
-                                </h3>
-                                <div class="roadmap-badge">Credential</div>
-                                {% if entry.tags %}
-                                <div>
-                                    {% for tag in entry.get_tags_list %}
-                                    <span class="roadmap-tag">{{ tag }}</span>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                {% if entry.certificate_file %}
-                                <a href="{{ entry.certificate_file.url }}" target="_blank" class="timeline-link">
-                                    View Certificate <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                                {% if entry.certificate_file_2 %}
-                                <a href="{{ entry.certificate_file_2.url }}" target="_blank" class="timeline-link">
-                                    View Certificate <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </article>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Events & Leadership -->
-                <div class="events-section mb-12" data-aos="fade-up" data-aos-delay="350">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Events & Leadership</h2>
-                    {% for event in events %}
-                    <div class="glass-card p-8 max-w-3xl mx-auto relative overflow-hidden mb-6">
-                        <span class="featured-badge">Organizer</span>
-                        <div class="timeline-line absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 to-purple-600">
-                        </div>
-                        <div class="flex flex-col md:flex-row items-start pl-4">
-                            <div class="timeline-node w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center mr-6 flex-shrink-0 mb-4 md:mb-0">
-                                <i class="fas fa-code text-3xl text-blue-400"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex flex-wrap items-center gap-3 mb-2">
-                                    <h3 class="text-2xl font-['Orbitron']">{{ event.title }}</h3>
-                                    <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs border border-green-500/30">
-                                        College Level
-                                    </span>
-                                </div>
-                                <p class="text-purple-400 text-sm font-medium mb-3">
-                                    {{ event.role }} · {{ event.year }}
-                                </p>
-                                <p class="text-gray-300 mb-4">{{ event.description|linebreaksbr }}</p>
-                                <div class="flex flex-wrap gap-4">
-                                    {% if event.stat_1_value %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-users text-blue-400"></i>
-                                        <span>{{ event.stat_1_value }} {{ event.stat_1_label }}</span>
-                                    </div>
-                                    {% endif %}
-                                    {% if event.stat_2_value %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-trophy text-yellow-400"></i>
-                                        <span>{{ event.stat_2_value }} {{ event.stat_2_label }}</span>
-                                    </div>
-                                    {% endif %}
-                                    {% if event.stat_3_value %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-calendar text-purple-400"></i>
-                                        <span>{{ event.stat_3_value }} {{ event.stat_3_label }}</span>
-                                    </div>
-                                    {% endif %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-map-marker-alt text-green-400"></i>
-                                        <span>{{ event.location }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        {% endif %}
+                    </li>
                     {% endfor %}
-                </div>
+                </ol>
+            </section>
+            {% endif %}
 
-                <!-- Additional Certifications -->
-                <div class="mb-12" data-aos="fade-up" data-aos-delay="400">
-                    <h2 class="text-2xl font-['Orbitron'] mb-8 text-center">Additional Certifications</h2>
-                    <div class="glass-card p-6 max-w-5xl mx-auto">
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            {% for cert in certifications %}
-                            <div class="text-center">
-                                <div class="mb-2">
-                                    <i class="{{ cert.icon_class }} text-3xl {{ cert.icon_color }} mb-2"></i>
-                                    <h4 class="font-['Orbitron'] text-lg">{{ cert.title }}</h4>
-                                </div>
-                                {% if cert.certificate_file %}
-                                <a href="{{ cert.certificate_file.url }}" target="_blank"
-                                   class="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-full hover:bg-blue-500/30 transition-colors inline-block">
-                                    View
-                                </a>
-                                {% elif cert.see_experience_note %}
-                                <p class="text-xs text-gray-500">{{ cert.see_experience_note }}</p>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
+            <!-- Education -->
+            {% if education %}
+            <section class="site-section" aria-labelledby="education-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="education-heading">Education</h2>
+                    <span class="label-mono">{{ education|length }} entr{{ education|length|pluralize:"y,ies" }}</span>
+                </div>
+                <ol class="bento">
+                    {% for entry in education %}
+                    <li class="card{% if forloop.first %}{% if education|length == 1 %} span-6{% else %} span-4{% endif %}{% else %} card--deep span-2{% endif %}">
+                        {% if entry.year_range %}<span class="label-mono">{{ entry.year_range }}</span>{% endif %}
+                        <h3 class="card__title{% if forloop.first %} card__title--lg{% endif %}">{{ entry.degree }}</h3>
+                        {% if entry.field_of_study %}<p class="card__accent">{{ entry.field_of_study }}</p>{% endif %}
+                        <p class="card__text card__text--small">{{ entry.institution }}</p>
+                        {% if entry.bullet_1 or entry.bullet_2 %}
+                        <ul class="check-list card__list">
+                            {% if entry.bullet_1 %}<li>{{ entry.bullet_1 }}</li>{% endif %}
+                            {% if entry.bullet_2 %}<li>{{ entry.bullet_2 }}</li>{% endif %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+
+            <!-- Events -->
+            {% if events %}
+            <section class="site-section" aria-labelledby="events-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="events-heading">Events</h2>
+                    <span class="label-mono">{{ events|length }} event{{ events|length|pluralize }}</span>
+                </div>
+                <ol class="about-stack">
+                    {% for event in events %}
+                    <li class="card event-card">
+                        <div class="event-card__when">
+                            <span class="event-card__year">{{ event.year }}</span>
+                            {% if event.location %}<span class="label-mono">{{ event.location }}</span>{% endif %}
                         </div>
-                    </div>
-                </div>
+                        <div>
+                            <h3 class="card__title card__title--lg">{{ event.title }}</h3>
+                            {% if event.role %}<p class="card__text">{{ event.role }}</p>{% endif %}
+                            {% if event.description %}<p class="card__text card__text--small">{{ event.description|linebreaksbr }}</p>{% endif %}
+                            {% if event.stat_1_value or event.stat_2_value or event.stat_3_value %}
+                            <ul class="event-card__stats">
+                                {% if event.stat_1_value %}<li><span class="event-card__stat">{{ event.stat_1_value }}</span> <span class="label-mono">{{ event.stat_1_label }}</span></li>{% endif %}
+                                {% if event.stat_2_value %}<li><span class="event-card__stat">{{ event.stat_2_value }}</span> <span class="label-mono">{{ event.stat_2_label }}</span></li>{% endif %}
+                                {% if event.stat_3_value %}<li><span class="event-card__stat">{{ event.stat_3_value }}</span> <span class="label-mono">{{ event.stat_3_label }}</span></li>{% endif %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
 
-                <!-- Call to Action -->
-                <div class="text-center" data-aos="fade-up" data-aos-delay="500">
-                    <a href="{% url 'contact' %}" 
-                       class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity mr-4">
-                        <i class="fas fa-paper-plane mr-2"></i>Let's Work Together
-                    </a>
-                    <a href="{% url 'projects' %}" 
-                       class="inline-block px-8 py-3 border border-blue-500/50 rounded-full text-blue-400 hover:bg-blue-500/10 transition-colors">
-                        <i class="fas fa-code-branch mr-2"></i>View My Projects
-                    </a>
-                    <a href="{{ resume_url }}" target="_blank"
-                       class="inline-block px-8 py-3 border border-blue-500/50 rounded-full text-blue-400 hover:bg-blue-500/10 transition-colors mt-4 md:mt-0">
-                        <i class="fas fa-file-alt mr-2"></i>Resume
-                    </a>
+            <!-- Certifications -->
+            {% if cert_total %}
+            <section class="site-section" aria-labelledby="certifications-heading">
+                <div class="section-head section-head--split">
+                    <h2 id="certifications-heading">Courses and certificates</h2>
+                    <span class="label-mono">{{ cert_total }} on file</span>
                 </div>
+                {% if featured_certs %}
+                <ul class="bento">
+                    {% for cert in featured_certs %}
+                    <li class="card card--gold span-2 cert-card">
+                        {% if cert.issuer %}<span class="label-mono text-accent">{{ cert.issuer }}</span>{% endif %}
+                        <h3 class="card__title">{{ cert.title }}</h3>
+                        {% if cert.category or cert.issued_date %}
+                        <p class="label-mono">{{ cert.category }}{% if cert.category and cert.issued_date %} · {% endif %}{% if cert.issued_date %}{{ cert.issued_date|date:"M Y" }}{% endif %}</p>
+                        {% endif %}
+                        <p class="cert-card__links">
+                            {% if cert.certificate_file %}<a href="{{ cert.certificate_file.url }}" target="_blank" rel="noopener" class="text-accent">View certificate <span aria-hidden="true">→</span></a>{% endif %}
+                            {% if cert.certificate_file_2 %}<a href="{{ cert.certificate_file_2.url }}" target="_blank" rel="noopener" class="text-accent">View second certificate <span aria-hidden="true">→</span></a>{% endif %}
+                            {% if cert.credential_url %}<a href="{{ cert.credential_url }}" target="_blank" rel="noopener" class="text-accent">Verify <span aria-hidden="true">→</span></a>{% endif %}
+                        </p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if other_certs %}
+                <div class="card cert-also">
+                    {% if featured_certs %}<span class="label-mono">Also</span>{% endif %}
+                    <ul class="cert-chips">
+                        {% for cert in other_certs %}
+                        <li class="cert-chip">
+                            {{ cert.title }}{% if cert.issuer or cert.issued_date %}<span class="cert-chip__meta"> · {{ cert.issuer }}{% if cert.issuer and cert.issued_date %} · {% endif %}{% if cert.issued_date %}{{ cert.issued_date|date:"M Y" }}{% endif %}</span>{% endif %}
+                            {% if cert.certificate_file %}<a href="{{ cert.certificate_file.url }}" target="_blank" rel="noopener" class="text-accent" aria-label="View certificate: {{ cert.title }}">View</a>{% endif %}
+                            {% if cert.certificate_file_2 %}<a href="{{ cert.certificate_file_2.url }}" target="_blank" rel="noopener" class="text-accent" aria-label="View second certificate: {{ cert.title }}">View 2</a>{% endif %}
+                            {% if cert.credential_url %}<a href="{{ cert.credential_url }}" target="_blank" rel="noopener" class="text-accent" aria-label="Verify: {{ cert.title }}">Verify</a>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            <!-- Closing cards -->
+            <div class="bento about-close">
+                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="card span-4 about-close__card">
+                    <span class="card__title">Want the short version?</span>
+                    <span class="label-mono text-accent">Resume PDF <span aria-hidden="true">→</span></span>
+                </a>
+                <a href="{% url 'contact' %}" class="card card--gold span-2 about-close__card about-close__card--center">
+                    <span class="label-mono text-accent">Contact <span aria-hidden="true">→</span></span>
+                </a>
             </div>
         </div>
     </main>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% endblock %}

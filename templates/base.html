@@ -4,16 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Portfolio{% endblock %}</title>
+    <title>{% block title %}{{ site_settings.hero_name_display }}{% endblock %}</title>
+    {% block meta %}<meta name="description" content="{{ default_meta_description }}">{% endblock %}
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="{{ site_settings.hero_name_display }}">
+    <meta property="og:title" content="{% block og_title %}{{ site_settings.meta_title|default:site_settings.hero_name_display }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ default_meta_description }}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% block og_image %}{{ absolute_profile_image_url }}{% endblock %}">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
-<body>
+<body class="bg-gray-900 text-white"{% block body_attrs %}{% endblock %}>
+    {% block atmosphere %}<div id="atmosphere-container" class="atmosphere-container"></div>{% endblock %}
+    {% block before_nav %}{% endblock %}
+    {% with nav=request.resolver_match.url_name %}
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50" aria-label="Main">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="{% url 'index' %}" class="nav-brand">
+                    <span class="nav-brand__mark font-display">KP</span>
+                    <span class="nav-brand__label">OPS://BUNNY</span>
+                </a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="{% url 'index' %}#agents" class="nav-link{% if nav == 'index' %} active{% endif %}">Agents</a>
+                    <a href="{% url 'projects' %}" class="nav-link{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Cases</a>
+                    <a href="{% url 'skills' %}" class="nav-link{% if nav == 'skills' %} active{% endif %}">Skills</a>
+                    <a href="{% url 'blog' %}" class="nav-link{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Logs</a>
+                    <a href="{% url 'about' %}" class="nav-link{% if nav == 'about' %} active{% endif %}">About</a>
+                    <a href="{% url 'contact' %}" class="nav-link{% if nav == 'contact' %} active{% endif %}">Contact</a>
+                </div>
+                <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" aria-label="Open menu" aria-controls="mobileMenu">
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="mobile-menu md:hidden">
+        <div class="p-4">
+            <a href="{% url 'index' %}#agents" class="block py-2 text-gray-300 hover:text-white{% if nav == 'index' %} active{% endif %}">Agents</a>
+            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'projects' or nav == 'project_detail' %} active{% endif %}">Cases</a>
+            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'skills' %} active{% endif %}">Skills</a>
+            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'blog' or nav == 'blog_detail' %} active{% endif %}">Logs</a>
+            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'about' %} active{% endif %}">About</a>
+            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white{% if nav == 'contact' %} active{% endif %}">Contact</a>
+        </div>
+    </div>
+    {% endwith %}
+
     {% block content %}{% endblock %}
-    <script src="{% static 'script.js' %}"></script>
+
+    {# Full contact section: only on pages that turn it on (home, case files, log posts). #}
+    {% block contact_section %}{% endblock %}
+    {% include 'partials/site_footer.html' %}
+
+    <script src="{% static 'script.js' %}" defer></script>
+    <script src="{% static 'chat_widget.js' %}" defer></script>
+    {% block extra_scripts %}{% endblock %}
+    {% include 'pet_widget.html' %}
 </body>
 </html>

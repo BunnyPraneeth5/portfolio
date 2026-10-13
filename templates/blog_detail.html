@@ -1,127 +1,102 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ post.title }} | Karu Praneeth Kumar</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']">
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link active">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+
+{% block title %}{{ post.title }} | Karu Praneeth Kumar{% endblock %}
+
+{% block meta %}<meta name="description" content="{% if post.excerpt %}{{ post.excerpt|truncatechars:160 }}{% else %}{{ default_meta_description }}{% endif %}">{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_description %}{% if post.excerpt %}{{ post.excerpt|truncatechars:200 }}{% else %}{{ default_meta_description }}{% endif %}{% endblock %}
+{% block og_image %}{% if post.image %}{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}{% else %}{{ absolute_profile_image_url }}{% endif %}{% endblock %}
+
+{% block atmosphere %}{% endblock %}
+
+{% block content %}
+    <main class="case log-detail">
+        <div class="site-wrap">
+            <div class="case-topbar case-topbar--end">
+                <p class="label-mono case-topbar__crumb" aria-label="Breadcrumb">
+                    <a href="{% url 'blog' %}">Logs</a> / <a href="{% url 'blog' %}?type={{ post.log_type }}">{{ post.get_log_type_display }}</a>
+                </p>
             </div>
-        </div>
-    </nav>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white active">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
-
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl mx-auto">
-                
-                <!-- Back button -->
-                <div class="mb-8" data-aos="fade-up">
-                    <a href="{% url 'blog' %}" 
-                       class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Blog
-                    </a>
-                </div>
-                
-                <!-- Post header -->
-                <div class="glass-card p-8 mb-8" data-aos="fade-up">
-                    
-                    {% if post.image %}
-                    <div class="w-full h-64 overflow-hidden rounded-xl mb-6">
-                        <img src="{{ post.image.url }}" 
-                             alt="{{ post.title }}"
-                             class="w-full h-full object-cover">
+            <div class="log-layout">
+            <aside class="log-rail" aria-label="About this log">
+                <a href="{% url 'blog' %}" class="label-mono case-topbar__back log-rail__back"><span aria-hidden="true">←</span> All logs</a>
+                <dl>
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Type</dt>
+                        <dd><a href="{% url 'blog' %}?type={{ post.log_type }}" class="log-stamp log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</a></dd>
+                    </div>
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Date</dt>
+                        <dd><time datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M Y" }}</time></dd>
+                    </div>
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Read</dt>
+                        <dd>{{ post.reading_minutes }} min</dd>
+                    </div>
+                    {% with case=post.visible_project %}{% if case %}
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Case</dt>
+                        <dd><a href="{% url 'project_detail' case.slug %}" class="text-accent">{% if case.case_label %}Case {{ case.case_label }} · {% endif %}{{ case.title }}</a></dd>
+                    </div>
+                    {% endif %}{% endwith %}
+                    {% if post.updated_at|date:"Ymd" != post.created_at|date:"Ymd" %}
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Updated</dt>
+                        <dd>{{ post.updated_at|date:"d M Y" }}</dd>
                     </div>
                     {% endif %}
-                    
-                    <h1 class="text-3xl md:text-4xl font-['Orbitron'] font-bold mb-4">
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                            {{ post.title }}
-                        </span>
-                    </h1>
-                    
-                    <div class="flex items-center gap-4 text-sm text-gray-400 mb-6 pb-6 border-b border-gray-700/50">
-                        <span>
-                            <i class="fas fa-calendar mr-1"></i>
-                            {{ post.event_date|date:"F d, Y" }}
-                        </span>
-                        <span>
-                            <i class="fas fa-clock mr-1"></i>
-                            {{ post.updated_at|date:"F d, Y" }}
-                        </span>
-                    </div>
-                    
-                    <!-- Post content -->
-                    <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed">
-                        {{ post.content|safe|linebreaks }}
-                    </div>
-                    
+                </dl>
+            </aside>
+
+            <article class="log-article">
+                <header class="log-article__header">
+                    <h1 class="case-title">{{ post.title }}</h1>
+                    {% if post.excerpt %}
+                    <p class="case-summary">{{ post.excerpt }}</p>
+                    {% endif %}
+                </header>
+
+                {% if post.image %}
+                <figure class="case-thumb log-article__image">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                </figure>
+                {% endif %}
+
+                <div class="case-prose log-article__body">
+                    {{ post.content|safe|linebreaks }}
                 </div>
-                
-                <!-- Back to blog CTA -->
-                <div class="text-center" data-aos="fade-up">
-                    <a href="{% url 'blog' %}" 
-                       class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white hover:opacity-90 transition-opacity">
-                        <i class="fas fa-th-large mr-2"></i>All Posts
+
+                <div class="case-pager" role="navigation" aria-label="More logs">
+                    {% if older_post %}
+                    <a href="{% url 'blog_detail' older_post.slug %}" class="case-pager__link">
+                        <span class="label-mono"><span aria-hidden="true">←</span> Older</span>
+                        <span class="case-pager__title">{{ older_post.title }}</span>
                     </a>
+                    {% else %}
+                    <div class="case-pager__link case-pager__link--empty">
+                        <span class="label-mono"><span aria-hidden="true">←</span> Older</span>
+                        <span class="case-pager__none">None yet</span>
+                    </div>
+                    {% endif %}
+                    {% if newer_post %}
+                    <a href="{% url 'blog_detail' newer_post.slug %}" class="case-pager__link case-pager__link--next">
+                        <span class="label-mono">Newer <span aria-hidden="true">→</span></span>
+                        <span class="case-pager__title">{{ newer_post.title }}</span>
+                    </a>
+                    {% else %}
+                    <div class="case-pager__link case-pager__link--next case-pager__link--empty">
+                        <span class="label-mono">Newer <span aria-hidden="true">→</span></span>
+                        <span class="case-pager__none">None yet</span>
+                    </div>
+                    {% endif %}
                 </div>
-                
+            </article>
             </div>
         </div>
     </main>
+{% endblock %}
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}

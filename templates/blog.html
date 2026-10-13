@@ -1,174 +1,61 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog | Karu Praneeth Kumar</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    {% if site_appearance %}
-    <style>
-        :root {
-            --accent-blue: {{ site_appearance.primary_color }};
-            --accent-purple: {{ site_appearance.secondary_color }};
-            --accent-cyan: {{ site_appearance.accent_color }};
-        }
-    </style>
-    {% endif %}
-</head>
-<body class="bg-gray-900 text-white font-['Space_Grotesk']" data-chapter="blog">
-    <div id="atmosphere-container" class="atmosphere-container"></div>
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900/50 backdrop-blur-md border-b border-gray-700/30">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <a href="{% url 'index' %}" class="text-xl font-['Orbitron'] bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">KP</a>
-                <div class="hidden md:flex space-x-8">
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
-                    <a href="{% url 'skills' %}" class="nav-link">Skills</a>
-                    <a href="{% url 'projects' %}" class="nav-link">Projects</a>
-                    <a href="{% url 'blog' %}" class="nav-link active">Blog</a>
-                    <a href="{% url 'contact' %}" class="nav-link">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
+
+{% block title %}Logs | Karu Praneeth Kumar{% endblock %}
+
+{% block body_attrs %} data-chapter="blog"{% endblock %}
+
+{% block content %}
+    <main class="logs">
+        <div class="site-wrap">
+            <div class="section-head">
+                <span class="label-mono">Logs · {{ total_count }} filed</span>
+                <h1 class="logs-title">Logs</h1>
             </div>
-        </div>
-    </nav>
+            <p class="page-lead">Decisions, incidents and build notes from the work.</p>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu md:hidden">
-        <div class="p-4">
-            <a href="{% url 'about' %}" class="block py-2 text-gray-300 hover:text-white">About</a>
-            <a href="{% url 'skills' %}" class="block py-2 text-gray-300 hover:text-white">Skills</a>
-            <a href="{% url 'projects' %}" class="block py-2 text-gray-300 hover:text-white">Projects</a>
-            <a href="{% url 'blog' %}" class="block py-2 text-gray-300 hover:text-white active">Blog</a>
-            <a href="{% url 'contact' %}" class="block py-2 text-gray-300 hover:text-white">Contact</a>
-        </div>
-    </div>
-
-    <!-- Blog Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h1 class="text-4xl md:text-5xl font-['Orbitron'] font-bold mb-4">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-                        Field Notes
-                    </span>
-                </h1>
-                <p class="text-xl text-gray-300">Preserved thoughts, experiments, and reflections.</p>
+            {% if filters %}
+            <div class="log-filters" role="navigation" aria-label="Filter logs by type">
+                <a href="{% url 'blog' %}" class="log-filter"{% if not active_type %} aria-current="page"{% endif %}>All <span class="log-filter__count">{{ total_count }}</span></a>
+                {% for item in filters %}
+                <a href="{% url 'blog' %}?type={{ item.value }}" class="log-filter"{% if active_type == item.value %} aria-current="page"{% endif %}>{{ item.label }} <span class="log-filter__count">{{ item.count }}</span></a>
+                {% endfor %}
             </div>
+            {% endif %}
 
-            <!-- Blog Posts Grid -->
-            <div class="max-w-6xl mx-auto">
-                {% if posts %}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogGrid">
-                    {% for post in posts %}
-                    <div class="glass-card overflow-hidden" 
-                         data-aos="fade-up" 
-                         data-aos-delay="{{ forloop.counter0 }}00">
-                        
-                        {% if post.image %}
-                        <div class="w-full h-48 overflow-hidden">
-                            <img src="{{ post.image.url }}" 
-                                 alt="{{ post.title }}"
-                                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-                        </div>
-                        {% else %}
-                        <div class="blog-card-visual blog-card-visual--empty h-48"></div>
-                        {% endif %}
-                        
-                        <div class="p-6">
-                            <div class="flex items-center gap-2 mb-3">
-                                <span class="text-xs text-gray-500">
-                                    {{ post.event_date|date:"M d, Y" }}
-                                </span>
-                            </div>
-                            
-                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug hover:text-blue-400 transition-colors">
-                                <a href="{% url 'blog_detail' post.slug %}">
-                                    {{ post.title }}
-                                </a>
-                            </h2>
-                            
-                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
-                                {{ post.excerpt|linebreaksbr }}
+            {% if posts %}
+            {% regroup posts by event_date.year as years %}
+            {% for year in years %}
+            <section class="log-year" aria-labelledby="log-year-{{ year.grouper }}">
+                <h2 id="log-year-{{ year.grouper }}" class="log-year__label">{{ year.grouper }}</h2>
+                <ol class="log-index">
+                    {% for post in year.list %}
+                    <li class="log-entry">
+                        <time class="label-mono log-entry__date" datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M" }}</time>
+                        <div class="log-entry__body">
+                            <p class="label-mono log-entry__meta">
+                                <span class="log-stamp log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span>
+                                <span>{{ post.reading_minutes }} min read</span>
                             </p>
-                            
-                            <a href="{% url 'blog_detail' post.slug %}" 
-                               class="card-cta inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors text-sm font-medium">
-                                Read More 
-                                <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-                            </a>
+                            <h3 class="log-entry__title"><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h3>
+                            {% if post.excerpt %}
+                            <p class="log-entry__excerpt">{{ post.excerpt }}</p>
+                            {% endif %}
+                            {% with case=post.visible_project %}{% if case %}
+                            <p class="label-mono log-entry__case">Filed under <a href="{% url 'project_detail' case.slug %}" class="text-accent">{% if case.case_label %}Case {{ case.case_label }} · {% endif %}{{ case.title }}</a></p>
+                            {% endif %}{% endwith %}
                         </div>
-                    </div>
+                        <a href="{% url 'blog_detail' post.slug %}" class="label-mono text-accent log-entry__read" aria-hidden="true" tabindex="-1">Read <span>→</span></a>
+                    </li>
                     {% endfor %}
-                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up">
-                        <div class="blog-card-visual blog-card-visual--systems"></div>
-                        <div class="p-6">
-                            <span class="featured-badge mb-3">Coming Soon</span>
-                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">Designing Agentic SOC Workflows</h2>
-                            <p class="text-gray-400 text-sm leading-relaxed">Notes on MCP orchestration, agent boundaries, and reliable security automation.</p>
-                        </div>
-                    </div>
-                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up" data-aos-delay="100">
-                        <div class="blog-card-visual blog-card-visual--ml"></div>
-                        <div class="p-6">
-                            <span class="featured-badge mb-3">Coming Soon</span>
-                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">What Accuracy Hides</h2>
-                            <p class="text-gray-400 text-sm leading-relaxed">A practical reflection on ML metrics, dataset trust, and meaningful evaluation.</p>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blogGrid">
-                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up">
-                        <div class="blog-card-visual blog-card-visual--systems"></div>
-                        <div class="p-6">
-                            <span class="featured-badge mb-3">Coming Soon</span>
-                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">Designing Agentic SOC Workflows</h2>
-                            <p class="text-gray-400 text-sm leading-relaxed">Notes on MCP orchestration, agent boundaries, and reliable security automation.</p>
-                        </div>
-                    </div>
-                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up" data-aos-delay="100">
-                        <div class="blog-card-visual blog-card-visual--ml"></div>
-                        <div class="p-6">
-                            <span class="featured-badge mb-3">Coming Soon</span>
-                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">What Accuracy Hides</h2>
-                            <p class="text-gray-400 text-sm leading-relaxed">A practical reflection on ML metrics, dataset trust, and meaningful evaluation.</p>
-                        </div>
-                    </div>
-                    <div class="glass-card blog-placeholder-card overflow-hidden" data-aos="fade-up" data-aos-delay="200">
-                        <div class="blog-card-visual blog-card-visual--build"></div>
-                        <div class="p-6">
-                            <span class="featured-badge mb-3">Coming Soon</span>
-                            <h2 class="text-xl font-['Orbitron'] mb-3 leading-snug">Building Calm Engineering Tools</h2>
-                            <p class="text-gray-400 text-sm leading-relaxed">How interface restraint can make complex AI systems easier to understand.</p>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
+                </ol>
+            </section>
+            {% endfor %}
+            {% elif active_type %}
+            <p class="logs-empty">Nothing filed under {{ active_label }} yet. <a href="{% url 'blog' %}" class="text-accent">Show all logs</a></p>
+            {% else %}
+            <p class="logs-empty">No logs published yet.</p>
+            {% endif %}
         </div>
     </main>
-
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
-    {% include 'pet_widget.html' %}
-</body>
-</html>
+{% endblock %}

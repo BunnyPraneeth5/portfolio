@@ -1,0 +1,44 @@
+<section id="contact" class="site-section site-contact" aria-labelledby="contact-heading">
+    <div class="site-wrap">
+        <div class="section-head">
+            <span class="label-mono">Contact</span>
+            <h2 id="contact-heading">{{ site_settings.contact_tagline|default:"Contact" }}</h2>
+        </div>
+        <div class="contact-grid">
+            <div class="panel contact-panel">
+                <dl class="kv-list">
+                    {% if site_settings.contact_email %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Email</dt>
+                        <dd><a href="mailto:{{ site_settings.contact_email }}" class="text-accent">{{ site_settings.contact_email }}</a></dd>
+                    </div>
+                    {% endif %}
+                    {% if site_settings.contact_location %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Location</dt>
+                        <dd>{{ site_settings.contact_location }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="kv-row">
+                        <dt class="label-mono">Links</dt>
+                        <dd class="link-row">
+                            {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                            {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+                            {% if site_settings.kaggle_url %}<a href="{{ site_settings.kaggle_url }}" target="_blank" rel="noopener">Kaggle</a>{% endif %}
+                            {% if site_settings.leetcode_url %}<a href="{{ site_settings.leetcode_url }}" target="_blank" rel="noopener">LeetCode</a>{% endif %}
+                            {% if site_settings.hackerrank_url %}<a href="{{ site_settings.hackerrank_url }}" target="_blank" rel="noopener">HackerRank</a>{% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="contact-actions">
+                {% if site_settings.contact_form_active %}
+                <a href="{% url 'contact' %}" class="btn-primary">Send a message</a>
+                {% elif site_settings.contact_email %}
+                <a href="mailto:{{ site_settings.contact_email }}" class="btn-primary">Email me</a>
+                {% endif %}
+                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="btn-ghost">Resume</a>
+            </div>
+        </div>
+    </div>
+</section>
