@@ -23,21 +23,32 @@
             {% endif %}
 
             {% if posts %}
-            <ul class="log-index">
-                {% for post in posts %}
-                <li>
-                    <a href="{% url 'blog_detail' post.slug %}" class="log-entry">
-                        <span class="label-mono log-entry__meta">
-                            <span class="log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span> · {{ post.event_date|date:"d M Y" }}
-                        </span>
-                        <span class="log-entry__title">{{ post.title }}</span>
-                        {% if post.excerpt %}
-                        <span class="log-entry__excerpt">{{ post.excerpt }}</span>
-                        {% endif %}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
+            {% regroup posts by event_date.year as years %}
+            {% for year in years %}
+            <section class="log-year" aria-labelledby="log-year-{{ year.grouper }}">
+                <h2 id="log-year-{{ year.grouper }}" class="log-year__label">{{ year.grouper }}</h2>
+                <ol class="log-index">
+                    {% for post in year.list %}
+                    <li class="log-entry">
+                        <time class="label-mono log-entry__date" datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M" }}</time>
+                        <div class="log-entry__body">
+                            <p class="label-mono log-entry__meta">
+                                <span class="log-stamp log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span>
+                                <span>{{ post.reading_minutes }} min read</span>
+                            </p>
+                            <h3 class="log-entry__title"><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h3>
+                            {% if post.excerpt %}
+                            <p class="log-entry__excerpt">{{ post.excerpt }}</p>
+                            {% endif %}
+                            {% with case=post.visible_project %}{% if case %}
+                            <p class="label-mono log-entry__case">Filed under <a href="{% url 'project_detail' case.slug %}" class="text-accent">{% if case.case_label %}Case {{ case.case_label }} · {% endif %}{{ case.title }}</a></p>
+                            {% endif %}{% endwith %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endfor %}
             {% elif active_type %}
             <p class="logs-empty">Nothing filed under {{ active_label }} yet. <a href="{% url 'blog' %}" class="text-accent">Show all logs</a></p>
             {% else %}

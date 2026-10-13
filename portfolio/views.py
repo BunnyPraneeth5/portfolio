@@ -7,7 +7,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -124,6 +124,7 @@ def blog_view(request):
         for value, label in BlogPost.LOG_TYPE_CHOICES if counts.get(value)
     ]
     posts = published.filter(log_type=active_type) if active_type else published
+    posts = posts.select_related('related_project')
     return render(request, 'blog.html', {
         'posts': posts,
         'filters': filters,
@@ -133,8 +134,14 @@ def blog_view(request):
     })
 
 def blog_detail(request, slug):
-    post = get_object_or_404(BlogPost, slug=slug, published=True)
-    return render(request, 'blog_detail.html', {'post': post})
+    post = get_object_or_404(BlogPost.objects.select_related('related_project'), slug=slug, published=True)
+    published = BlogPost.objects.filter(published=True).exclude(pk=post.pk)
+    same_day = Q(event_date=post.event_date)
+    # Same order as the index: event date, then creation time.
+    older = published.filter(Q(event_date__lt=post.event_date) | (same_day & Q(created_at__lt=post.created_at))).first()
+    newer = (published.filter(Q(event_date__gt=post.event_date) | (same_day & Q(created_at__gt=post.created_at)))
+             .order_by('event_date', 'created_at').first())
+    return render(request, 'blog_detail.html', {'post': post, 'older_post': older, 'newer_post': newer})
 
 def project_detail(request, slug):
     project = get_object_or_404(Project, slug=slug, is_published=True)
@@ -145,6 +152,7 @@ def project_detail(request, slug):
         'decisions': list(project.decisions.all()),
         'incidents': list(project.incidents.all()),
         'replays': list(project.replays.filter(is_published=True).select_related('project')),
+        'case_logs': list(project.logs.filter(published=True)),
         'previous_case': published[index - 1] if index > 0 else None,
         'next_case': published[index + 1] if index + 1 < len(published) else None,
     })

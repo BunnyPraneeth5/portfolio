@@ -1,3 +1,4 @@
+import math
 import re
 from datetime import date
 
@@ -591,6 +592,18 @@ class BlogPost(models.Model):
     
     class Meta:
         ordering = ['-event_date', '-created_at']
+
+    @property
+    def reading_minutes(self):
+        """Whole minutes at 200 words a minute, at least 1."""
+        from django.utils.html import strip_tags
+        return max(1, math.ceil(len(strip_tags(self.content).split()) / 200))
+
+    @property
+    def visible_project(self):
+        """The linked case, only while that case is published."""
+        project = self.related_project
+        return project if project and project.is_published else None
     
     def __str__(self):
         return self.title

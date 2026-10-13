@@ -76,7 +76,7 @@
             {% endif %}
 
             <!-- Sections: each renders only when it has content -->
-            {% if project.brief_text or project.architecture_notes or decisions or incidents or replays or project.open_leads_list %}
+            {% if project.brief_text or project.architecture_notes or decisions or incidents or replays or project.open_leads_list or case_logs %}
             <div class="case-body">
                 <div class="case-nav" role="navigation" aria-label="Case file sections">
                     <ul>
@@ -86,6 +86,7 @@
                         {% if incidents %}<li><a href="#incidents">Incidents</a></li>{% endif %}
                         {% if replays %}<li><a href="#replay">Replay</a></li>{% endif %}
                         {% if project.open_leads_list %}<li><a href="#open-leads">Open leads</a></li>{% endif %}
+                        {% if case_logs %}<li><a href="#case-logs">Logs</a></li>{% endif %}
                     </ul>
                 </div>
 
@@ -162,6 +163,23 @@
                             <li>{{ lead }}</li>
                             {% endfor %}
                         </ul>
+                    </section>
+                    {% endif %}
+
+                    {% if case_logs %}
+                    <section id="case-logs" class="case-section" aria-labelledby="case-logs-heading">
+                        <h2 id="case-logs-heading" class="case-section__title">Logs on this case</h2>
+                        <ol class="log-ledger">
+                            {% for post in case_logs %}
+                            <li>
+                                <a href="{% url 'blog_detail' post.slug %}" class="log-ledger__row">
+                                    <time class="label-mono" datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M Y" }}</time>
+                                    <span class="label-mono log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span>
+                                    <span class="log-ledger__title">{{ post.title }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ol>
                     </section>
                     {% endif %}
                 </div>

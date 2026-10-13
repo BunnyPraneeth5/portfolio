@@ -21,17 +21,41 @@
                 </p>
             </div>
 
+            <div class="log-layout">
+            <aside class="log-rail" aria-label="About this log">
+                <dl>
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Type</dt>
+                        <dd><a href="{% url 'blog' %}?type={{ post.log_type }}" class="log-stamp log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</a></dd>
+                    </div>
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Date</dt>
+                        <dd><time datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M Y" }}</time></dd>
+                    </div>
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Read</dt>
+                        <dd>{{ post.reading_minutes }} min</dd>
+                    </div>
+                    {% with case=post.visible_project %}{% if case %}
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Case</dt>
+                        <dd><a href="{% url 'project_detail' case.slug %}" class="text-accent">{% if case.case_label %}Case {{ case.case_label }} · {% endif %}{{ case.title }}</a></dd>
+                    </div>
+                    {% endif %}{% endwith %}
+                    {% if post.updated_at|date:"Ymd" != post.created_at|date:"Ymd" %}
+                    <div class="log-rail__item">
+                        <dt class="label-mono">Updated</dt>
+                        <dd>{{ post.updated_at|date:"d M Y" }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </aside>
+
             <article class="log-article">
                 <header class="log-article__header">
-                    <p class="label-mono case-header__kicker">
-                        <span class="log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span> · {{ post.event_date|date:"d M Y" }}
-                    </p>
                     <h1 class="case-title">{{ post.title }}</h1>
                     {% if post.excerpt %}
                     <p class="case-summary">{{ post.excerpt }}</p>
-                    {% endif %}
-                    {% if post.updated_at|date:"Ymd" != post.created_at|date:"Ymd" %}
-                    <p class="label-mono log-article__updated">Updated {{ post.updated_at|date:"d M Y" }}</p>
                     {% endif %}
                 </header>
 
@@ -44,9 +68,25 @@
                 <div class="case-prose log-article__body">
                     {{ post.content|safe|linebreaks }}
                 </div>
-            </article>
 
-            <p class="section-more"><a href="{% url 'blog' %}" class="text-accent"><span aria-hidden="true">←</span> All logs</a></p>
+                {% if older_post or newer_post %}
+                <div class="case-pager" role="navigation" aria-label="More logs">
+                    {% if older_post %}
+                    <a href="{% url 'blog_detail' older_post.slug %}" class="case-pager__link">
+                        <span class="label-mono"><span aria-hidden="true">←</span> Older</span>
+                        <span class="case-pager__title">{{ older_post.title }}</span>
+                    </a>
+                    {% else %}<span></span>{% endif %}
+                    {% if newer_post %}
+                    <a href="{% url 'blog_detail' newer_post.slug %}" class="case-pager__link case-pager__link--next">
+                        <span class="label-mono">Newer <span aria-hidden="true">→</span></span>
+                        <span class="case-pager__title">{{ newer_post.title }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </article>
+            </div>
         </div>
     </main>
 {% endblock %}

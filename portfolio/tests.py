@@ -873,7 +873,9 @@ class LogsTests(TestCase):
     def test_default_type_is_note(self):
         self.assertEqual(self.old.log_type, 'note')
         response = self.client.get(reverse('blog'))
-        self.assertContains(response, 'log-type--note">Note</span> · 05 Jan 2024')
+        self.assertContains(response, 'log-type--note">Note</span>')
+        self.assertContains(response, 'datetime="2024-01-05">05 Jan</time>')
+        self.assertContains(response, '<h2 id="log-year-2024" class="log-year__label">2024</h2>', html=True)
 
     def test_ordered_by_event_date(self):
         titles = [p.title for p in self.client.get(reverse('blog')).context['posts']]
@@ -1370,3 +1372,70 @@ class HomePhase8Tests(TestCase):
         response = self.client.get(reverse('projects'))
         self.assertContains(response, 'href="/#replay"')
         self.assertNotContains(response, "Watch the run")
+
+
+
+class LogsPhase8Tests(TestCase):
+    def setUp(self):
+        BlogPost.objects.all().delete()
+        self.case = Project.objects.create(title="Linked Case", slug="linked-case", case_number=7)
+        self.first = BlogPost.objects.create(title="First log", slug="first-log", content="word " * 450,
+                                             excerpt="e", published=True, event_date=date(2025, 3, 1))
+        self.second = BlogPost.objects.create(title="Second log", slug="second-log", content="short",
+                                              excerpt="e", published=True, event_date=date(2026, 1, 2),
+                                              related_project=self.case)
+        self.third = BlogPost.objects.create(title="Third log", slug="third-log", content="short",
+                                             excerpt="e", published=True, event_date=date(2026, 5, 9))
+        BlogPost.objects.create(title="Draft log", slug="draft-log", content="x", excerpt="e",
+                                event_date=date(2026, 2, 1), related_project=self.case)
+
+    def test_reading_time(self):
+        self.assertEqual(self.first.reading_minutes, 3)
+        self.assertEqual(self.second.reading_minutes, 1)
+        html_post = BlogPost(content="<p>" + "word " * 200 + "</p>")
+        self.assertEqual(html_post.reading_minutes, 1)
+
+    def test_index_grouped_by_year_newest_first(self):
+        html = self.client.get(reverse('blog')).content.decode()
+        self.assertLess(html.index('log-year-2026'), html.index('log-year-2025'))
+        self.assertLess(html.index('Third log'), html.index('Second log'))
+        self.assertIn('3 min read', html)
+
+    def test_filed_under_only_for_linked_published_case(self):
+        response = self.client.get(reverse('blog'))
+        self.assertContains(response, 'Filed under', count=1)
+        self.assertContains(response, 'Case 007 · Linked Case')
+        Project.objects.filter(pk=self.case.pk).update(is_published=False)
+        self.assertNotContains(self.client.get(reverse('blog')), 'Filed under')
+
+    def test_detail_rail_and_case_link(self):
+        response = self.client.get(reverse('blog_detail', args=['second-log']))
+        self.assertContains(response, 'class="log-rail"')
+        self.assertContains(response, '1 min')
+        self.assertContains(response, reverse('project_detail', args=['linked-case']))
+        response = self.client.get(reverse('blog_detail', args=['third-log']))
+        self.assertNotContains(response, '>Case<')
+
+    def test_older_and_newer_links(self):
+        middle = self.client.get(reverse('blog_detail', args=['second-log'])).context
+        self.assertEqual(middle['older_post'].slug, 'first-log')
+        self.assertEqual(middle['newer_post'].slug, 'third-log')
+        oldest = self.client.get(reverse('blog_detail', args=['first-log'])).context
+        self.assertIsNone(oldest['older_post'])
+        newest = self.client.get(reverse('blog_detail', args=['third-log'])).context
+        self.assertIsNone(newest['newer_post'])
+        self.assertEqual(newest['older_post'].slug, 'second-log')
+
+    def test_same_day_posts_follow_creation_order(self):
+        same = BlogPost.objects.create(title="Same day later", slug="same-day-later", content="x", excerpt="e",
+                                       published=True, event_date=date(2026, 1, 2))
+        context = self.client.get(reverse('blog_detail', args=['second-log'])).context
+        self.assertEqual(context['newer_post'].slug, same.slug)
+
+    def test_case_file_lists_its_published_logs(self):
+        response = self.client.get(reverse('project_detail', args=['linked-case']))
+        self.assertContains(response, 'Logs on this case')
+        self.assertContains(response, 'href="#case-logs"')
+        self.assertEqual([p.title for p in response.context['case_logs']], ["Second log"])
+        other = Project.objects.create(title="Other Case", slug="other-case")
+        self.assertNotContains(self.client.get(reverse('project_detail', args=['other-case'])), 'Logs on this case')
