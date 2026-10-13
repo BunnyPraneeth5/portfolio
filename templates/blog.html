@@ -9,9 +9,10 @@
     <main class="logs">
         <div class="site-wrap">
             <div class="section-head">
-                <span class="label-mono">Decisions · incidents · build logs</span>
+                <span class="label-mono">Logs · {{ total_count }} filed</span>
                 <h1 class="logs-title">Logs</h1>
             </div>
+            <p class="page-lead">Decisions, incidents and build notes from the work.</p>
 
             {% if filters %}
             <div class="log-filters" role="navigation" aria-label="Filter logs by type">
@@ -44,6 +45,7 @@
                             <p class="label-mono log-entry__case">Filed under <a href="{% url 'project_detail' case.slug %}" class="text-accent">{% if case.case_label %}Case {{ case.case_label }} · {% endif %}{{ case.title }}</a></p>
                             {% endif %}{% endwith %}
                         </div>
+                        <a href="{% url 'blog_detail' post.slug %}" class="label-mono text-accent log-entry__read" aria-hidden="true" tabindex="-1">Read <span>→</span></a>
                     </li>
                     {% endfor %}
                 </ol>

@@ -175,7 +175,8 @@ class HomepageTests(TestCase):
         self.assertContains(response, 'roster-status--flagship')
         self.assertContains(response, "Python · MCP · PyQt6 · Django")
         self.assertNotContains(response, "Extra")
-        self.assertContains(response, "84")
+        self.assertNotContains(response, "Key metric")
+        self.assertNotContains(response, "roster__metric")
 
     def test_best_work_is_flagship(self):
         response = self.client.get(reverse('index'))
@@ -1496,7 +1497,7 @@ class AboutPhase8Tests(TestCase):
         response = self.get()
         self.assertEqual(response.context['featured_certs'], [self.cert_a])
         self.assertEqual(response.context['other_certs'], [self.cert_b])
-        self.assertContains(response, "Certifications · 2 on file")
+        self.assertContains(response, "2 on file")
         self.assertContains(response, 'href="https://example.com/verify"')
         self.assertContains(response, ">Also<")
 
@@ -1519,3 +1520,51 @@ class AboutPhase8Tests(TestCase):
         response = self.get()
         self.assertContains(response, '<span class="about-do__num">01</span>', html=True)
         self.assertContains(response, "2 capabilities")
+
+
+
+class CaseNoteTests(TestCase):
+    def test_personal_note_only_when_filled(self):
+        Project.objects.create(title="Noted", slug="noted")
+        url = reverse('project_detail', args=['noted'])
+        self.assertNotContains(self.client.get(url), 'case-note')
+        Project.objects.filter(slug='noted').update(personal_note="I would log earlier next time.")
+        response = self.client.get(url)
+        self.assertContains(response, 'class="case-note"')
+        self.assertContains(response, "I would log earlier next time.")
+
+
+
+class MockupGapTests(TestCase):
+    def setUp(self):
+        Project.objects.update(is_featured=False)
+        Project.objects.create(title="Bare Archive", slug="bare-archive")
+        BlogPost.objects.all().delete()
+        self.only = BlogPost.objects.create(title="Only log", slug="only-log", content="c", excerpt="e",
+                                            published=True, event_date=date(2026, 1, 1))
+
+    def test_archive_shows_none_listed_for_empty_stack(self):
+        self.assertContains(self.client.get(reverse('projects')), "none listed")
+
+    def test_logs_lead_and_read_link(self):
+        response = self.client.get(reverse('blog'))
+        self.assertContains(response, "Decisions, incidents and build notes from the work.")
+        self.assertContains(response, "Logs · 1 filed")
+        self.assertContains(response, 'log-entry__read')
+
+    def test_log_pager_shows_none_yet_both_sides(self):
+        response = self.client.get(reverse('blog_detail', args=['only-log']))
+        self.assertContains(response, "None yet", count=2)
+        self.assertContains(response, 'log-rail__back')
+
+    def test_about_personnel_file_and_split_headings(self):
+        from .models import WhatIDo
+        WhatIDo.objects.create(item="Build agents")
+        response = self.client.get(reverse('about'))
+        self.assertContains(response, "About · personnel file")
+        self.assertContains(response, "KP · ops://bunny")
+        self.assertContains(response, 'section-head section-head--split')
+
+    def test_footer_last_updated_sits_with_links(self):
+        html = self.client.get(reverse('contact')).content.decode()
+        self.assertLess(html.index('site-footer__end'), html.index('Last updated'))

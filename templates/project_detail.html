@@ -30,6 +30,9 @@
                     {% if project.short_description %}
                     <p class="case-summary">{{ project.short_description }}</p>
                     {% endif %}
+                    {% if project.personal_note %}
+                    <p class="case-note"><span class="label-mono">Field note</span> {{ project.personal_note }}</p>
+                    {% endif %}
                     {% if project.status_stamp %}
                     <p class="case-stamp case-stamp--{{ project.status }}">{{ project.status_stamp }}</p>
                     {% endif %}

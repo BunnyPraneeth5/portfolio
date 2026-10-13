@@ -1252,21 +1252,6 @@ a.text-accent:hover {
     font-size: 12px;
 }
 
-.roster__metric {
-    color: var(--text);
-    font-family: var(--font-display) !important;
-    font-size: 1.4rem;
-}
-
-.roster__metric-label {
-    display: block;
-    color: var(--muted) !important;
-    font-family: var(--font-mono) !important;
-    font-size: 11px;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase;
-}
-
 .roster-status {
     display: inline-flex;
     align-items: center;
@@ -1385,9 +1370,10 @@ a.text-accent:hover {
     gap: var(--space-4);
 }
 
-.site-footer__meta {
+.site-footer__end {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-2) var(--space-5);
 }
 
@@ -1686,6 +1672,22 @@ a.text-accent:hover {
     line-height: 1.65;
 }
 
+.case-note {
+    max-width: 40rem;
+    margin: var(--space-3) 0 var(--space-4);
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--gold);
+    color: var(--text-2) !important;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+.case-note .label-mono {
+    margin-right: var(--space-2);
+    color: var(--gold) !important;
+    font-style: normal;
+}
+
 .case-stamp {
     display: inline-block;
     padding: var(--space-2) var(--space-3);
@@ -1924,6 +1926,16 @@ a.text-accent:hover {
 .case-pager__link--next {
     grid-column: 2;
     text-align: right;
+}
+
+.case-pager__link--empty {
+    border-style: dashed;
+    background: transparent;
+}
+
+.case-pager__none {
+    color: var(--muted) !important;
+    font-size: 0.95rem;
 }
 
 .case-pager__title {
@@ -2319,7 +2331,6 @@ a.text-accent:hover {
 }
 
 .log-year {
-    max-width: 52rem;
     margin-bottom: var(--space-6);
 }
 
@@ -2340,7 +2351,7 @@ a.text-accent:hover {
 
 .log-entry {
     display: grid;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
     gap: var(--space-4);
     padding: var(--space-5) 0;
     border-bottom: 1px solid var(--line-soft);
@@ -2401,6 +2412,11 @@ a.text-accent:hover {
     color: var(--teal) !important;
 }
 
+.log-entry__read {
+    padding-top: 2px;
+    white-space: nowrap;
+}
+
 .log-entry__case a {
     font-family: inherit !important;
 }
@@ -2425,6 +2441,15 @@ a.text-accent:hover {
 
 .log-rail dl {
     margin: 0;
+}
+
+.log-rail__back {
+    display: inline-block;
+    margin-bottom: var(--space-5);
+}
+
+.case-topbar--end {
+    justify-content: flex-end;
 }
 
 .log-rail__item {
@@ -2469,6 +2494,10 @@ a.text-accent:hover {
     .log-entry {
         grid-template-columns: minmax(0, 1fr);
         gap: var(--space-2);
+    }
+
+    .log-entry__read {
+        display: none;
     }
 }
 
@@ -2747,10 +2776,15 @@ textarea.form-input {
 }
 
 .case-row__summary {
+    display: -webkit-box;
     max-width: 44rem;
     margin-top: var(--space-3);
+    overflow: hidden;
     color: var(--text-2) !important;
     line-height: 1.65;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
 }
 
 .case-row__evidence {
@@ -2826,6 +2860,10 @@ textarea.form-input {
 .archive-table__stack {
     color: var(--text-2) !important;
     font-size: 0.9rem;
+}
+
+.archive-table__none {
+    color: var(--muted) !important;
 }
 
 .archive-table__links {
@@ -2943,13 +2981,45 @@ textarea.form-input {
     overflow: hidden;
 }
 
+.about-cards .about-card--portrait {
+    display: flex;
+    flex-direction: column;
+}
+
 .about-card--portrait img {
     display: block;
+    flex: 1;
     width: 100%;
-    height: 100%;
     min-height: 16rem;
     object-fit: cover;
     border-radius: 0 !important;
+}
+
+.about-card__id {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--line);
+}
+
+.about-card__id-value {
+    color: var(--text);
+    font-family: var(--font-display) !important;
+    font-size: 1.05rem;
+}
+
+.about-kicker {
+    margin-bottom: var(--space-3);
+}
+
+.section-head--split {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
 }
 
 .about-cards .about-card--name {

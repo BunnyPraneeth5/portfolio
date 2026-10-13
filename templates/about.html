@@ -10,14 +10,18 @@
 {% block content %}
     <main class="page about-page">
         <div class="site-wrap">
+            <p class="label-mono text-accent about-kicker">About · personnel file</p>
             <!-- Intro cards: each card is hidden while its content is empty -->
             <section class="bento about-cards" aria-labelledby="about-heading">
                 <figure class="card card--deep about-card--portrait">
                     <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}" width="600" height="600">
+                    <figcaption class="about-card__id">
+                        <span class="label-mono">ID</span>
+                        <span class="about-card__id-value">KP · ops://bunny</span>
+                    </figcaption>
                 </figure>
 
                 <div class="card about-card--name">
-                    <span class="label-mono">About</span>
                     <h1 id="about-heading" class="page-title">{{ site_settings.hero_name_display }}</h1>
                     <p class="about-card__subtitle">{% if about.subtitle %}{{ about.subtitle }}{% else %}{{ site_settings.hero_roles_list|join:" · " }}{% endif %}</p>
                 </div>
@@ -64,9 +68,9 @@
             <!-- What I do -->
             {% if what_i_do %}
             <section class="site-section" aria-labelledby="what-heading">
-                <div class="section-head">
-                    <span class="label-mono">{{ what_i_do|length }} capabilit{{ what_i_do|length|pluralize:"y,ies" }}</span>
+                <div class="section-head section-head--split">
                     <h2 id="what-heading">What I do</h2>
+                    <span class="label-mono">{{ what_i_do|length }} capabilit{{ what_i_do|length|pluralize:"y,ies" }}</span>
                 </div>
                 <ol class="bento about-do">
                     {% for item in what_i_do %}
@@ -82,9 +86,9 @@
             <!-- Work -->
             {% if experience_all %}
             <section class="site-section" aria-labelledby="work-heading">
-                <div class="section-head">
-                    <span class="label-mono">Professional experience · {{ experience_all|length }} role{{ experience_all|length|pluralize }}</span>
+                <div class="section-head section-head--split">
                     <h2 id="work-heading">Work</h2>
+                    <span class="label-mono">{{ experience_all|length }} role{{ experience_all|length|pluralize }}</span>
                 </div>
                 <ol class="about-stack">
                     {% for entry in experience_all %}
@@ -128,9 +132,9 @@
             <!-- Education -->
             {% if education %}
             <section class="site-section" aria-labelledby="education-heading">
-                <div class="section-head">
-                    <span class="label-mono">Study · {{ education|length }} entr{{ education|length|pluralize:"y,ies" }}</span>
+                <div class="section-head section-head--split">
                     <h2 id="education-heading">Education</h2>
+                    <span class="label-mono">{{ education|length }} entr{{ education|length|pluralize:"y,ies" }}</span>
                 </div>
                 <ol class="bento">
                     {% for entry in education %}
@@ -154,9 +158,9 @@
             <!-- Events -->
             {% if events %}
             <section class="site-section" aria-labelledby="events-heading">
-                <div class="section-head">
-                    <span class="label-mono">Hackathons and leadership · {{ events|length }} event{{ events|length|pluralize }}</span>
+                <div class="section-head section-head--split">
                     <h2 id="events-heading">Events</h2>
+                    <span class="label-mono">{{ events|length }} event{{ events|length|pluralize }}</span>
                 </div>
                 <ol class="about-stack">
                     {% for event in events %}
@@ -186,9 +190,9 @@
             <!-- Certifications -->
             {% if cert_total %}
             <section class="site-section" aria-labelledby="certifications-heading">
-                <div class="section-head">
-                    <span class="label-mono">Certifications · {{ cert_total }} on file</span>
+                <div class="section-head section-head--split">
                     <h2 id="certifications-heading">Courses and certificates</h2>
+                    <span class="label-mono">{{ cert_total }} on file</span>
                 </div>
                 {% if featured_certs %}
                 <ul class="bento">

@@ -79,13 +79,13 @@ Use your superuser credentials.
   - `Is featured` & `Is published`
   - `Order`: Display priority (lower number appears first).
   - `Status`: Flagship, Live, Benchmarking or Archived. Shown as a badge in the roster; empty hides it. The Flagship project is the "Best work" link in the 30-second view (otherwise the first featured project).
-  - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy). Metric 1 is the "Key metric" column in the roster.
+  - `Metric kickers & values`: Small kicker labels and key stats (e.g. 99.88% Detection Accuracy). Shown on the case file (the homepage roster no longer has a Key metric column since Phase 8).
   - `Case board` (from Phase 8.1; each item hidden while empty):
     - `Role`: your role, e.g. Solo builder.
     - `Year`: e.g. 2025 or 2024-2025.
     - `Project type`: short label, e.g. Agent system.
     - `One-liner`: one short line for the homepage roster. While empty, the first sentence of the short description is used.
-    - `Personal note`: one line in your own words for the case file, e.g. what you would do differently.
+    - `Personal note`: one line in your own words, shown as a "Field note" under the summary on the case file, e.g. what you would do differently.
   - `Case file` (project page `/projects/<slug>/`; each section only shows when it has content):
     - `Case number`: shown as CASE FILE NO. 00X and in the CASES / 00X breadcrumb. Empty hides the number.
     - `Brief`: the Brief section. While empty, the `Long description` is shown instead.

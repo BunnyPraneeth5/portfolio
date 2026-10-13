@@ -14,8 +14,7 @@
 {% block content %}
     <main class="case log-detail">
         <div class="site-wrap">
-            <div class="case-topbar">
-                <a href="{% url 'blog' %}" class="label-mono case-topbar__back"><span aria-hidden="true">←</span> All logs</a>
+            <div class="case-topbar case-topbar--end">
                 <p class="label-mono case-topbar__crumb" aria-label="Breadcrumb">
                     <a href="{% url 'blog' %}">Logs</a> / <a href="{% url 'blog' %}?type={{ post.log_type }}">{{ post.get_log_type_display }}</a>
                 </p>
@@ -23,6 +22,7 @@
 
             <div class="log-layout">
             <aside class="log-rail" aria-label="About this log">
+                <a href="{% url 'blog' %}" class="label-mono case-topbar__back log-rail__back"><span aria-hidden="true">←</span> All logs</a>
                 <dl>
                     <div class="log-rail__item">
                         <dt class="label-mono">Type</dt>
@@ -69,22 +69,30 @@
                     {{ post.content|safe|linebreaks }}
                 </div>
 
-                {% if older_post or newer_post %}
                 <div class="case-pager" role="navigation" aria-label="More logs">
                     {% if older_post %}
                     <a href="{% url 'blog_detail' older_post.slug %}" class="case-pager__link">
                         <span class="label-mono"><span aria-hidden="true">←</span> Older</span>
                         <span class="case-pager__title">{{ older_post.title }}</span>
                     </a>
-                    {% else %}<span></span>{% endif %}
+                    {% else %}
+                    <div class="case-pager__link case-pager__link--empty">
+                        <span class="label-mono"><span aria-hidden="true">←</span> Older</span>
+                        <span class="case-pager__none">None yet</span>
+                    </div>
+                    {% endif %}
                     {% if newer_post %}
                     <a href="{% url 'blog_detail' newer_post.slug %}" class="case-pager__link case-pager__link--next">
                         <span class="label-mono">Newer <span aria-hidden="true">→</span></span>
                         <span class="case-pager__title">{{ newer_post.title }}</span>
                     </a>
+                    {% else %}
+                    <div class="case-pager__link case-pager__link--next case-pager__link--empty">
+                        <span class="label-mono">Newer <span aria-hidden="true">→</span></span>
+                        <span class="case-pager__none">None yet</span>
+                    </div>
                     {% endif %}
                 </div>
-                {% endif %}
             </article>
             </div>
         </div>

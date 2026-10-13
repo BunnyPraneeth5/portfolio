@@ -13,7 +13,7 @@
                 <h1 class="page-title">Case board</h1>
             </div>
             {% if featured_cases and archive_projects %}
-            <p class="page-lead">Featured cases first. Every other project is in the archive below.</p>
+            <p class="page-lead">Featured cases first. Every other project sits in the archive below.</p>
             {% endif %}
 
             {% if featured_cases %}
@@ -94,7 +94,7 @@
                         <tr>
                             {% if archive_has_year %}<td class="archive-table__year label-mono">{{ project.year }}</td>{% endif %}
                             <td class="archive-table__project"><a href="{% url 'project_detail' project.slug %}">{{ project.title }}</a></td>
-                            <td class="archive-table__stack">{{ project.tech_tags_list|join:", " }}</td>
+                            <td class="archive-table__stack">{% if project.tech_tags_list %}{{ project.tech_tags_list|join:", " }}{% else %}<span class="archive-table__none">none listed</span>{% endif %}</td>
                             <td class="archive-table__links">
                                 {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" rel="noopener" class="text-accent">Code</a>{% endif %}
                                 {% if project.live_demo_url %}<a href="{{ project.live_demo_url }}" target="_blank" rel="noopener" class="text-accent">Demo</a>{% endif %}

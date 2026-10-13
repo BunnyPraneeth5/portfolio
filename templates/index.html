@@ -103,7 +103,6 @@
                             <tr>
                                 <th scope="col">Agent</th>
                                 <th scope="col">Stack</th>
-                                <th scope="col">Key metric</th>
                                 <th scope="col">Status</th>
                             </tr>
                         </thead>
@@ -117,12 +116,6 @@
                                     {% endif %}
                                 </td>
                                 <td class="roster__stack">{{ project.tech_tags_list|slice:":4"|join:" · " }}</td>
-                                <td>
-                                    {% if project.metric_1_value %}
-                                    <span class="roster__metric">{{ project.metric_1_value }}</span>
-                                    <span class="roster__metric-label">{{ project.metric_1_label }}</span>
-                                    {% endif %}
-                                </td>
                                 <td>
                                     {% if project.status %}
                                     <span class="roster-status roster-status--{{ project.status }}">{{ project.get_status_display }}</span>

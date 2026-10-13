@@ -12,7 +12,20 @@ Newest entry at the top.
 
 **Mockups approved by Bunny:** Case board (Projects), Home, Logs, About (card grid, v2 with separate Work / Education / Events). Plan saved as Phase 8 in `docs/REDESIGN_PLAN.md`.
 
-**Phase 8.0:** done locally, waiting for review. Migration `0027_phase8_page_fields` adds 13 optional fields (all blank, so pages are unchanged until filled). Admin fieldsets and ADMIN_GUIDE updated. Tests 114 → 119.
+**Phase 8.0:** committed (`80ef951`). Migration `0027_phase8_page_fields` adds 13 optional fields (all blank, so pages are unchanged until filled).
+
+**Phase 8.1 to 8.4:** committed one by one (`6e5b970`, `4d2b3a6`, `4c0dd10`, `10e2a2c`): Case board, Home, Logs, About as cards. Old page CSS pruned at each step (layout fingerprints of untouched pages identical).
+
+**Phase 8.5:** Field note (`personal_note`) on the case file. Checks on 10 page types at 390px and 1440px: no horizontal scroll, no overflow, no text below 4.5:1 (checker validated with a planted 1.40:1 element). Lighthouse (local dev server): Home mobile 88 / desktop 98, Case board mobile 86 / desktop 96, accessibility, best practices and SEO 100. Tests 114 → 150.
+
+**Local data notes:** the illustrative sample replay is imported and published on SOC Copilot in the local DB only (title "Example run (illustrative only)"). Every other preview value used during checks was set with direct updates and cleared again.
+
+**Deploy note for Bunny (Phase 8)**
+1. Back up the MySQL database.
+2. Pull the branch, then `python manage.py migrate` (0027; also 0025 and 0026 if Phase 5b was never migrated there).
+3. `python manage.py collectstatic --noinput`, then reload the web app.
+4. Hard refresh in your browser (static files are not versioned yet, so an old `styles.css` can stick).
+5. Fill the new fields in admin: featured ticks, case numbers, statuses, role, year, type, one-liner per project; Currently line; Off duty and quote; featured certificates.
 
 ---
 
