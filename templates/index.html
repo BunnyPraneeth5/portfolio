@@ -3,12 +3,6 @@
 
 {% block title %}{% if site_settings.meta_title %}{{ site_settings.meta_title }}{% else %}{{ site_settings.hero_name_display }} | Portfolio{% endif %}{% endblock %}
 
-{% block meta %}
-    {% if site_settings.meta_description %}
-    <meta name="description" content="{{ site_settings.meta_description }}">
-    {% endif %}
-{% endblock %}
-
 {% block body_attrs %} data-chapter="home"{% endblock %}
 
 {% block content %}
@@ -175,3 +169,5 @@
 {% endblock %}
 
 {% block extra_scripts %}{% if replays %}<script src="{% static 'replay.js' %}" defer></script>{% endif %}{% endblock %}
+
+{% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}

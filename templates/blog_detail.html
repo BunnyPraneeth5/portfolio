@@ -3,11 +3,11 @@
 
 {% block title %}{{ post.title }} | Karu Praneeth Kumar{% endblock %}
 
-{% block meta %}
-    {% if post.excerpt %}
-    <meta name="description" content="{{ post.excerpt|truncatechars:160 }}">
-    {% endif %}
-{% endblock %}
+{% block meta %}<meta name="description" content="{% if post.excerpt %}{{ post.excerpt|truncatechars:160 }}{% else %}{{ default_meta_description }}{% endif %}">{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_description %}{% if post.excerpt %}{{ post.excerpt|truncatechars:200 }}{% else %}{{ default_meta_description }}{% endif %}{% endblock %}
+{% block og_image %}{% if post.image %}{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}{% else %}{{ absolute_profile_image_url }}{% endif %}{% endblock %}
 
 {% block atmosphere %}{% endblock %}
 
@@ -50,3 +50,5 @@
         </div>
     </main>
 {% endblock %}
+
+{% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}

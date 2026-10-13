@@ -10,7 +10,7 @@
     <main class="pt-24 pb-12">
         <div class="container mx-auto px-4">
             <!-- Header -->
-            <div class="text-center mb-12" data-aos="fade-up">
+            <div class="text-center mb-12">
                 <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
                     <span>
                         Projects
@@ -19,13 +19,13 @@
                 <p class="text-xl text-gray-300">Ideas tested against reality.</p>
             </div>
 
-            <hr class="section-rule" data-aos="fade-up">
+            <hr class="section-rule">
 
             <!-- Projects Grid -->
             <div class="projects-grid">
                 <div class="secondary-project-grid gap-8">
                     {% for project in all_projects %}
-                    <article class="glass-card project-card secondary-project-card" data-aos="fade-up" data-aos-delay="160">
+                    <article class="glass-card project-card secondary-project-card">
                         <div class="project-thumbnail">
                             {% include 'partials/case_thumb.html' %}
                         </div>
@@ -68,13 +68,13 @@
                 </div>
             </div>
 
-            <hr class="section-rule" data-aos="fade-up">
+            <hr class="section-rule">
 
             <!-- More Projects Link -->
-            <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="500">
+            <div class="text-center mt-12">
                 <a href="https://github.com/BunnyPraneeth5" target="_blank" 
                    class="github-outline-button btn-ghost">
-                    <i class="fab fa-github mr-2"></i>More Work on GitHub <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+                    More work on GitHub <span class="cta-arrow" aria-hidden="true">&rarr;</span>
                 </a>
             </div>
         </div>

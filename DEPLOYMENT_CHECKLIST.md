@@ -42,7 +42,7 @@ python manage.py collectstatic --noinput
 - [ ] Click Reload button
 - [ ] Visit your site (`https://your_username.pythonanywhere.com`)
 - [ ] Test admin panel (`https://your_username.pythonanywhere.com/admin`)
-- [ ] Configure Site Settings & Site Appearance
+- [ ] Configure Site Settings (open it and click Save once)
 
 ## Post-Deployment
 

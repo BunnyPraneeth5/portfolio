@@ -5,17 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_settings.hero_name_display }}{% endblock %}</title>
-    {% block meta %}{% endblock %}
+    {% block meta %}<meta name="description" content="{{ default_meta_description }}">{% endblock %}
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="{{ site_settings.hero_name_display }}">
+    <meta property="og:title" content="{% block og_title %}{{ site_settings.meta_title|default:site_settings.hero_name_display }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ default_meta_description }}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% block og_image %}{{ absolute_profile_image_url }}{% endblock %}">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body class="bg-gray-900 text-white"{% block body_attrs %}{% endblock %}>
@@ -39,7 +43,6 @@
                     <a href="{% url 'contact' %}" class="nav-link{% if nav == 'contact' %} active{% endif %}">Contact</a>
                 </div>
                 <button id="mobileMenuToggle" class="md:hidden p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors" aria-label="Open menu" aria-controls="mobileMenu">
-                    <i class="fas fa-bars" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
@@ -60,11 +63,11 @@
 
     {% block content %}{% endblock %}
 
-    {% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}
+    {# Full contact section: only on pages that turn it on (home, case files, log posts). #}
+    {% block contact_section %}{% endblock %}
     {% include 'partials/site_footer.html' %}
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'script.js' %}" defer></script>
     <script src="{% static 'chat_widget.js' %}" defer></script>
     {% block extra_scripts %}{% endblock %}
     {% include 'pet_widget.html' %}

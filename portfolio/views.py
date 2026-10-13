@@ -48,9 +48,16 @@ def about_view(request):
     experience_all = ExperienceEntry.objects.select_related('related_project')
     events = EventEntry.objects.all()
     certifications = Certification.objects.all()
-    
+    stats = []
+    if about:
+        for field in ('accuracy', 'agents', 'teams', 'projects'):
+            value = getattr(about, f'stat_{field}')
+            if value:
+                stats.append({'value': value, 'label': getattr(about, f'stat_{field}_label')})
+
     return render(request, 'about.html', {
         'about': about,
+        'stats': stats,
         'what_i_do': what_i_do,
         'education': education,
         'experience_all': experience_all,

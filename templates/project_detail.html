@@ -3,11 +3,11 @@
 
 {% block title %}{{ project.title }} | Karu Praneeth Kumar{% endblock %}
 
-{% block meta %}
-    {% if project.short_description %}
-    <meta name="description" content="{{ project.short_description|truncatechars:160 }}">
-    {% endif %}
-{% endblock %}
+{% block meta %}<meta name="description" content="{% if project.short_description %}{{ project.short_description|truncatechars:160 }}{% else %}{{ default_meta_description }}{% endif %}">{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{% if project.case_label %}Case file {{ project.case_label }}: {% endif %}{{ project.title }}{% endblock %}
+{% block og_description %}{% if project.short_description %}{{ project.short_description|truncatechars:200 }}{% else %}{{ default_meta_description }}{% endif %}{% endblock %}
+{% block og_image %}{% if project.thumbnail %}{{ request.scheme }}://{{ request.get_host }}{{ project.thumbnail.url }}{% else %}{{ absolute_profile_image_url }}{% endif %}{% endblock %}
 
 {% block body_attrs %} data-chapter="projects"{% endblock %}
 
@@ -190,3 +190,5 @@
 {% endblock %}
 
 {% block extra_scripts %}{% if replays %}<script src="{% static 'replay.js' %}" defer></script>{% endif %}{% endblock %}
+
+{% block contact_section %}{% include 'partials/contact_section.html' %}{% endblock %}

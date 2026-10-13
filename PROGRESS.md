@@ -4,6 +4,31 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-13 — Session 9: Phase 5b committed + pushed, Phase 7 implemented
+
+**Git:** Phase 5b committed (`fa92128`) and pushed.
+
+**Phase 7:** done locally, waiting for review. See TASKS.md for the list.
+- Third-party CSS/JS gone (Tailwind, Font Awesome, AOS); script.js 11 KB → 2.3 KB and deferred; styles.css 3884 → about 3000 lines.
+- Before any CSS removal and after: layout probe showed no layout change on 8 pages × 2 widths except the intended ones (removed menu icon, contact section placement).
+- Lighthouse numbers are from the local dev server (no compression); production will differ.
+- Tests 108 → 114, all pass.
+
+**Deploy note for Bunny (Phase 7)**
+1. Back up the MySQL database.
+2. Pull the branch. No new migrations in Phase 7 (0025 and 0026 from Phase 5b still need `migrate` if not run yet).
+3. `python manage.py collectstatic --noinput` (styles.css and script.js changed).
+4. Reload the web app.
+5. Open Site Settings once and Save.
+6. Share a case file link in a preview tool and check og:url / og:image are https. If they are http, we add `SECURE_PROXY_SSL_HEADER` (not done, needs your OK).
+
+**For Bunny (discuss next)**
+- About description is "-----" locally; bio paragraph 3 contradicts Quiet mode.
+- 26 "needs review" chat answers.
+- Extra superuser accounts to deactivate.
+
+---
+
 ## 2026-10-12 — Session 8: Phase 6 committed + pushed, recruiter research, Phase 5b implemented
 
 **Git:** Phase 6 committed (`f4b7289`); branch pushed (Phases 0 to 6 on GitHub, no co-author lines).

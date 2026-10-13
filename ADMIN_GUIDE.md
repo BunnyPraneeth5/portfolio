@@ -44,7 +44,7 @@ Use your superuser credentials.
     - `Availability last updated` is set automatically when the mode, notice period or preferences change. Check it when you change jobs.
     - Your own texts (hero description, About bio, resume PDF) are not changed by the mode: keep them consistent with it.
   - `Social URLs`: GitHub, LinkedIn, Kaggle, HackerRank, LeetCode. Shown in the 30-second view, contact section and footer.
-  - `Contact Info`: Email, Location, Tagline (used as the contact section heading on every page), and `Contact form active` toggle switch.
+  - `Contact Info`: Email, Location, Tagline (heading of the Contact page and of the contact section on the home page, case files and logs), and `Contact form active` toggle switch.
   - `SEO Meta`: Meta title & Meta description.
 
 ### 2. About Section
@@ -53,7 +53,7 @@ Use your superuser credentials.
   - `Title`: Header text.
   - `Subtitle`: Professional tagline.
   - `Bio Paragraphs 1, 2, 3`: Separate bio text blocks.
-  - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels.
+  - `Stat Metrics`: `stat_accuracy`, `stat_agents`, `stat_teams`, `stat_projects` and their respective labels. Only filled values are shown on the About page; leave empty rather than guess a number.
 
 ### 3. Skills
 - **Purpose**: Categorized skill matrix displayed on `/skills/` page and featured on homepage.

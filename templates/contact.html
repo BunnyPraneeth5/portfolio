@@ -1,146 +1,90 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if site_settings.meta_title %}Contact | {{ site_settings.meta_title }}{% else %}Contact | {{ site_settings.hero_name_display }}{% endif %}{% endblock %}
+{% block title %}Contact | {{ site_settings.hero_name_display }}{% endblock %}
 
 {% block meta %}
-    {% if site_settings.meta_description %}
-    <meta name="description" content="{{ site_settings.meta_description }}">
-    {% endif %}
+    <meta name="description" content="Contact {{ site_settings.hero_name_display }}{% if site_settings.contact_location %}, {{ site_settings.contact_location }}{% endif %}.">
 {% endblock %}
 
 {% block body_attrs %} data-chapter="contact"{% endblock %}
 
 {% block content %}
-    <!-- Contact Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
-                    <span>
-                        Contact
-                    </span>
-                </h1>
-                <p class="text-xl text-gray-300">{{ site_settings.contact_tagline }}</p>
+    <main class="page">
+        <div class="site-wrap">
+            <div class="section-head">
+                <span class="label-mono">Contact</span>
+                <h1 class="page-title">{{ site_settings.contact_tagline|default:"Contact" }}</h1>
             </div>
 
-            <div class="max-w-4xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Contact Form -->
-                    <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="100">
-                        {% if site_settings.contact_form_active %}
-                        {% if messages %}
-                        <div class="contact-success" role="status">
-                            <h2>Thank you.</h2>
-                            <p>I'll get back to you soon.</p>
-                        </div>
-                        {% else %}
-                        <form id="contactForm" method="POST" class="contact-form-refined space-y-6">
-                            {% csrf_token %}
-                            <div>
-                                <label for="name" class="block text-sm font-medium mb-2">Name</label>
-                                <input type="text" id="name" name="name" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg form-input">
-                            </div>
-                            <div>
-                                <label for="email" class="block text-sm font-medium mb-2">Email</label>
-                                <input type="email" id="email" name="email" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg form-input">
-                            </div>
-                            <div>
-                                <label for="subject" class="block text-sm font-medium mb-2">Subject</label>
-                                <input type="text" id="subject" name="subject" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg form-input">
-                            </div>
-                            <div>
-                                <label for="message" class="block text-sm font-medium mb-2">Message</label>
-                                <textarea id="message" name="message" rows="3" required
-                                    class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg form-input"></textarea>
-                            </div>
-                            <button type="submit" id="submitBtn"
-                                class="btn-primary w-full">
-                                <i class="fas fa-paper-plane mr-2"></i><span id="btnText">Send Message</span>
-                            </button>
-                        </form>
-                        {% endif %}
-                        {% else %}
-                        <div class="contact-success" role="status">
-                            <h2>Email directly.</h2>
-                            <p>The contact form is currently offline.</p>
-                            <a href="mailto:{{ site_settings.contact_email }}"
-                               class="btn-primary mt-6">
-                                Send a direct email
-                            </a>
-                        </div>
-                        {% endif %}
+            <div class="contact-page">
+                <div class="panel contact-page__form">
+                    {% if site_settings.contact_form_active %}
+                    {% if messages %}
+                    <div class="contact-success" role="status">
+                        <h2 class="entry__title">Thank you.</h2>
+                        <p class="entry__text">I'll get back to you soon.</p>
                     </div>
-
-                    <!-- Contact Information -->
-                    <div class="space-y-8">
-                        <!-- Contact Details -->
-                        <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="200">
-                            <h2 class="text-2xl font-display mb-4">Coordinates</h2>
-                            <div class="space-y-4">
-                                <div class="flex items-center">
-                                    <i class="fas fa-envelope text-accent w-8"></i>
-                                    <a href="mailto:{{ site_settings.contact_email }}" class="text-gray-300 hover:text-white">
-                                        {{ site_settings.contact_email }}
-                                    </a>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-map-marker-alt text-accent w-8"></i>
-                                    <span class="text-gray-300">{{ site_settings.contact_location }}</span>
-                                </div>
-                            </div>
+                    {% else %}
+                    <form id="contactForm" method="POST" class="contact-form">
+                        {% csrf_token %}
+                        <div class="form-field">
+                            <label for="name" class="label-mono">Name</label>
+                            <input type="text" id="name" name="name" required autocomplete="name" class="form-input">
                         </div>
-
-                        <!-- Social Links -->
-                        <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
-                            <h2 class="text-2xl font-display mb-4">Elsewhere</h2>
-                            <div class="grid grid-cols-2 gap-4">
-                                {% if site_settings.github_url %}
-                                <a href="{{ site_settings.github_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-github text-xl mr-2"></i>
-                                    <span>GitHub</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.linkedin_url %}
-                                <a href="{{ site_settings.linkedin_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-linkedin text-xl mr-2"></i>
-                                    <span>LinkedIn</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.kaggle_url %}
-                                <a href="{{ site_settings.kaggle_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-kaggle text-xl mr-2"></i>
-                                    <span>Kaggle</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.hackerrank_url %}
-                                <a href="{{ site_settings.hackerrank_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fab fa-hackerrank text-xl mr-2"></i>
-                                    <span>HackerRank</span>
-                                </a>
-                                {% endif %}
-                                {% if site_settings.leetcode_url %}
-                                <a href="{{ site_settings.leetcode_url }}" target="_blank"
-                                    class="flex items-center p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
-                                    <i class="fas fa-code text-xl mr-2"></i>
-                                    <span>LeetCode</span>
-                                </a>
-                                {% endif %}
-                            </div>
+                        <div class="form-field">
+                            <label for="email" class="label-mono">Email</label>
+                            <input type="email" id="email" name="email" required autocomplete="email" class="form-input">
                         </div>
+                        <div class="form-field">
+                            <label for="subject" class="label-mono">Subject</label>
+                            <input type="text" id="subject" name="subject" required class="form-input">
+                        </div>
+                        <div class="form-field">
+                            <label for="message" class="label-mono">Message</label>
+                            <textarea id="message" name="message" rows="5" required class="form-input"></textarea>
+                        </div>
+                        <button type="submit" id="submitBtn" class="btn-primary">Send message</button>
+                    </form>
+                    {% endif %}
+                    {% else %}
+                    <div class="contact-success" role="status">
+                        <h2 class="entry__title">Email directly.</h2>
+                        <p class="entry__text">The contact form is currently offline.</p>
+                        <a href="mailto:{{ site_settings.contact_email }}" class="btn-primary">Send an email</a>
                     </div>
+                    {% endif %}
+                </div>
+
+                <div class="panel contact-page__details">
+                    <dl class="kv-list">
+                        <div class="kv-row">
+                            <dt class="label-mono">Email</dt>
+                            <dd><a href="mailto:{{ site_settings.contact_email }}" class="text-accent">{{ site_settings.contact_email }}</a></dd>
+                        </div>
+                        {% if site_settings.contact_location %}
+                        <div class="kv-row">
+                            <dt class="label-mono">Location</dt>
+                            <dd>{{ site_settings.contact_location }}</dd>
+                        </div>
+                        {% endif %}
+                        <div class="kv-row">
+                            <dt class="label-mono">Links</dt>
+                            <dd class="link-row">
+                                {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
+                                {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+                                {% if site_settings.kaggle_url %}<a href="{{ site_settings.kaggle_url }}" target="_blank" rel="noopener">Kaggle</a>{% endif %}
+                                {% if site_settings.hackerrank_url %}<a href="{{ site_settings.hackerrank_url }}" target="_blank" rel="noopener">HackerRank</a>{% endif %}
+                                {% if site_settings.leetcode_url %}<a href="{{ site_settings.leetcode_url }}" target="_blank" rel="noopener">LeetCode</a>{% endif %}
+                            </dd>
+                        </div>
+                        <div class="kv-row">
+                            <dt class="label-mono">Resume</dt>
+                            <dd><a href="{{ resume_url }}" target="_blank" rel="noopener">Download PDF</a></dd>
+                        </div>
+                    </dl>
                 </div>
             </div>
         </div>
     </main>
 {% endblock %}
-
-{% block contact_section %}{% endblock %}

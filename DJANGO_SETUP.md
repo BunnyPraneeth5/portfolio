@@ -104,9 +104,6 @@ Click "Reload" button in PythonAnywhere Web tab
 - Social media profiles (GitHub, LinkedIn, Kaggle, LeetCode, HackerRank)
 - Contact email, location, tagline, and form availability toggle
 
-**Site Appearance:**
-- Customize primary, secondary, and accent colors via color pickers
-
 **About Section:**
 - Add/Edit title, subtitle, and bio paragraphs (1–3)
 - Configure performance stat metrics (Accuracy %, MCP Agents Built, Projects, Teams)

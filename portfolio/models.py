@@ -160,6 +160,10 @@ class SiteSettings(models.Model):
             from django.utils import timezone
             self.availability_updated_at = timezone.now()
         super().save(*args, **kwargs)
+        from .middleware import get_request_memo
+        memo = get_request_memo()
+        if memo is not None:
+            memo['site_settings'] = self
 
     @property
     def is_job_hunting(self):
@@ -167,7 +171,14 @@ class SiteSettings(models.Model):
 
     @classmethod
     def load(cls):
+        # Loaded once per request (see portfolio.middleware); fresh everywhere else.
+        from .middleware import get_request_memo
+        memo = get_request_memo()
+        if memo is not None and 'site_settings' in memo:
+            return memo['site_settings']
         obj, created = cls.objects.get_or_create(pk=1)
+        if memo is not None:
+            memo['site_settings'] = obj
         return obj
 
     @property

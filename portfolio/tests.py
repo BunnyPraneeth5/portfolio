@@ -142,13 +142,18 @@ class BaseLayoutTests(TestCase):
         self.assertContains(response, 'class="nav-link">About</a>')
 
     def test_contact_section_and_footer(self):
-        for url in [reverse('index'), reverse('about'), reverse('blog')]:
-            response = self.client.get(url)
-            self.assertContains(response, 'id="contact"', msg_prefix=url)
-            self.assertContains(response, 'class="site-footer"', msg_prefix=url)
-        response = self.client.get(reverse('contact'))
-        self.assertNotContains(response, 'id="contact"')
-        self.assertContains(response, 'class="site-footer"')
+        Project.objects.create(title="Gargantua Probe", slug="gargantua-probe")
+        BlogPost.objects.create(title="A log", slug="a-log", content="x", excerpt="x", published=True)
+        with_section = [reverse('index'), reverse('project_detail', args=['gargantua-probe']),
+                        reverse('blog_detail', args=['a-log'])]
+        without_section = [reverse('about'), reverse('skills'), reverse('projects'), reverse('blog'),
+                           reverse('contact')]
+        for url in with_section:
+            self.assertContains(self.client.get(url), 'id="contact"', msg_prefix=url)
+        for url in without_section:
+            self.assertNotContains(self.client.get(url), 'id="contact"', msg_prefix=url)
+        for url in with_section + without_section:
+            self.assertContains(self.client.get(url), 'class="site-footer"', msg_prefix=url)
 
 
 class HomepageTests(TestCase):
@@ -1095,3 +1100,60 @@ class ChatAdminViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse('admin:portfolio_chatanswer_add'), response['Location'])
         self.assertIn('night+shifts', response['Location'])
+
+
+class Phase7Tests(TestCase):
+    def setUp(self):
+        self.project = Project.objects.create(title="Gargantua Probe", slug="gargantua-probe",
+                                              short_description="Probe summary for sharing.")
+        self.post = BlogPost.objects.create(title="A log", slug="a-log", content="x", excerpt="Log excerpt.",
+                                            published=True)
+        self.urls = [reverse('index'), reverse('about'), reverse('skills'), reverse('projects'),
+                     reverse('project_detail', args=['gargantua-probe']), reverse('blog'),
+                     reverse('blog_detail', args=['a-log']), reverse('contact')]
+
+    def test_no_third_party_css_or_js_libraries(self):
+        for url in self.urls:
+            html = self.client.get(url).content.decode()
+            for library in ['tailwindcss', 'font-awesome', 'unpkg.com/aos', 'cdn.jsdelivr']:
+                self.assertNotIn(library, html, f'{url}: {library}')
+
+    def test_every_page_has_description_and_open_graph(self):
+        for url in self.urls:
+            response = self.client.get(url)
+            self.assertContains(response, '<meta name="description" content="', msg_prefix=url)
+            self.assertNotContains(response, '<meta name="description" content="">', msg_prefix=url)
+            for prop in ['og:title', 'og:description', 'og:url', 'og:image']:
+                self.assertContains(response, f'property="{prop}"', msg_prefix=url)
+
+    def test_case_file_and_log_share_their_own_details(self):
+        response = self.client.get(reverse('project_detail', args=['gargantua-probe']))
+        self.assertContains(response, '<meta property="og:title" content="Gargantua Probe">')
+        self.assertContains(response, 'content="Probe summary for sharing."')
+        self.assertContains(response, '<meta property="og:type" content="article">')
+        response = self.client.get(reverse('blog_detail', args=['a-log']))
+        self.assertContains(response, '<meta property="og:title" content="A log">')
+
+    def test_site_settings_loaded_once_per_request(self):
+        SiteSettings.load()  # the row exists in real use; creating it is a one-time cost
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        for url in self.urls:
+            with CaptureQueriesContext(connection) as ctx:
+                self.client.get(url)
+            count = sum('portfolio_sitesettings' in q['sql'] for q in ctx.captured_queries)
+            self.assertEqual(count, 1, url)
+
+    def test_restyled_pages_drop_hardcoded_badges(self):
+        EventEntry.objects.create(title="Hackathon X", role="Lead", year="2025", location="Bengaluru",
+                                  description="Ran it.")
+        response = self.client.get(reverse('about'))
+        self.assertContains(response, "Hackathon X")
+        self.assertNotContains(response, "College Level")
+        self.assertNotContains(response, ">Organizer<")
+        self.assertNotContains(response, "data-count-to")
+
+    def test_skills_marks_core_stack(self):
+        Skill.objects.create(name="Zeta Lang", category="languages", is_featured=True)
+        response = self.client.get(reverse('skills'))
+        self.assertContains(response, 'Zeta Lang <span class="tag tag--core">Core</span>')

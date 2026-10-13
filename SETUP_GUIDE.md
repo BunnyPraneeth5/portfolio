@@ -32,12 +32,11 @@ Access admin at: http://127.0.0.1:8000/admin/
 ### Add Content via Admin:
 
 1. **Site Settings**: Set profile image, resume PDF, hero display title, social URLs, and contact info
-2. **Site Appearance**: Customize site primary, secondary, and accent colors
-3. **About Section**: Add bio paragraphs and key metric stats
-4. **Skills**: Add skills grouped by category (Agentic AI, ML, Web, Security, Tools, etc.)
-5. **Projects**: Add featured and archived projects with short/long descriptions, tech tags, URLs, and performance metrics
-6. **Education & Experience**: Populate education history, work experience timeline, events, and additional certifications
-7. **Blog Posts**: Publish technical posts and case studies
+2. **About Section**: Add bio paragraphs and key metric stats
+3. **Skills**: Add skills grouped by category (Agentic AI, ML, Web, Security, Tools, etc.)
+4. **Projects**: Add featured and archived projects with short/long descriptions, tech tags, URLs, and performance metrics
+5. **Education & Experience**: Populate education history, work experience timeline, events, and certifications
+6. **Blog Posts**: Publish technical posts and case studies
 8. **Contact Messages**: View incoming messages sent via the contact form
 
 ## Project Structure
@@ -54,7 +53,7 @@ portfolio/
 │   ├── urls.py          # Application URL patterns
 │   ├── context_processors.py # Global site settings & appearance processors
 │   └── admin.py         # Customized Django admin interface
-├── templates/           # HTML templates (Tailwind & Django template tags)
+├── templates/           # HTML templates (Django template tags)
 ├── static/              # Custom CSS stylesheets & JS scripts
 └── media/               # Uploaded images, resumes, and certificates
 ```

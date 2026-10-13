@@ -1,46 +1,44 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Skills | Karu Praneeth Kumar{% endblock %}
+{% block title %}Skills | {{ site_settings.hero_name_display }}{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="Skills of {{ site_settings.hero_name_display }}, grouped by area.">
+{% endblock %}
 
 {% block body_attrs %} data-chapter="skills"{% endblock %}
 
 {% block content %}
-    <!-- Skills Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
-                    <span>
-                        Capabilities
-                    </span>
-                </h1>
-                <p class="text-xl text-gray-300">Knowledge organized into useful systems.</p>
+    <main class="page">
+        <div class="site-wrap">
+            <div class="section-head">
+                <span class="label-mono">Skills{% if skills %} · {{ skills|length }} listed{% endif %}</span>
+                <h1 class="page-title">Skills</h1>
             </div>
+            <p class="page-lead">Grouped by area. <span class="tag tag--core">Core</span> marks the core stack shown on the homepage.</p>
 
-            <hr class="section-rule" data-aos="fade-up">
-
-            <!-- Skills Grid -->
-            <div class="skills-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {% if grouped_skills %}
+            <div class="skill-groups">
                 {% for group in grouped_skills %}
-                <div class="glass-card skill-card p-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter }}00">
-                    <div class="skill-card-header flex items-center mb-4">
-                        <h2 class="text-xl font-display">{{ group.label }}</h2>
-                    </div>
-                    <ul class="space-y-2">
+                <section class="panel skill-group" aria-labelledby="skills-{{ forloop.counter }}">
+                    <h2 id="skills-{{ forloop.counter }}" class="label-mono skill-group__title">{{ group.label }}</h2>
+                    <ul class="skill-group__list">
                         {% for skill in group.items %}
-                        <li>{{ skill.name }}</li>
+                        <li>{{ skill.name }}{% if skill.is_featured %} <span class="tag tag--core">Core</span>{% endif %}</li>
                         {% endfor %}
                     </ul>
-                </div>
-                {% empty %}
-                <div class="glass-card p-6 text-center md:col-span-2 lg:col-span-3" data-aos="fade-up">
-                    <p class="text-gray-300">No skills have been added yet. Add them from the admin panel.</p>
-                </div>
+                </section>
                 {% endfor %}
             </div>
+            {% else %}
+            <p class="page-lead">No skills are listed yet.</p>
+            {% endif %}
 
+            <div class="page-actions">
+                <a href="{% url 'projects' %}" class="btn-primary">See them in case files</a>
+                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="btn-ghost">Resume</a>
+            </div>
         </div>
     </main>
 {% endblock %}

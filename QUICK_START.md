@@ -31,11 +31,6 @@ Login with your superuser credentials.
 - Configure social links (GitHub, LinkedIn, LeetCode, Kaggle, HackerRank) and contact email/location
 - Save
 
-### Configure Site Appearance:
-- Click **Site Appearance** → Edit entry
-- Choose primary, secondary, and accent colors using color pickers
-- Save
-
 ### Add About Info:
 - Click **About** → Edit entry
 - Fill in title, subtitle, and bio paragraphs (1–3)

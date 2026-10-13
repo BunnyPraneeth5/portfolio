@@ -6,27 +6,28 @@ A personal portfolio website built with Django to showcase my projects, skills, 
 
 ## Why I Built This
 
-I wanted a portfolio that was more than just a static website. Instead of hardcoding every update, I built a system where projects, skills, achievements, certifications, blog posts, and site appearance can be managed directly through the Django admin panel.
+I wanted a portfolio that was more than just a static website. Instead of hardcoding every update, I built a system where projects, skills, achievements, certifications, blog posts, and site settings can be managed directly through the Django admin panel.
 
 The project also serves as a reusable portfolio solution that can be customized by other developers, students, and professionals.
 
 ## Features
 
 * Dynamic content management through Django Admin
-* Project showcase with metric kickers & tech tags
-* Categorized skill matrix (Agentic AI, ML, Web, Security, Tools, etc.)
-* Timeline management (Education, Experience, Events & Leadership)
-* Certifications and achievements showcase
-* Built-in Blog engine with detail pages
-* Customizable site appearance (theme accent colors) & site settings (hero, social links, contact info)
-* Responsive design with dynamic micro-animations
-* Contact form with database logging & toggle control
+* Project case files: brief, decisions, incidents, open leads and metrics
+* Recorded agent replays on case files, uploaded in admin or imported with `python manage.py import_replay`
+* Rule-based chat helper whose answers, keywords and job search mode are edited in admin
+* Categorized skills, with the core stack marked
+* Experience, education, events and certifications on the About page
+* Blog posts presented as logs
+* Site settings for hero text, social links, contact details and SEO
+* Meta descriptions and Open Graph tags on every page
+* Contact form with database logging and an on/off switch
 
 ## Tech Stack
 
 * **Backend**: Python, Django 5.x
 * **Database**: SQLite (Local development), MySQL (Production)
-* **Frontend**: HTML5, Tailwind CSS, JavaScript, FontAwesome 6, AOS Animation Library
+* **Frontend**: HTML5, one hand-written stylesheet, vanilla JavaScript (no frontend libraries, no build step)
 * **Media & Utilities**: Pillow, Python-Dotenv
 
 ## Getting Started
@@ -76,6 +77,12 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+### Run the Tests
+
+```bash
+python manage.py test portfolio
+```
+
 ### Start the Development Server
 
 ```bash
@@ -96,7 +103,7 @@ http://127.0.0.1:8000/admin/
 
 ## Project Structure
 
-The portfolio content is managed through the Django admin panel, making it easy to update information without changing the frontend code. This allows the website to remain maintainable as new projects and achievements are added.
+The portfolio content is managed through the Django admin panel, making it easy to update information without changing the frontend code. See `ARCHITECTURE.md` for routes, models and the request flow, `ADMIN_GUIDE.md` for filling content, and `docs/REPLAY_FORMAT.md` for the replay file format.
 
 ## Future Improvements
 

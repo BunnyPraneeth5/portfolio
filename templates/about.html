@@ -1,297 +1,187 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}About | Karu Praneeth Kumar{% endblock %}
+{% block title %}About | {{ site_settings.hero_name_display }}{% endblock %}
+
+{% block meta %}<meta name="description" content="{% if about.subtitle %}About {{ site_settings.hero_name_display }}: {{ about.subtitle }}{% else %}{{ default_meta_description }}{% endif %}">{% endblock %}
 
 {% block body_attrs %} data-chapter="about"{% endblock %}
 
 {% block content %}
-    <!-- About Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <div class="max-w-4xl mx-auto">
-                <!-- Header -->
-                <div class="text-center mb-12" data-aos="fade-up">
-                    <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
-                        <span>
-                            Behind the Work
-                        </span>
-                    </h1>
-                    <p class="text-xl text-gray-400">
-                        {% if about.subtitle %}{{ about.subtitle }}{% else %}Agentic AI Engineer / B.Tech CSE-AI / Kurnool, India{% endif %}
-                    </p>
+    <main class="page">
+        <div class="site-wrap">
+            <!-- Intro -->
+            <section class="about-intro" aria-labelledby="about-heading">
+                <div class="about-intro__text">
+                    <div class="section-head">
+                        <span class="label-mono">About</span>
+                        <h1 id="about-heading" class="page-title">{{ site_settings.hero_name_display }}</h1>
+                    </div>
+                    <p class="page-lead">{% if about.subtitle %}{{ about.subtitle }}{% else %}{{ site_settings.hero_roles_list|join:" · " }}{% endif %}</p>
+                    <div class="prose-block">
+                        {% if about.description %}<p>{{ about.description|linebreaksbr }}</p>{% endif %}
+                        {% if about.bio_paragraph_1 %}<p>{{ about.bio_paragraph_1|linebreaksbr }}</p>{% endif %}
+                        {% if about.bio_paragraph_2 %}<p>{{ about.bio_paragraph_2|linebreaksbr }}</p>{% endif %}
+                        {% if about.bio_paragraph_3 %}<p>{{ about.bio_paragraph_3|linebreaksbr }}</p>{% endif %}
+                    </div>
+                    {% if what_i_do %}
+                    <h2 class="label-mono about-subhead">What I do</h2>
+                    <ul class="check-list">
+                        {% for item in what_i_do %}
+                        <li>{{ item.item }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                 </div>
+                <div class="about-intro__side">
+                    <figure class="about-portrait">
+                        <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}" width="600" height="600">
+                    </figure>
+                    {% if stats %}
+                    <div class="about-stats">
+                        {% for stat in stats %}
+                        <div class="stat-tile">
+                            <span class="stat-tile__value">{{ stat.value }}</span>
+                            <span class="stat-tile__label">{{ stat.label }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
 
-                <!-- Main Content -->
-                <div class="glass-card p-8 mb-12" data-aos="fade-up" data-aos-delay="200">
-                    <div class="flex flex-col md:flex-row gap-8">
-                        <div class="md:w-3/5">
-                            {% if about.description %}
-                            <p class="mb-4 text-gray-300 leading-relaxed font-medium">
-                                {{ about.description|linebreaksbr }}
-                            </p>
-                            {% endif %}
-                            <p class="mb-4 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_1|linebreaksbr }}
-                            </p>
-                            <p class="mb-4 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_2|linebreaksbr }}
-                            </p>
-                            <p class="mb-6 text-gray-300 leading-relaxed">
-                                {{ about.bio_paragraph_3|linebreaksbr }}
-                            </p>
-
-                            {% if what_i_do %}
-                            <h2 class="text-xl font-display mb-3 mt-2">What I Do</h2>
-                            <ul class="about-checklist space-y-2">
-                                {% for item in what_i_do %}
-                                <li>
-                                    <span class="about-check">✓</span>{{ item.item }}
-                                </li>
+            <!-- Professional experience -->
+            {% if experience_all %}
+            <section class="site-section" aria-labelledby="experience-heading">
+                <div class="section-head">
+                    <span class="label-mono">Roles</span>
+                    <h2 id="experience-heading">Professional Experience</h2>
+                </div>
+                <ol class="entry-list">
+                    {% for entry in experience_all %}
+                    <li class="panel entry experience-item">
+                        <div class="entry__meta">
+                            <span class="label-mono entry__badge">{{ entry.get_employment_type_display }}</span>
+                            {% if entry.date_range_label %}<span class="label-mono">{{ entry.date_range_label }}</span>{% endif %}
+                        </div>
+                        <h3 class="entry__title">{{ entry.role }} <span class="entry__org">· {{ entry.organization }}</span></h3>
+                        <p class="experience-meta">
+                            {{ entry.role }}{% if entry.date_range_label %} · {{ entry.date_range_label }}{% endif %}{% if entry.location %} · {{ entry.location }}{% endif %}{% if entry.is_remote %} · Remote{% endif %}
+                        </p>
+                        {% if entry.summary %}<p class="entry__text">{{ entry.summary|linebreaksbr }}</p>{% endif %}
+                        {% if entry.highlights_list %}
+                        <details class="experience-highlights">
+                            <summary>Highlights</summary>
+                            <ul class="check-list">
+                                {% for point in entry.highlights_list %}
+                                <li>{{ point }}</li>
                                 {% endfor %}
                             </ul>
-                            {% endif %}
-                        </div>
-
-                        <div class="md:w-2/5">
-                            <figure class="story-portrait" aria-label="{{ site_settings.hero_name_display }} profile image">
-                                <img src="{{ profile_image_url }}" alt="{{ site_settings.hero_name_display }}">
-                            </figure>
-                            {% if about %}
-                            <div class="about-stats-grid">
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">◎</span>
-                                        <strong data-count-to="{{ about.stat_accuracy|default:'0' }}" data-count-decimals="2" data-count-suffix="%">
-                                            {{ about.stat_accuracy }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_accuracy_label }}
-                                        </span>
-                                    </div>
-
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">◇</span>
-                                        <strong data-count-to="{{ about.stat_agents|default:'0' }}">
-                                            {{ about.stat_agents }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_agents_label }}
-                                        </span>
-                                    </div>
-
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">◈</span>
-                                        <strong data-count-to="{{ about.stat_teams|default:'0' }}">
-                                            {{ about.stat_teams }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_teams_label }}
-                                        </span>
-                                    </div>
-
-                                    <div class="glass-card stat-card">
-                                        <span class="metric-symbol">⌥</span>
-                                        <strong data-count-to="{{ about.stat_projects|default:'0' }}">
-                                            {{ about.stat_projects }}
-                                        </strong>
-                                        <span>
-                                            {{ about.stat_projects_label }}
-                                        </span>
-                                    </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Timeline -->
-                <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
-                    <h2 class="text-2xl font-display mb-8 text-center">Education Journey</h2>
-                    <div class="roadmap education-roadmap">
-                        <div class="roadmap-line"><div class="timeline-progress"></div></div>
-
-                        {% for entry in education %}
-                        <article class="roadmap-item">
-                            <span class="roadmap-dot"></span>
-                            <div class="roadmap-side-note">
-                                <span class="roadmap-year">{{ entry.year_range }}</span>
-                                <strong>{{ entry.field_of_study }}</strong>
-                            </div>
-                            <div class="glass-card roadmap-card">
-                                <h3>{{ entry.degree }}</h3>
-                                <div class="roadmap-badge">Education</div>
-                                <p>{{ entry.institution }}</p>
-                                {% if entry.bullet_1 or entry.bullet_2 %}
-                                <ul class="roadmap-points">
-                                    {% if entry.bullet_1 %}
-                                    <li><span class="about-check">✓</span>{{ entry.bullet_1 }}</li>
-                                    {% endif %}
-                                    {% if entry.bullet_2 %}
-                                    <li><span class="about-check">✓</span>{{ entry.bullet_2 }}</li>
-                                    {% endif %}
-                                </ul>
-                                {% endif %}
-                            </div>
-                        </article>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Experience Timeline -->
-                {% if experience_all %}
-                <div class="mb-12" data-aos="fade-up" data-aos-delay="300">
-                    <h2 class="text-2xl font-display mb-8 text-center">Professional Experience</h2>
-                    <div class="roadmap">
-                        <div class="roadmap-line"><div class="timeline-progress"></div></div>
-                        {% for entry in experience_all %}
-                        <article class="roadmap-item experience-item">
-                            <span class="roadmap-dot"></span>
-                            <div class="roadmap-side-note">
-                                <span class="roadmap-year">{{ entry.date_range_label }}</span>
-                                <strong>{{ entry.role }}</strong>
-                            </div>
-                            <div class="glass-card roadmap-card">
-                                <h3>{{ entry.organization }}</h3>
-                                <div class="roadmap-badge">{{ entry.get_employment_type_display }}</div>
-                                <p class="experience-meta">
-                                    {{ entry.role }}{% if entry.date_range_label %} · {{ entry.date_range_label }}{% endif %}{% if entry.location %} · {{ entry.location }}{% endif %}{% if entry.is_remote %} · Remote{% endif %}
-                                </p>
-                                {% if entry.summary %}
-                                <p class="experience-summary">{{ entry.summary|linebreaksbr }}</p>
-                                {% endif %}
-                                {% if entry.highlights_list %}
-                                <details class="experience-highlights">
-                                    <summary>Highlights</summary>
-                                    <ul class="roadmap-points">
-                                        {% for point in entry.highlights_list %}
-                                        <li><span class="about-check">✓</span>{{ point }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </details>
-                                {% endif %}
-                                {% if entry.tags %}
-                                <div>
-                                    {% for tag in entry.get_tags_list %}
-                                    <span class="roadmap-tag">{{ tag }}</span>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                {% if entry.related_project and entry.related_project.is_published %}
-                                <a href="{% url 'project_detail' entry.related_project.slug %}" class="timeline-link">
-                                    See the project <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </article>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Events & Leadership -->
-                <div class="events-section mb-12" data-aos="fade-up" data-aos-delay="350">
-                    <h2 class="text-2xl font-display mb-8 text-center">Events & Leadership</h2>
-                    {% for event in events %}
-                    <div class="glass-card p-8 max-w-3xl mx-auto relative overflow-hidden mb-6">
-                        <span class="featured-badge">Organizer</span>
-                        <div class="timeline-line absolute left-0 top-0 bottom-0 w-1">
-                        </div>
-                        <div class="flex flex-col md:flex-row items-start pl-4">
-                            <div class="timeline-node w-16 h-16 rounded-full border border-gray-700 flex items-center justify-center mr-6 flex-shrink-0 mb-4 md:mb-0">
-                                <i class="fas fa-code text-3xl text-accent"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex flex-wrap items-center gap-3 mb-2">
-                                    <h3 class="text-2xl font-display">{{ event.title }}</h3>
-                                    <span class="tag">
-                                        College Level
-                                    </span>
-                                </div>
-                                <p class="text-accent text-sm font-medium mb-3">
-                                    {{ event.role }} · {{ event.year }}
-                                </p>
-                                <p class="text-gray-300 mb-4">{{ event.description|linebreaksbr }}</p>
-                                <div class="flex flex-wrap gap-4">
-                                    {% if event.stat_1_value %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-users text-accent"></i>
-                                        <span>{{ event.stat_1_value }} {{ event.stat_1_label }}</span>
-                                    </div>
-                                    {% endif %}
-                                    {% if event.stat_2_value %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-trophy text-accent"></i>
-                                        <span>{{ event.stat_2_value }} {{ event.stat_2_label }}</span>
-                                    </div>
-                                    {% endif %}
-                                    {% if event.stat_3_value %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-calendar text-accent"></i>
-                                        <span>{{ event.stat_3_value }} {{ event.stat_3_label }}</span>
-                                    </div>
-                                    {% endif %}
-                                    <div class="flex items-center gap-2 text-sm text-gray-400">
-                                        <i class="fas fa-map-marker-alt text-accent"></i>
-                                        <span>{{ event.location }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Certifications -->
-                {% if certifications %}
-                <div class="mb-12" data-aos="fade-up" data-aos-delay="400">
-                    <h2 class="text-2xl font-display mb-8 text-center">Certifications</h2>
-                    <div class="glass-card p-6 max-w-5xl mx-auto">
-                        <ul class="certification-list">
-                            {% for cert in certifications %}
-                            <li class="certification-item">
-                                <h4 class="font-display text-lg">{{ cert.title }}</h4>
-                                {% if cert.issuer or cert.issued_date %}
-                                <p class="certification-meta">
-                                    {{ cert.issuer }}{% if cert.issuer and cert.issued_date %} · {% endif %}{% if cert.issued_date %}{{ cert.issued_date|date:"M Y" }}{% endif %}
-                                </p>
-                                {% endif %}
-                                {% if cert.certificate_file %}
-                                <a href="{{ cert.certificate_file.url }}" target="_blank" rel="noopener" class="timeline-link">
-                                    View certificate <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                                {% if cert.certificate_file_2 %}
-                                <a href="{{ cert.certificate_file_2.url }}" target="_blank" rel="noopener" class="timeline-link">
-                                    View second certificate <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                                {% if cert.credential_url %}
-                                <a href="{{ cert.credential_url }}" target="_blank" rel="noopener" class="timeline-link">
-                                    Verify credential <span aria-hidden="true">→</span>
-                                </a>
-                                {% endif %}
-                            </li>
-                            {% endfor %}
+                        </details>
+                        {% endif %}
+                        {% if entry.get_tags_list %}
+                        <ul class="tag-row">
+                            {% for tag in entry.get_tags_list %}<li class="tag">{{ tag }}</li>{% endfor %}
                         </ul>
-                    </div>
-                </div>
-                {% endif %}
+                        {% endif %}
+                        {% if entry.related_project and entry.related_project.is_published %}
+                        <a href="{% url 'project_detail' entry.related_project.slug %}" class="text-accent entry__link">See the project <span aria-hidden="true">→</span></a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
 
-                <!-- Call to Action -->
-                <div class="text-center" data-aos="fade-up" data-aos-delay="500">
-                    <a href="{% url 'contact' %}" 
-                       class="btn-primary mr-4">
-                        <i class="fas fa-paper-plane mr-2"></i>Let's Work Together
-                    </a>
-                    <a href="{% url 'projects' %}" 
-                       class="btn-ghost">
-                        <i class="fas fa-code-branch mr-2"></i>View My Projects
-                    </a>
-                    <a href="{{ resume_url }}" target="_blank"
-                       class="btn-ghost mt-4 md:mt-0">
-                        <i class="fas fa-file-alt mr-2"></i>Resume
-                    </a>
+            <!-- Education -->
+            {% if education %}
+            <section class="site-section" aria-labelledby="education-heading">
+                <div class="section-head">
+                    <span class="label-mono">Study</span>
+                    <h2 id="education-heading">Education</h2>
                 </div>
+                <ol class="entry-list">
+                    {% for entry in education %}
+                    <li class="panel entry">
+                        <div class="entry__meta"><span class="label-mono">{{ entry.year_range }}</span></div>
+                        <h3 class="entry__title">{{ entry.degree }}{% if entry.field_of_study %}, {{ entry.field_of_study }}{% endif %}</h3>
+                        <p class="entry__text">{{ entry.institution }}</p>
+                        {% if entry.bullet_1 or entry.bullet_2 %}
+                        <ul class="check-list">
+                            {% if entry.bullet_1 %}<li>{{ entry.bullet_1 }}</li>{% endif %}
+                            {% if entry.bullet_2 %}<li>{{ entry.bullet_2 }}</li>{% endif %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+
+            <!-- Events & leadership -->
+            {% if events %}
+            <section class="site-section" aria-labelledby="events-heading">
+                <div class="section-head">
+                    <span class="label-mono">Hackathons and leadership</span>
+                    <h2 id="events-heading">Events</h2>
+                </div>
+                <ol class="entry-list">
+                    {% for event in events %}
+                    <li class="panel entry">
+                        <div class="entry__meta">
+                            <span class="label-mono">{{ event.year }}</span>
+                            {% if event.location %}<span class="label-mono">{{ event.location }}</span>{% endif %}
+                        </div>
+                        <h3 class="entry__title">{{ event.title }} <span class="entry__org">· {{ event.role }}</span></h3>
+                        {% if event.description %}<p class="entry__text">{{ event.description|linebreaksbr }}</p>{% endif %}
+                        {% if event.stat_1_value or event.stat_2_value or event.stat_3_value %}
+                        <ul class="tag-row">
+                            {% if event.stat_1_value %}<li class="tag">{{ event.stat_1_value }} {{ event.stat_1_label }}</li>{% endif %}
+                            {% if event.stat_2_value %}<li class="tag">{{ event.stat_2_value }} {{ event.stat_2_label }}</li>{% endif %}
+                            {% if event.stat_3_value %}<li class="tag">{{ event.stat_3_value }} {{ event.stat_3_label }}</li>{% endif %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+
+            <!-- Certifications -->
+            {% if certifications %}
+            <section class="site-section" aria-labelledby="certifications-heading">
+                <div class="section-head">
+                    <span class="label-mono">Courses and certificates</span>
+                    <h2 id="certifications-heading">Certifications</h2>
+                </div>
+                <ul class="certification-list">
+                    {% for cert in certifications %}
+                    <li class="panel certification-item">
+                        <h3 class="entry__title">{{ cert.title }}</h3>
+                        {% if cert.issuer or cert.issued_date %}
+                        <p class="certification-meta">
+                            {{ cert.issuer }}{% if cert.issuer and cert.issued_date %} · {% endif %}{% if cert.issued_date %}{{ cert.issued_date|date:"M Y" }}{% endif %}
+                        </p>
+                        {% endif %}
+                        {% if cert.certificate_file %}
+                        <a href="{{ cert.certificate_file.url }}" target="_blank" rel="noopener" class="text-accent cert-link">View certificate <span aria-hidden="true">→</span></a>
+                        {% endif %}
+                        {% if cert.certificate_file_2 %}
+                        <a href="{{ cert.certificate_file_2.url }}" target="_blank" rel="noopener" class="text-accent cert-link">View second certificate <span aria-hidden="true">→</span></a>
+                        {% endif %}
+                        {% if cert.credential_url %}
+                        <a href="{{ cert.credential_url }}" target="_blank" rel="noopener" class="text-accent cert-link">Verify credential <span aria-hidden="true">→</span></a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+            <div class="page-actions">
+                <a href="{% url 'contact' %}" class="btn-primary">Contact</a>
+                <a href="{% url 'projects' %}" class="btn-ghost">Case files</a>
+                <a href="{{ resume_url }}" target="_blank" rel="noopener" class="btn-ghost">Resume</a>
             </div>
         </div>
     </main>

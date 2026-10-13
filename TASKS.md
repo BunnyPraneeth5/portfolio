@@ -255,11 +255,16 @@ Decisions (Bunny, 2026-10-12): remove "Coming Soon" placeholder cards; sort by e
 - [x] 85 tests pass. Browser: desktop + 390px, filter and empty state checked.
 - Phase 7: old blog card CSS (`blog-card-visual--*`, `blog-placeholder-card`) is now unused; remove in the CSS cleanup.
 
-## Phase 7 (later) — notes carried forward
-- Performance audit (2026-10-12, measured): full Tailwind 2.2.19 CSS from CDN on every page (2.9 MB raw) for a few utilities; `aos@next` resolves to a floating beta (3.0.0-beta.6) and looks mostly unused (script.js strips data-aos); atmosphere background updates every 180 ms on every page; site settings queried twice per page (5 to 10 queries/page otherwise fine). Fix together with a before/after Lighthouse score.
-- Plan gap: About, Skills and Contact pages have the new tokens/fonts but not a rebuilt layout (glass cards, "Behind the Work" hero, count-up stats). Decide with Bunny: restyle in Phase 7 or a separate phase.
-- Decide with Bunny: keep the contact section on every page, or only on some pages (see PROGRESS.md session 7).
-- `ARCHITECTURE.md` still describes the old `ExperienceEntry` / `AdditionalCertification` fields. Rewrite with the Phase 7 docs update.
-- `SiteAppearance` is still mentioned in `README.md`, `QUICK_START.md`, `SETUP_GUIDE.md`, `DJANGO_SETUP.md`, `DEPLOYMENT_CHECKLIST.md`, `ARCHITECTURE.md`. Clean up in Phase 7.
-- Django admin's calendar/clock icons are Django's own blue-grey SVGs; leave or recolour in Phase 7.
-- Unused Tailwind utility shims remain at the top of `styles.css` (e.g. `.h-3`, `.w-6`); remove in Phase 7 if still unused.
+## Phase 7 — Polish and launch checks (done, waiting for review)
+Decisions (Bunny, 2026-10-13): full contact section only on home, case files and logs; restyle About, Skills and Contact; remove Tailwind and AOS; Lighthouse via a temporary `npx` download.
+- [x] Removed Tailwind CDN, Font Awesome, AOS. Small base reset added to `styles.css` in place of Tailwind's preflight.
+- [x] `script.js` cut to background layers + mobile nav (no 180 ms timer, no fade-ins/count-ups), loaded with `defer`.
+- [x] Pruned unused CSS (272 selectors, 139 classes, incl. old blog cards and Tailwind shims); dynamic class prefixes kept.
+- [x] About, Skills, Contact restyled with the case-file panels; hardcoded "College Level" / "Organizer" badges removed; About stats show only filled values.
+- [x] Meta description on every page (falls back to hero description); Open Graph + Twitter tags; case files and logs share their own title, summary and image.
+- [x] Site settings loaded once per request (`RequestMemoMiddleware`).
+- [x] Layout checked at 390px and 1440px on all 8 pages; contrast check: no text below 4.5:1.
+- [x] Lighthouse (local dev server, after `defer`) home mobile 61 → 88, desktop 94 → 96, SEO 90 → 100, weight 642 → 218 KiB; case file mobile 64 → 86, desktop 94 → 97. Accessibility and best practices 100. Single runs vary (one case-file mobile run scored 66; two reruns 86).
+- [x] README, ARCHITECTURE rewritten; SiteAppearance removed from setup docs; ADMIN_GUIDE updated.
+- [x] Tests pass.
+- Left as is: Django admin's own calendar/clock icons; text compression (server setting); `SECURE_PROXY_SSL_HEADER` not set (OG URLs may be http on PythonAnywhere), decide with Bunny.
