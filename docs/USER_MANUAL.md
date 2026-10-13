@@ -204,7 +204,7 @@ You can fill everything on your own computer and copy it to PythonAnywhere in on
 - Back up production first (section 3.1).
 - Clean your local test data before exporting.
 
-**On your computer** (export only content, never contact messages or chat logs):
+**On your computer** (export only content, never contact messages or chat logs). On Windows, run `set PYTHONUTF8=1` first (PowerShell: `$env:PYTHONUTF8=1`); otherwise the file is saved in a Windows encoding and `loaddata` on PythonAnywhere rejects it:
 
 ```bash
 python manage.py dumpdata portfolio.SiteSettings portfolio.About portfolio.WhatIDo portfolio.EducationEntry portfolio.ExperienceEntry portfolio.EventEntry portfolio.Certification portfolio.Skill portfolio.Project portfolio.CaseDecision portfolio.CaseIncident portfolio.ProjectReplay portfolio.BlogPost portfolio.SuggestedQuestion portfolio.ChatAnswer --indent 2 -o content.json
