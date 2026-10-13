@@ -1124,6 +1124,14 @@ a.text-accent:hover {
     color: var(--gold) !important;
 }
 
+.home-hero__currently {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    color: var(--text-2) !important;
+}
+
 .home-hero__pitch {
     max-width: 38rem;
     margin-bottom: var(--space-5);
@@ -1343,43 +1351,48 @@ a.text-accent:hover {
     color: var(--muted) !important;
 }
 
-/* From the logs */
-.log-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: var(--space-4);
+/* From the logs: dated list (Phase 8.2) */
+.log-ledger {
     margin: 0;
     padding: 0;
     list-style: none;
+    border-bottom: 1px solid var(--line);
 }
 
-.log-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    height: 100%;
-    padding: var(--space-5);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-panel);
-    background: var(--panel);
-    transition: border-color 200ms ease;
+.log-ledger__row {
+    display: grid;
+    grid-template-columns: 8rem 7rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--line);
 }
 
-.log-item:hover {
-    border-color: rgba(201, 168, 76, 0.45);
+.log-ledger__row time {
+    color: var(--muted) !important;
 }
 
-.log-item__title {
+.log-ledger__title {
     color: var(--text);
     font-family: var(--font-display) !important;
-    font-size: 1.4rem;
+    font-size: 1.35rem;
     line-height: 1.2;
+    transition: color 200ms ease;
 }
 
-.log-item__excerpt {
-    color: var(--muted) !important;
-    font-size: 0.9rem;
-    line-height: 1.55;
+.log-ledger__row:hover .log-ledger__title {
+    color: var(--gold-hover);
+}
+
+@media (max-width: 640px) {
+    .log-ledger__row {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: var(--space-1) var(--space-4);
+    }
+
+    .log-ledger__title {
+        grid-column: 1 / -1;
+    }
 }
 
 /* Contact section (every page except /contact/) */
@@ -1408,6 +1421,12 @@ a.text-accent:hover {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
+}
+
+.site-footer__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
 }
 
 .site-footer__links {

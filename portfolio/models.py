@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django.db import models
@@ -340,6 +341,14 @@ class Project(models.Model):
     @property
     def tech_tags_list(self):
         return [tag.strip() for tag in self.tech_tags.split(',') if tag.strip()]
+
+    @property
+    def roster_line(self):
+        """One line for the homepage roster: the one-liner, else the first sentence of the summary."""
+        if self.one_liner:
+            return self.one_liner
+        text = ' '.join(self.short_description.split())
+        return re.split(r'(?<=[.!?])\s', text, maxsplit=1)[0]
 
     @property
     def board_meta(self):

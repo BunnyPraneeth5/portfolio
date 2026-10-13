@@ -21,6 +21,9 @@
                 {% if recent_experience %}
                 <p class="home-hero__recent label-mono">Recent: {{ recent_experience.role }} at {{ recent_experience.organization }}</p>
                 {% endif %}
+                {% if site_settings.currently %}
+                <p class="home-hero__currently label-mono"><span class="status-dot" aria-hidden="true"></span>Currently: {{ site_settings.currently }}</p>
+                {% endif %}
                 {% if site_settings.hero_description %}
                 <p class="home-hero__pitch">{{ site_settings.hero_description|linebreaksbr }}</p>
                 {% endif %}
@@ -91,7 +94,7 @@
         <section id="agents" class="site-section" aria-labelledby="agents-heading">
             <div class="site-wrap">
                 <div class="section-head">
-                    <span class="label-mono">Roster · {{ roster|length }} published</span>
+                    <span class="label-mono">Roster · {% if roster_is_featured %}{{ roster|length }} featured{% else %}{{ roster|length }} of {{ case_total }}{% endif %}</span>
                     <h2 id="agents-heading">Agents</h2>
                 </div>
                 <div class="roster-scroll" tabindex="0" role="region" aria-label="Agent roster">
@@ -109,8 +112,8 @@
                             <tr>
                                 <td class="roster__agent">
                                     <a href="{% url 'project_detail' project.slug %}" class="roster__link">{{ project.title }}</a>
-                                    {% if project.short_description %}
-                                    <span class="roster__desc">{{ project.short_description|truncatechars:120 }}</span>
+                                    {% if project.roster_line %}
+                                    <span class="roster__desc">{{ project.roster_line|truncatechars:120 }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="roster__stack">{{ project.tech_tags_list|slice:":4"|join:" · " }}</td>
@@ -130,7 +133,7 @@
                         </tbody>
                     </table>
                 </div>
-                <p class="section-more"><a href="{% url 'projects' %}" class="text-accent">All case files <span aria-hidden="true">→</span></a></p>
+                <p class="section-more"><a href="{% url 'projects' %}" class="text-accent">Case board and archive ({{ case_total }} on file) <span aria-hidden="true">→</span></a></p>
             </div>
         </section>
         {% endif %}
@@ -148,19 +151,17 @@
                     <span class="label-mono">Logs</span>
                     <h2 id="logs-heading">From the logs</h2>
                 </div>
-                <ul class="log-list">
+                <ol class="log-ledger">
                     {% for post in latest_posts %}
                     <li>
-                        <a href="{% url 'blog_detail' post.slug %}" class="log-item">
-                            <span class="label-mono"><span class="log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span> · {{ post.event_date|date:"d M Y" }}</span>
-                            <span class="log-item__title">{{ post.title }}</span>
-                            {% if post.excerpt %}
-                            <span class="log-item__excerpt">{{ post.excerpt|truncatechars:150 }}</span>
-                            {% endif %}
+                        <a href="{% url 'blog_detail' post.slug %}" class="log-ledger__row">
+                            <time class="label-mono" datetime="{{ post.event_date|date:'Y-m-d' }}">{{ post.event_date|date:"d M Y" }}</time>
+                            <span class="label-mono log-type log-type--{{ post.log_type }}">{{ post.get_log_type_display }}</span>
+                            <span class="log-ledger__title">{{ post.title }}</span>
                         </a>
                     </li>
                     {% endfor %}
-                </ul>
+                </ol>
                 <p class="section-more"><a href="{% url 'blog' %}" class="text-accent">All logs <span aria-hidden="true">→</span></a></p>
             </div>
         </section>

@@ -19,15 +19,20 @@ from .models import (
 )
 
 def index(request):
-    roster = list(Project.objects.filter(is_published=True).order_by('order'))
-    flagship = next((p for p in roster if p.status == 'flagship'), None)
+    published = list(Project.objects.filter(is_published=True).order_by('order'))
+    featured = [p for p in published if p.is_featured]
+    # Roster shows featured agents only; with none featured, the first four.
+    roster = featured or published[:4]
+    flagship = next((p for p in published if p.status == 'flagship'), None)
     if flagship is None:
-        flagship = next((p for p in roster if p.is_featured), roster[0] if roster else None)
+        flagship = next((p for p in published if p.is_featured), published[0] if published else None)
     return render(request, 'index.html', {
         'recent_experience': ExperienceEntry.newest_first().first(),
         'education': EducationEntry.objects.first(),
         'core_stack': Skill.objects.filter(is_featured=True)[:8],
         'roster': roster,
+        'roster_is_featured': bool(featured),
+        'case_total': len(published),
         'flagship': flagship,
         'latest_posts': BlogPost.objects.filter(published=True)[:3],
         # Featured replay first; the switcher offers the rest.
@@ -104,7 +109,7 @@ def projects_view(request):
         'archive_projects': archive,
         'archive_has_year': any(project.year for project in archive),
         'total_count': len(featured) + len(archive),
-        'has_replays': any(case.published_replays for case in featured),
+        'board_has_replays': any(case.published_replays for case in featured),
     })
 
 def blog_view(request):

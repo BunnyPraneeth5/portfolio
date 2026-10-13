@@ -1,6 +1,9 @@
 <footer class="site-footer">
     <div class="site-wrap site-footer__inner">
-        <span class="label-mono">&copy; {% now "Y" %} {{ site_settings.hero_name_display }}</span>
+        <div class="site-footer__meta">
+            <span class="label-mono">&copy; {% now "Y" %} {{ site_settings.hero_name_display }}</span>
+            {% with updated=site_last_updated %}{% if updated %}<span class="label-mono">Last updated <time datetime="{{ updated|date:'Y-m-d' }}">{{ updated|date:"d M Y" }}</time></span>{% endif %}{% endwith %}
+        </div>
         <div class="site-footer__links">
             {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" rel="noopener">GitHub</a>{% endif %}
             {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}

@@ -166,6 +166,7 @@ class HomepageTests(TestCase):
         Project.objects.create(title="Hidden Agent", slug="hidden-agent", is_published=False)
 
     def test_roster_lists_published_projects_in_order(self):
+        Project.objects.filter(slug__in=['first-agent', 'second-agent', 'hidden-agent']).update(is_featured=True)
         response = self.client.get(reverse('index'))
         titles = [p.title for p in response.context['roster']]
         self.assertLess(titles.index("First Agent"), titles.index("Second Agent"))
@@ -1295,3 +1296,77 @@ class CaseBoardTests(TestCase):
         self.assertEqual(response.context['featured_cases'], [])
         self.assertContains(response, "All projects")
         self.assertNotContains(response, 'class="case-board"')
+
+
+class HomePhase8Tests(TestCase):
+    def setUp(self):
+        Project.objects.update(is_featured=False)
+        self.a = Project.objects.create(title="Alpha Agent", slug="alpha-agent", order=1, is_featured=True,
+                                        short_description="First sentence here. Second sentence here.")
+        self.b = Project.objects.create(title="Beta Agent", slug="beta-agent", order=2,
+                                        short_description="Beta summary.")
+
+    def test_currently_line_only_when_filled(self):
+        self.assertNotContains(self.client.get(reverse('index')), 'home-hero__currently')
+        settings = SiteSettings.load()
+        settings.currently = "Building a replay recorder"
+        settings.save()
+        self.assertContains(self.client.get(reverse('index')), "Currently: Building a replay recorder")
+
+    def test_roster_shows_featured_only(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual([p.title for p in response.context['roster']], ["Alpha Agent"])
+        self.assertContains(response, "Roster · 1 featured")
+        total = Project.objects.filter(is_published=True).count()
+        self.assertContains(response, "Case board and archive (%d on file)" % total)
+
+    def test_roster_falls_back_to_first_four(self):
+        Project.objects.update(is_featured=False)
+        for i in range(5):
+            Project.objects.create(title="Extra %d" % i, slug="extra-%d" % i, order=10 + i)
+        response = self.client.get(reverse('index'))
+        self.assertEqual(len(response.context['roster']), 4)
+        self.assertContains(response, "Roster · 4 of")
+
+    def test_roster_line_prefers_one_liner_then_first_sentence(self):
+        self.assertContains(self.client.get(reverse('index')), "First sentence here.")
+        self.assertNotContains(self.client.get(reverse('index')), "Second sentence here.")
+        Project.objects.filter(pk=self.a.pk).update(one_liner="Short roster line")
+        self.assertContains(self.client.get(reverse('index')), "Short roster line")
+
+    def test_logs_list_latest_three_newest_first(self):
+        for i in range(4):
+            BlogPost.objects.create(title="Log %d" % i, slug="log-%d" % i, content="c", excerpt="e",
+                                    published=True, event_date=date(2026, 1, i + 1))
+        BlogPost.objects.create(title="Draft log", slug="draft-log", content="c", excerpt="e", event_date=date(2026, 2, 1))
+        response = self.client.get(reverse('index'))
+        titles = [p.title for p in response.context['latest_posts']]
+        self.assertEqual(titles, ["Log 3", "Log 2", "Log 1"])
+        self.assertContains(response, 'class="log-ledger"')
+        self.assertContains(response, '<time class="label-mono" datetime="2026-01-04">04 Jan 2026</time>', html=True)
+
+    def test_footer_last_updated_is_newest_change(self):
+        from .context_processors import last_updated
+        SiteSettings.load()
+        About.objects.create(title="About", description="x")
+        old = timezone.now() - timedelta(days=30)
+        Project.objects.update(updated_at=old)
+        BlogPost.objects.update(updated_at=old)
+        About.objects.update(updated_at=old)
+        SiteSettings.objects.update(updated_at=old)
+        newest = timezone.now() - timedelta(days=2)
+        BlogPost.objects.create(title="Fresh", slug="fresh", content="c", excerpt="e", published=True)
+        BlogPost.objects.filter(slug="fresh").update(updated_at=newest)
+        draft = BlogPost.objects.create(title="Draft", slug="draft", content="c", excerpt="e")
+        settings = SiteSettings.objects.get(pk=1)
+        self.assertEqual(last_updated(settings), newest)
+        response = self.client.get(reverse('about'))
+        self.assertContains(response, "Last updated")
+        self.assertContains(response, newest.strftime("%d %b %Y"))
+
+    def test_projects_page_keeps_replay_nav_link(self):
+        replay = ProjectReplay.objects.create(project=self.b, title="Run", duration_s=1, is_published=True,
+                                              steps=[{"t": 0, "actor": "a", "kind": "info", "text": "x"}])
+        response = self.client.get(reverse('projects'))
+        self.assertContains(response, 'href="/#replay"')
+        self.assertNotContains(response, "Watch the run")
