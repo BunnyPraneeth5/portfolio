@@ -493,6 +493,7 @@ class CaseFileTests(TestCase):
         self.assertEqual(self.get('hidden-case').status_code, 404)
 
     def test_projects_list_uses_thumbnail_fallback(self):
+        Project.objects.filter(is_published=True).update(is_featured=True, thumbnail='')
         response = self.client.get(reverse('projects'))
         self.assertContains(response, 'class="case-thumb-fallback"')
         self.assertNotContains(response, 'project-thumbnail--')
@@ -1210,3 +1211,87 @@ class Phase8FieldsTests(TestCase):
     def test_public_pages_unchanged_by_new_empty_fields(self):
         for url in [reverse('index'), reverse('about'), reverse('projects'), reverse('blog')]:
             self.assertEqual(self.client.get(url).status_code, 200, url)
+
+
+class CaseBoardTests(TestCase):
+    def setUp(self):
+        self.lead = Project.objects.create(
+            title="Lazarus Lead", slug="lazarus-lead", is_featured=True, order=1, case_number=1,
+            status='live', role="Solo builder", year="2025", project_type="Agent system",
+            short_description="Lead summary.", tech_tags="Python, MCP", github_url="https://example.com/code")
+        self.side = Project.objects.create(title="Side Quest", slug="side-quest", order=2, year="2024",
+                                           tech_tags="Django", live_demo_url="https://example.com/demo")
+        Project.objects.create(title="Hidden Draft", slug="hidden-draft", is_featured=True, is_published=False)
+
+    def get(self):
+        return self.client.get(reverse('projects'))
+
+    def test_featured_on_board_and_others_in_archive(self):
+        response = self.get()
+        featured = [p.title for p in response.context['featured_cases']]
+        archive = [p.title for p in response.context['archive_projects']]
+        self.assertIn("Lazarus Lead", featured)
+        self.assertNotIn("Side Quest", featured)
+        self.assertIn("Side Quest", archive)
+        self.assertNotIn("Lazarus Lead", archive)
+        total = Project.objects.filter(is_published=True).count()
+        self.assertEqual(len(featured) + len(archive), total)
+        self.assertContains(response, "Cases · %d on file" % total)
+        self.assertNotContains(response, "Hidden Draft")
+
+    def test_board_row_shows_filled_fields(self):
+        response = self.get()
+        self.assertContains(response, "Case 001")
+        self.assertContains(response, "Case closed · Shipped")
+        self.assertContains(response, "Solo builder · 2025 · Agent system")
+        self.assertContains(response, '<li class="tag">MCP</li>', html=True)
+
+    def test_empty_fields_render_nothing(self):
+        Project.objects.filter(pk=self.lead.pk).update(role='', year='', project_type='', status='', case_number=None)
+        response = self.get()
+        self.assertNotContains(response, 'case-row__meta')
+        self.assertNotContains(response, 'case-stamp')
+        self.assertContains(response, 'Case file')
+
+    def test_evidence_counts_and_hidden_when_zero(self):
+        self.assertNotContains(self.get(), 'case-row__evidence')
+        CaseDecision.objects.create(project=self.lead, code="D-01", decision="d", tradeoff="t")
+        CaseDecision.objects.create(project=self.lead, code="D-02", decision="d", tradeoff="t")
+        CaseIncident.objects.create(project=self.lead, symptom="s", root_cause="r", fix="f")
+        response = self.get()
+        self.assertContains(response, "2 decisions")
+        self.assertContains(response, "1 incident<")
+        self.assertNotContains(response, "Replay on file")
+
+    def test_replay_only_when_published_replay_exists(self):
+        response = self.get()
+        self.assertNotContains(response, "Watch the run")
+        self.assertNotContains(response, "replay.js")
+        replay = ProjectReplay.objects.create(
+            project=self.lead, title="Run one", duration_s=3,
+            steps=[{"t": 0, "actor": "agent", "kind": "info", "text": "hello"}])
+        self.assertNotContains(self.get(), "Watch the run")
+        replay.is_published = True
+        replay.save()
+        response = self.get()
+        self.assertContains(response, "Watch the run")
+        self.assertContains(response, "Replay on file")
+        self.assertContains(response, "replay.js")
+        self.assertContains(response, 'id="replay-data-%d"' % replay.pk)
+
+    def test_thumbnail_fallback_has_no_duplicate_title(self):
+        response = self.get()
+        self.assertContains(response, 'case-thumb-fallback')
+        self.assertNotContains(response, 'case-thumb-fallback__title')
+
+    def test_archive_year_column_only_when_any_year(self):
+        self.assertContains(self.get(), 'archive-table__year')
+        Project.objects.filter(pk=self.side.pk).update(year='')
+        self.assertNotContains(self.get(), 'archive-table__year')
+
+    def test_no_featured_means_everything_in_archive(self):
+        Project.objects.update(is_featured=False)
+        response = self.get()
+        self.assertEqual(response.context['featured_cases'], [])
+        self.assertContains(response, "All projects")
+        self.assertNotContains(response, 'class="case-board"')

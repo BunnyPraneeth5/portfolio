@@ -272,7 +272,7 @@ Decisions (Bunny, 2026-10-13): full contact section only on home, case files and
 ## Phase 8 — Page redesigns (in progress)
 Plan: `docs/REDESIGN_PLAN.md` Phase 8. Approved 2026-10-14 after mockups.
 - [x] 8.0 New admin fields (migration `0027_phase8_page_fields`, 13 optional fields) + admin fieldsets + ADMIN_GUIDE; 119 tests pass. Waiting for review.
-- [ ] 8.1 Projects page as the Case board (featured rows, evidence line, replay preview, archive table)
+- [x] 8.1 Case board: featured rows (case no., stamp, role · year · type, evidence counts, Watch the run via existing player), archive table (year column only when any year), no duplicate title; old projects CSS pruned (71 selectors, other 7 pages layout-identical); 127 tests pass. Waiting for review.
 - [ ] 8.2 Home (Currently line, featured-only roster, dated logs list, Last updated)
 - [ ] 8.3 Logs (year ledger, reading time, related case, side rail, older/newer, Logs on this case)
 - [ ] 8.4 About (card grid, separate Work / Education / Events, featured certificates, no stat tiles)

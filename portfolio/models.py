@@ -342,6 +342,11 @@ class Project(models.Model):
         return [tag.strip() for tag in self.tech_tags.split(',') if tag.strip()]
 
     @property
+    def board_meta(self):
+        """Role, year and type for the case board; empty ones are left out."""
+        return [value for value in (self.role, self.year, self.project_type) if value]
+
+    @property
     def card_description(self):
         return self.short_description
 

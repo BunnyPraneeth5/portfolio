@@ -7,7 +7,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -87,25 +87,24 @@ def skills_view(request):
     return render(request, 'skills.html', {'skills': skills, 'grouped_skills': grouped_skills.values()})
 
 def projects_view(request):
-    featured = Project.objects.filter(
-        is_featured=True,
-        is_published=True
-    ).order_by('order').first()
-
-    other_projects = Project.objects.filter(is_published=True)
-    if featured:
-        other_projects = other_projects.exclude(pk=featured.pk)
-    other_projects = other_projects.order_by('order')
-
-    secondary_projects = other_projects[:2]
-    archive_projects = other_projects[2:]
-
+    published = Project.objects.filter(is_published=True).order_by('order', 'id')
+    # Featured projects are the case board; everything else goes to the archive table.
+    featured = list(
+        published.filter(is_featured=True)
+        .annotate(decision_count=Count('decisions', distinct=True), incident_count=Count('incidents', distinct=True))
+        .prefetch_related(Prefetch(
+            'replays',
+            queryset=ProjectReplay.objects.filter(is_published=True).select_related('project'),
+            to_attr='published_replays',
+        ))
+    )
+    archive = list(published.filter(is_featured=False))
     return render(request, 'projects.html', {
-        'featured_project': featured,
-        'other_projects': other_projects,
-        'secondary_projects': secondary_projects,
-        'archive_projects': archive_projects,
-        'all_projects': Project.objects.filter(is_published=True).order_by('order'),
+        'featured_cases': featured,
+        'archive_projects': archive,
+        'archive_has_year': any(project.year for project in archive),
+        'total_count': len(featured) + len(archive),
+        'has_replays': any(case.published_replays for case in featured),
     })
 
 def blog_view(request):

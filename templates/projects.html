@@ -1,82 +1,122 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Projects | Karu Praneeth Kumar{% endblock %}
+{% block title %}Cases | {{ site_settings.hero_name_display }}{% endblock %}
 
 {% block body_attrs %} data-chapter="projects"{% endblock %}
 
 {% block content %}
-    <!-- Projects Content -->
-    <main class="pt-24 pb-12">
-        <div class="container mx-auto px-4">
-            <!-- Header -->
-            <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
-                    <span>
-                        Projects
-                    </span>
-                </h1>
-                <p class="text-xl text-gray-300">Ideas tested against reality.</p>
+    <main class="page">
+        <div class="site-wrap">
+            <div class="section-head">
+                <span class="label-mono">Cases · {{ total_count }} on file</span>
+                <h1 class="page-title">Case board</h1>
             </div>
+            {% if featured_cases and archive_projects %}
+            <p class="page-lead">Featured cases first. Every other project is in the archive below.</p>
+            {% endif %}
 
-            <hr class="section-rule">
-
-            <!-- Projects Grid -->
-            <div class="projects-grid">
-                <div class="secondary-project-grid gap-8">
-                    {% for project in all_projects %}
-                    <article class="glass-card project-card secondary-project-card">
-                        <div class="project-thumbnail">
-                            {% include 'partials/case_thumb.html' %}
-                        </div>
-                        <div class="secondary-project-card-body">
-                            {% if project.secondary_kicker %}
-                            <span class="secondary-project-kicker">{{ project.secondary_kicker }}</span>
+            {% if featured_cases %}
+            <ol class="case-board" aria-label="Featured cases">
+                {% for project in featured_cases %}
+                <li class="case-row panel">
+                    <a href="{% url 'project_detail' project.slug %}" class="case-row__thumb" tabindex="-1" aria-hidden="true">
+                        {% include 'partials/case_thumb.html' with hide_title=True %}
+                    </a>
+                    <div class="case-row__body">
+                        <div class="case-row__top">
+                            <span class="label-mono case-row__number">{% if project.case_label %}Case {{ project.case_label }}{% else %}Case file{% endif %}</span>
+                            {% if project.status_stamp %}
+                            <span class="case-stamp case-stamp--{{ project.status }}">{{ project.status_stamp }}</span>
                             {% endif %}
-                            <h2>{{ project.title }}</h2>
-                            <p>
-                                {{ project.card_description|linebreaksbr }}
-                            </p>
-                            <div class="project-tags mb-4">
-                                {% for tag in project.tech_tags_list %}
-                                <span class="project-tag">{{ tag }}</span>
-                                {% endfor %}
-                            </div>
-                            <div class="secondary-project-footer">
-                                {% if project.metric_1_value %}
-                                <span class="secondary-project-metric">{{ project.metric_1_value }} <small>{{ project.metric_1_label }}</small></span>
-                                {% endif %}
-                                <div>
-                                    <a href="{% url 'project_detail' project.slug %}" class="view-code-link">
-                                        View Project <span aria-hidden="true">&rarr;</span>
-                                    </a>
-                                    {% if project.github_url %}
-                                    <a href="{{ project.github_url }}" target="_blank" class="view-code-link">
-                                        View Code <span aria-hidden="true">&rarr;</span>
-                                    </a>
-                                    {% endif %}
-                                    {% if project.primary_live_url %}
-                                    <a href="{{ project.primary_live_url }}" target="_blank" class="view-code-link">
-                                        Live Demo <span aria-hidden="true">&rarr;</span>
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </div>
                         </div>
-                    </article>
-                    {% endfor %}
+                        <h2 class="case-row__title"><a href="{% url 'project_detail' project.slug %}">{{ project.title }}</a></h2>
+                        {% if project.board_meta %}
+                        <p class="label-mono case-row__meta">{{ project.board_meta|join:" · " }}</p>
+                        {% endif %}
+                        {% if project.short_description %}
+                        <p class="case-row__summary">{{ project.short_description }}</p>
+                        {% endif %}
+                        {% if project.tech_tags_list %}
+                        <ul class="tag-row" aria-label="Stack">
+                            {% for tag in project.tech_tags_list %}
+                            <li class="tag">{{ tag }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                        {% if project.decision_count or project.incident_count or project.published_replays %}
+                        <p class="label-mono case-row__evidence">
+                            {% if project.decision_count %}<span>{{ project.decision_count }} decision{{ project.decision_count|pluralize }}</span>{% endif %}
+                            {% if project.incident_count %}<span>{{ project.incident_count }} incident{{ project.incident_count|pluralize }}</span>{% endif %}
+                            {% if project.published_replays %}<span>Replay on file</span>{% endif %}
+                        </p>
+                        {% endif %}
+                        {% if project.published_replays %}
+                        <details class="case-row__replay">
+                            <summary class="label-mono">Watch the run</summary>
+                            {% with replays=project.published_replays|slice:":1" %}
+                            {% include 'partials/replay_player.html' %}
+                            {% endwith %}
+                        </details>
+                        {% endif %}
+                        <p class="case-row__links">
+                            <a href="{% url 'project_detail' project.slug %}" class="text-accent">Open case file <span aria-hidden="true">&rarr;</span></a>
+                            {% if project.github_url %}
+                            <a href="{{ project.github_url }}" target="_blank" rel="noopener" class="text-accent">View code <span aria-hidden="true">&rarr;</span></a>
+                            {% endif %}
+                            {% if project.live_demo_url %}
+                            <a href="{{ project.live_demo_url }}" target="_blank" rel="noopener" class="text-accent">Live demo <span aria-hidden="true">&rarr;</span></a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ol>
+            {% endif %}
+
+            {% if archive_projects %}
+            <section class="case-archive" aria-labelledby="archive-heading">
+                <div class="section-head">
+                    <span class="label-mono">Archive · {{ archive_projects|length }}</span>
+                    <h2 id="archive-heading">{% if featured_cases %}Everything else on file{% else %}All projects{% endif %}</h2>
                 </div>
-            </div>
+                <table class="archive-table">
+                    <thead>
+                        <tr>
+                            {% if archive_has_year %}<th scope="col" class="label-mono">Year</th>{% endif %}
+                            <th scope="col" class="label-mono">Project</th>
+                            <th scope="col" class="label-mono">Built with</th>
+                            <th scope="col" class="label-mono">Links</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in archive_projects %}
+                        <tr>
+                            {% if archive_has_year %}<td class="archive-table__year label-mono">{{ project.year }}</td>{% endif %}
+                            <td class="archive-table__project"><a href="{% url 'project_detail' project.slug %}">{{ project.title }}</a></td>
+                            <td class="archive-table__stack">{{ project.tech_tags_list|join:", " }}</td>
+                            <td class="archive-table__links">
+                                {% if project.github_url %}<a href="{{ project.github_url }}" target="_blank" rel="noopener" class="text-accent">Code</a>{% endif %}
+                                {% if project.live_demo_url %}<a href="{{ project.live_demo_url }}" target="_blank" rel="noopener" class="text-accent">Demo</a>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            {% endif %}
 
-            <hr class="section-rule">
+            {% if not featured_cases and not archive_projects %}
+            <p class="page-lead">No cases are published yet.</p>
+            {% endif %}
 
-            <!-- More Projects Link -->
-            <div class="text-center mt-12">
-                <a href="https://github.com/BunnyPraneeth5" target="_blank" 
-                   class="github-outline-button btn-ghost">
-                    More work on GitHub <span class="cta-arrow" aria-hidden="true">&rarr;</span>
-                </a>
+            {% if site_settings.github_url %}
+            <div class="page-actions">
+                <a href="{{ site_settings.github_url }}" target="_blank" rel="noopener" class="btn-ghost">More work on GitHub <span aria-hidden="true">&rarr;</span></a>
             </div>
+            {% endif %}
         </div>
     </main>
 {% endblock %}
+
+{% block extra_scripts %}{% if has_replays %}<script src="{% static 'replay.js' %}" defer></script>{% endif %}{% endblock %}
