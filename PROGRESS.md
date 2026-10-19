@@ -4,6 +4,20 @@ Newest entry at the top.
 
 ---
 
+## 2026-10-16 — Session 11: Madness layer ideas and Phase 9 plan
+
+**Why:** Bunny felt the Phase 8 design reads as generic and wanted something personal, rooted in the films and games they love (Interstellar, Dune, Tenet, GoT, RDR, GTA, PUBG, Wall-E).
+
+**Decision (discussion, not yet in DECISIONS.md):** keep the deployed site as it is for recruiters and add a hidden, opt-in madness layer (cheat codes, Wall-E triggers, hidden spots) with achievements and a final reward.
+
+**Mockups (throwaway, nothing in the repo):** frontier map, cinematic dark version, and a working Wall-E compactor and Tenet inversion on a local copy of the live home page.
+
+**Plan:** `docs/PHASE9_MADNESS_PLAN.md` written (uncommitted): 13 layers including a WebGL black hole and a sandworm, 8 small RDR/GTA/GoT eggs, architecture, backend, sub-phases 9.0 to 9.8, tests and risks. No code changed. 166 tests pass.
+
+**Next:** Bunny reviews the plan and sends content. Building starts only on Bunny's go.
+
+---
+
 ## 2026-10-14 — Session 10: Phase 7 pushed, research and mockups, Phase 8.0
 
 **Git:** Phase 7 committed and pushed (`8dd2fe2`).

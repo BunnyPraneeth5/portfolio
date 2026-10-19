@@ -279,3 +279,9 @@ Plan: `docs/REDESIGN_PLAN.md` Phase 8. Approved 2026-10-14 after mockups.
 - [x] Database switch: `config/database.py` picks sqlite/mysql from `DB_ENGINE`; settings load `.env` for WSGI too; DEBUG=False without DB_ENGINE fails loudly; docs/USER_MANUAL.md added. 166 tests pass. Waiting for review.
 - [x] 8.6 Skills as Toolkit: nav Skills replaces Replay; core cards + area cards (bigger first); automatic Used in from project tags (exact part match, published only, same titles folded as ×N); fixed log pager/index tie-break for identical timestamps (found by a flaky 8.3 test); 160 tests pass. Waiting for review.
 - [x] 8.5 Mockup gaps fixed (case summaries clamped to 2 lines, archive "none listed", Home roster without Key metric, footer Last updated on the right, Logs lead + count label + Read link + full width + back link in rail + None yet pager boxes, About personnel file label + ID caption + split section headings). Field note on case file; checks on 10 page types at 390/1440 (overflow, contrast); Lighthouse Home 88/98, Case board 86/96, a11y/best/SEO 100; ARCHITECTURE, ADMIN_GUIDE, PROGRESS, deploy note updated; 155 tests pass. Waiting for review.
+
+## Phase 9 — Madness layer (planning only, not started)
+Plan: `docs/PHASE9_MADNESS_PLAN.md` (draft, uncommitted). The recruiter site stays as it is; hidden opt-in layers sit on top.
+- [ ] BLOCKED Bunny reviews the plan and sends content (section 7: cheat words, Wall-E lines, achievement names, black hole spot, drum rhythm, house mottos).
+- [ ] BLOCKED Bunny approves the rule changes in section 8 (opt-in animation exception, separate madness CSS).
+- [ ] 9.0 to 9.8 as listed in the plan, one sub-phase at a time, only after Bunny says go.
